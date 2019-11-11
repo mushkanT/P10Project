@@ -1,13 +1,5 @@
-import glob
-import imageio
 import matplotlib.pyplot as plt
-import numpy as np
-import os
-import PIL
 import tensorflow as tf
-
-import time
-
 
 layers = tf.keras.layers
 
@@ -51,17 +43,3 @@ def discriminator_dcgan():
     model.add(layers.Dense(1))
 
     return model
-
-
-generator = generator_dcgan()
-
-noise = tf.random.normal([1, 100])
-generated_image = generator(noise, training=False)
-
-plt.imshow(generated_image[0, :, :, 0], cmap='gray')
-plt.show()
-
-
-discriminator = discriminator_dcgan()
-decision = discriminator(generated_image)
-print (decision)
