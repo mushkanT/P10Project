@@ -1,166 +1,218 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from keras.layers import Input, Conv2D, Flatten, Dense, Conv2DTranspose, Reshape, Lambda, Activation, BatchNormalization, LeakyReLU, Dropout
+from keras.models import Model
+from keras import backend as K
+from keras.optimizers import Adam
+from keras.callbacks import ModelCheckpoint
+from keras.utils import plot_model
 
-import tensorflow as tf
+from callbacks import CustomCallback, step_decay_schedule
 
-
-import os
-import time
 import numpy as np
-import glob
-import matplotlib.pyplot as plt
-import PIL
-import imageio
-
-from IPython import display
-
-(train_images, _), (test_images, _) = tf.keras.datasets.mnist.load_data()
-
-train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
-test_images = test_images.reshape(test_images.shape[0], 28, 28, 1).astype('float32')
-
-train_images /= 255.
-test_images /= 255.
-
-train_images[train_images >= .5] = 1.
-train_images[train_images < .5] = 0.
-test_images[test_images >= .5] = 1.
-test_images[test_images < .5] = 0.
-
-TRAIN_BUF = 60000
-BATCH_SIZE = 100
-
-TEST_BUF = 10000
-
-train_dataset = tf.data.Dataset.from_tensor_slices(train_images).shuffle(TRAIN_BUF).batch(BATCH_SIZE)
-test_dataset = tf.data.Dataset.from_tensor_slices(test_images).shuffle(TEST_BUF).batch(BATCH_SIZE)
+import json
+import os
+import pickle
 
 
-class CVAE(tf.keras.Model):
-    def __init__(self, latent_dim):
-        super(CVAE, self).__init__()
-        self.latent_dim = latent_dim
-        self.inference_net = tf.keras.Sequential(
-            [
-                tf.keras.layers.InputLayer(input_shape=(28, 28, 1)),
-                tf.keras.layers.Conv2D(
-                    filters=32, kernel_size=3, strides=(2, 2), activation='relu'),
-                tf.keras.layers.Conv2D(
-                    filters=64, kernel_size=3, strides=(2, 2), activation='relu'),
-                tf.keras.layers.Flatten(),
-                tf.keras.layers.Dense(latent_dim + latent_dim),
-            ]
+class VAE():
+    def __init__(self,
+                 input_dim,
+                 encoder_conv_filters,
+                 encoder_conv_kernel_size,
+                 encoder_conv_strides,
+                 decoder_conv_t_filters,
+                 decoder_conv_t_kernel_size,
+                 decoder_conv_t_strides,
+                 z_dim,
+                 use_bacth_norm = False,
+                 use_dropout = False
+                 ):
+        self.name = 'VAE'
+
+        self.input_dim = input_dim
+        self.encoder_conv_filters = encoder_conv_filters
+        self.encoder_conv_kernel_size = encoder_conv_kernel_size
+        self.encoder_conv_strides = encoder_conv_strides
+        self.decoder_conv_t_filters = decoder_conv_t_filters
+        self.decoder_conv_t_kernel_size = decoder_conv_t_kernel_size
+        self.decoder_conv_t_strides = decoder_conv_t_strides
+        self.z_dim = z_dim
+        self.use_bacth_norm = use_bacth_norm
+        self.use_dropout = use_dropout
+
+        self.n_layers_encoder = len(encoder_conv_filters)
+        self.n_layers_decoder = len(decoder_conv_t_filters)
+
+        self._build()
+
+    def _build(self):
+        encoder_input = Input(shape=self.input_dim, name='encoder_input')
+
+        x = encoder_input
+
+        for i in range(self.n_layers_encoder):
+            conv_layer = Conv2D(
+                filters = self.encoder_conv_filters[i],
+                kernel_size = self.encoder_conv_kernel_size[i],
+                strides = self.encoder_conv_strides[i],
+                padding = 'same',
+                name = 'encoder_conv_' + str(i)
+            )
+
+            x = conv_layer(x)
+
+            if self.use_bacth_norm:
+                x = BatchNormalization()(x)
+
+            x = LeakyReLU()(x)
+
+            if self.use_dropout:
+                x = Dropout(rate = 0.25)(x)
+
+        shape_before_flattening = K.int_shape(x)[1:]
+
+        x = Flatten()(x)
+        self.mu = Dense(self.zdim, name='mu')(x)
+        self.log_var = Dense(self.z_dim, name='log_var')(x)
+
+        self.encoder_mu_log_var = Model(encoder_input, (self.mu, self.logvar))
+
+        def sampling(args):
+            mu, log_var = args
+            epsilon = K.random_normal(shape=K.shape(mu), mean=0., stddev=1.)
+            return mu + K.exp(log_var/2) * epsilon
+
+        encoder_output = Lambda(sampling,name='encoder_output')([self.mu, self.log_var])
+
+        self.encoder = Model(encoder_input,encoder_output)
+
+
+        decoder_input = Input(shape=(self.z_dim, ),name='decoder_input')
+
+        x = Dense(np.prod(shape_before_flattening))(decoder_input)
+        x = Reshape(shape_before_flattening)(x)
+
+        for i in range(self.n_layers_decoder):
+            conv_t_layer = Conv2DTranspose(
+                filters = self.decoder_conv_t_filters,
+                kernel_size = self.decoder_conv_t_kernel_size,
+                strides = self.decoder_conv_t_strides,
+                padding = 'same',
+                name = 'decoder_conv_t_' + str(i)
+            )
+
+            x = conv_t_layer(x)
+
+            if i < self.n_layers_decoder - 1:
+                if self.use_bacth_norm:
+                    x = BatchNormalization()(x)
+                x = LeakyReLU()(x)
+                if self.use_dropout:
+                    x = Dropout(rate = 0.25)(x)
+            else:
+                x = Activation('sigmoid')(x)
+
+        decoder_output = x
+
+        self.decoder = Model(decoder_input, decoder_output)
+
+        model_input = encoder_input
+        model_output = self.decoder_conv_t_strides(encoder_output)
+
+        self.model = Model(model_input, model_output)
+
+    def compile(self, learning_rate, r_loss_factor):
+        self.learning_rate = learning_rate
+
+        def vae_r_loss(y_true, y_pred):
+            r_loss = K.mean(K.square(y_true - y_pred), axis = [1, 2, 3])
+            return r_loss_factor * r_loss
+
+        def vae_kl_loss(y_true, y_pred):
+            kl_loss = -0.5 * K.sum(1 + self.log_var - K.square(self.mu) - K.exp(self.log_var), axis = 1)
+            return kl_loss
+
+        def vae_loss(y_true, y_pred):
+            r_loss = vae_r_loss(y_true, y_pred)
+            kl_loss = vae_kl_loss(y_true, y_pred)
+            return r_loss + kl_loss
+
+        optimizer = Adam(lr=learning_rate)
+        self.model.compile(optimizer=optimizer, loss = vae_loss, metrics = [vae_r_loss, vae_kl_loss])
+
+    def save(self, folder):
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+            os.makedirs(os.path.join(folder, 'viz'))
+            os.makedirs(os.path.join(folder, 'weights'))
+            os.makedirs(os.path.join(folder, 'images'))
+
+        with open(os.path.join(folder, 'params.pkl'), 'wb') as f:
+            pickle.dump([
+                self.input_dim
+                , self.encoder_conv_filters
+                , self.encoder_conv_kernel_size
+                , self.encoder_conv_strides
+                , self.decoder_conv_t_filters
+                , self.decoder_conv_t_kernel_size
+                , self.decoder_conv_t_strides
+                , self.z_dim
+                , self.use_batch_norm
+                , self.use_dropout
+            ], f)
+
+        self.plot_model(folder)
+
+    def load_weights(self, filepath):
+        self.model.load_weights(filepath)
+
+    def train(self, x_train, batch_size, epochs, run_folder, print_n_batches = 100, init_epoch = 0, lr_decay = 1):
+
+        custom_callback = CustomCallback(run_folder, print_n_batches, init_epoch, self)
+        lr_sched = step_decay_schedule(initial_lr=self.learning_rate, decay_factor=lr_decay, step_size=1)
+
+        checkpoint_filepath = os.path.join(run_folder, "weights/weights-{epoch:03d}-{loss:.2f}.h5")
+        checkpoint1 = ModelCheckpoint(checkpoint_filepath, save_weights_only= True, verbose=1)
+        checkpoint2 = ModelCheckpoint(os.path.join(run_folder, 'weights/weights.h5'), save_weights_only= True, verbose=1)
+
+        callbacks_list = [checkpoint1, checkpoint2, custom_callback, lr_sched]
+
+        self.model.fit(
+            x_train,
+            x_train,
+            batch_size=batch_size,
+            shuffle=True,
+            epochs=epochs,
+            initial_epoch=init_epoch,
+            callbacks=callbacks_list
         )
 
-        self.generative_net = tf.keras.Sequential(
-            [
-                tf.keras.layers.InputLayer(input_shape=(latent_dim,)),
-                tf.keras.layers.Dense(units=7*7*32, activation=tf.nn.relu),
-                tf.keras.layers.Reshape(target_shape=(7, 7, 32)),
-                tf.keras.layers.Conv2DTranspose(
-                    filters=64,
-                    kernel_size=3,
-                    strides=(2, 2),
-                    padding="SAME",
-                    activation='relu'
-                ),
-                tf.keras.layers.Conv2DTranspose(
-                    filters=32,
-                    kernel_size=3,
-                    strides=(2, 2),
-                    padding="SAME",
-                    activation='relu'
-                ),
-                tf.keras.layers.Conv2DTranspose(
-                    filters=1,
-                    kernel_size=3,
-                    strides=(1, 1),
-                    padding="SAME"
-                ),
-            ]
+    def train_with_generator(self, data_flow, epochs, steps_per_epoch, run_folder, print_every_n_batches=100,
+                             initial_epoch=0, lr_decay=1, ):
+
+        custom_callback = CustomCallback(run_folder, print_every_n_batches, initial_epoch, self)
+        lr_sched = step_decay_schedule(initial_lr=self.learning_rate, decay_factor=lr_decay, step_size=1)
+
+        checkpoint_filepath = os.path.join(run_folder, "weights/weights-{epoch:03d}-{loss:.2f}.h5")
+        checkpoint1 = ModelCheckpoint(checkpoint_filepath, save_weights_only=True, verbose=1)
+        checkpoint2 = ModelCheckpoint(os.path.join(run_folder, 'weights/weights.h5'), save_weights_only=True, verbose=1)
+
+        callbacks_list = [checkpoint1, checkpoint2, custom_callback, lr_sched]
+
+        self.model.save_weights(os.path.join(run_folder, 'weights/weights.h5'))
+
+        self.model.fit_generator(
+            data_flow
+            , shuffle=True
+            , epochs=epochs
+            , initial_epoch=initial_epoch
+            , callbacks=callbacks_list
+            , steps_per_epoch=steps_per_epoch
         )
-    @tf.function
-    def sample(self,eps=None):
-        if eps is None:
-            eps = tf.random.normal(shape=(100, self.latent_dim))
-        return self.decode(eps, apply_sigmoid=True)
 
-    def encode(self,x):
-        mean, logvar = tf.split(self.inference_net(x), num_or_size_splits=2, axis=1)
-        return mean, logvar
-
-    def reparameterize(self, mean, logvar):
-        eps = tf.random.normal(shape=mean.shape)
-        return eps * tf.exp(logvar * .5) + mean
-
-    def decode(self, z, apply_sigmoid=False):
-        logits = self.generative_net(z)
-        if apply_sigmoid:
-            probs = tf.sigmoid(logits)
-            return probs
-        return logits
-
-optimizer = tf.keras.optimizers.Adam(0.0001)
-
-def log_normal_pdf(sample, mean, logvar, raxis=1):
-    log2pi = tf.math.log(2. * np.pi)
-    return tf.reduce_sum(
-        -.5 * ((sample - mean) ** 2. * tf.exp(-logvar) + logvar + log2pi),
-        axis=raxis
-    )
-
-@tf.function
-def compute_loss(model, x):
-    mean, logvar = model.encode(x)
-    z = model.reparameterize(mean, logvar)
-    x_logit = model.decode(z)
-
-    cross_ent = tf.nn.sigmoid_cross_entropy_with_logits(logits=x_logit, labels=x)
-    logpx_z = -tf.reduce_sum(cross_ent, axis=[1,2,3])
-    logpz = log_normal_pdf(z, 0., 0.)
-    logqz_x = log_normal_pdf(z, mean, logvar)
-    return -tf.reduce_mean(logpx_z + logpz - logqz_x)
-
-@tf.function
-def compute_apply_gradients(model, x, optimizer):
-    with tf.GradientTape() as tape:
-        loss = compute_loss(model, x)
-    gradients = tape.gradient(loss, model.trainable_variables)
-    optimizer.apply_gradients(zip(gradients, model.trainable_variables))
-
-
-epochs = 100
-latent_dim = 50
-num_examples_to_generate = 16
-
-random_vector_for_generation = tf.random.normal(shape=[num_examples_to_generate, latent_dim])
-model = CVAE(latent_dim)
-
-def generate_and_save_images(model, epoch, test_input):
-    predictions = model.sample(test_input)
-    fig = plt.figure(figsize=(4, 4))
-
-    for i in range(predictions.shape[0]):
-        plt.subplot(4, 4, i+1)
-        plt.imshow(predictions[i, :, :, 0], cmap='gray')
-        plt.axis('off')
-
-    plt.savefig('image_at_epoch_{:04d}.png'.format(epoch))
-    plt.show()
-
-generate_and_save_images(model, 0, random_vector_for_generation)
-
-for epoch in range(1, epochs + 1):
-    start_time = time.time()
-    for train_x in train_dataset:
-        compute_apply_gradients(model, train_x, optimizer)
-    end_time = time.time()
-
-    if epoch % 1 == 0:
-        loss = tf.keras.metrics.Mean()
-        for test_x in test_dataset:
-            loss(compute_loss(model, test_x))
-        elbo = -loss.result()
-        display.clear_output(wait=False)
-        print('Epoch: {}, Test set ELBO: {}',
-              'time elapse for current epoch {}'. format(epoch, elbo, end_time - start_time))
-        generate_and_save_images(model, epoch, random_vector_for_generation)
+    def plot_model(self, run_folder):
+        plot_model(self.model, to_file=os.path.join(run_folder, 'viz/model.png'), show_shapes=True,
+                   show_layer_names=True)
+        plot_model(self.encoder, to_file=os.path.join(run_folder, 'viz/encoder.png'), show_shapes=True,
+                   show_layer_names=True)
+        plot_model(self.decoder, to_file=os.path.join(run_folder, 'viz/decoder.png'), show_shapes=True,
+                   show_layer_names=True)
