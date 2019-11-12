@@ -23,7 +23,7 @@ class VAE():
                  decoder_conv_t_kernel_size,
                  decoder_conv_t_strides,
                  z_dim,
-                 use_bacth_norm = False,
+                 use_batch_norm = False,
                  use_dropout = False
                  ):
         self.name = 'VAE'
@@ -36,7 +36,7 @@ class VAE():
         self.decoder_conv_t_kernel_size = decoder_conv_t_kernel_size
         self.decoder_conv_t_strides = decoder_conv_t_strides
         self.z_dim = z_dim
-        self.use_bacth_norm = use_bacth_norm
+        self.use_batch_norm = use_batch_norm
         self.use_dropout = use_dropout
 
         self.n_layers_encoder = len(encoder_conv_filters)
@@ -60,7 +60,7 @@ class VAE():
 
             x = conv_layer(x)
 
-            if self.use_bacth_norm:
+            if self.use_batch_norm:
                 x = BatchNormalization()(x)
 
             x = LeakyReLU()(x)
@@ -71,10 +71,10 @@ class VAE():
         shape_before_flattening = K.int_shape(x)[1:]
 
         x = Flatten()(x)
-        self.mu = Dense(self.zdim, name='mu')(x)
+        self.mu = Dense(self.z_dim, name='mu')(x)
         self.log_var = Dense(self.z_dim, name='log_var')(x)
 
-        self.encoder_mu_log_var = Model(encoder_input, (self.mu, self.logvar))
+        self.encoder_mu_log_var = Model(encoder_input, (self.mu, self.log_var))
 
         def sampling(args):
             mu, log_var = args
@@ -83,7 +83,7 @@ class VAE():
 
         encoder_output = Lambda(sampling,name='encoder_output')([self.mu, self.log_var])
 
-        self.encoder = Model(encoder_input,encoder_output)
+        self.encoder = Model(encoder_input, encoder_output)
 
 
         decoder_input = Input(shape=(self.z_dim, ),name='decoder_input')
@@ -93,9 +93,9 @@ class VAE():
 
         for i in range(self.n_layers_decoder):
             conv_t_layer = Conv2DTranspose(
-                filters = self.decoder_conv_t_filters,
-                kernel_size = self.decoder_conv_t_kernel_size,
-                strides = self.decoder_conv_t_strides,
+                filters = self.decoder_conv_t_filters[i],
+                kernel_size = self.decoder_conv_t_kernel_size[i],
+                strides = self.decoder_conv_t_strides[i],
                 padding = 'same',
                 name = 'decoder_conv_t_' + str(i)
             )
@@ -103,7 +103,7 @@ class VAE():
             x = conv_t_layer(x)
 
             if i < self.n_layers_decoder - 1:
-                if self.use_bacth_norm:
+                if self.use_batch_norm:
                     x = BatchNormalization()(x)
                 x = LeakyReLU()(x)
                 if self.use_dropout:
@@ -116,7 +116,7 @@ class VAE():
         self.decoder = Model(decoder_input, decoder_output)
 
         model_input = encoder_input
-        model_output = self.decoder_conv_t_strides(encoder_output)
+        model_output = self.decoder(encoder_output)
 
         self.model = Model(model_input, model_output)
 

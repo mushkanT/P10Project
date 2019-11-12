@@ -15,15 +15,21 @@ class CustomCallback(Callback):
 
     def on_batch_end(self, batch, logs={}):
         if batch % self.print_every_n_batches == 0:
-            z_new = np.random.normal(size=(1, self.vae.z_dim))
-            reconst = self.vae.decoder.predict(np.array(z_new))[0].squeeze()
+            fig = plt.figure(figsize=(4, 4))
+            z_new = np.random.normal(size=(16, self.vae.z_dim))
+            reconst = self.vae.decoder.predict(z_new)
+            for i in range(z_new.shape[0]):
+                plt.subplot(4, 4, i+1)
+                if reconst.shape[3] == 1:
+                    plt.imshow(reconst[i, :, :, 0], cmap='gray')
+                else:
+                    plt.imshow(reconst[i, :, :, :])
+                plt.axis('off')
 
             filepath = os.path.join(self.run_folder, 'images',
-                                    'img_' + str(self.epoch).zfill(3) + '_' + str(batch) + '.jpg')
-            if len(reconst.shape) == 2:
-                plt.imsave(filepath, reconst, cmap='gray_r')
-            else:
-                plt.imsave(filepath, reconst)
+                                    'img_' + str(self.epoch).zfill(3) + '_' + str(batch) + '.png')
+            print(len(reconst.shape))
+            plt.savefig(filepath)
 
     def on_epoch_begin(self, epoch, logs={}):
         self.epoch += 1
