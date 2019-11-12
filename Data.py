@@ -8,7 +8,6 @@ def plot_distribution(samples, title='', cmap='Blues',x="x",y="y"):
 
     df = pd.DataFrame(samples, columns=["x", "y"])
     sns.jointplot(x="x", y="y", data=df, kind="kde")
-
     plt.show()
 
     ''' # From 'Are all GANS created equal':
@@ -23,9 +22,21 @@ def plot_distribution(samples, title='', cmap='Blues',x="x",y="y"):
     plt.show()'''
 
 
+def draw_samples_and_plot_2d(generator):
+    a = []
+    for c in range(2000):
+        noise = tf.random.normal([1, 10])
+        generated_image = generator(noise, training=False)
+        a.append(generated_image)
+
+    samples = tf.convert_to_tensor(tf.reshape(a,[2000,2]))
+
+    df = pd.DataFrame(samples, columns=["x", "y"])
+    sns.jointplot(x="x", y="y", data=df, kind="kde")
+    plt.show()
 
 
-def createToyDataRing(n_mixtures=8, radius=3, Ntrain=10000, std=0.1):
+def createToyDataRing(n_mixtures=8, radius=3, Ntrain=50000, std=0.05):
     delta_theta = 2 * np.pi / n_mixtures
     centers_x = []
     centers_y = []
@@ -43,6 +54,5 @@ def createToyDataRing(n_mixtures=8, radius=3, Ntrain=10000, std=0.1):
     sample_centers = centers[ith_center, :]
 
     sample_points = np.random.normal(loc=sample_centers, scale=std).astype('float32')
-
     dat = tf.convert_to_tensor(sample_points)
     return dat

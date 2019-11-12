@@ -4,7 +4,6 @@ import tensorflow as tf
 layers = tf.keras.layers
 
 def generator_dcgan():
-
     model = tf.keras.Sequential()
     model.add(layers.Dense(7 * 7 * 256, use_bias=False, input_shape=(100,)))
     model.add(layers.BatchNormalization())
@@ -28,6 +27,7 @@ def generator_dcgan():
 
     return model
 
+
 def discriminator_dcgan():
     model = tf.keras.Sequential()
     model.add(layers.Conv2D(64, (5, 5), strides=(2, 2), padding='same',
@@ -41,5 +41,23 @@ def discriminator_dcgan():
 
     model.add(layers.Flatten())
     model.add(layers.Dense(1))
+
+    return model
+
+
+def generator_toy():
+    model = tf.keras.Sequential()
+    model.add(layers.Dense(128, input_dim=(10),activation='tanh'))
+    model.add(layers.Dense(64, activation='tanh'))
+    model.add(layers.Dense(2, activation='tanh'))
+
+    return model
+
+
+def discriminator_toy():
+    model = tf.keras.Sequential()
+    model.add(layers.Dense(128, input_shape=(256,2),activation='tanh'))
+    model.add(layers.Dense(64, activation='tanh'))
+    model.add(layers.Dense(2, activation='tanh'))
 
     return model
