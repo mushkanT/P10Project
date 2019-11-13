@@ -2,21 +2,12 @@
 import tensorflow as tf
 import glob
 import imageio
-import matplotlib.pyplot as plt
 import numpy as np
 import os
 import time
-import seaborn as sns
-import matplotlib.pyplot as plt
 import Losses as losses
 import Nets as nets
 import Data as dt
-import pandas as pd
-
-(train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
-
-train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
-train_images = (train_images - 127.5) / 127.5 # Normalize the images to [-1, 1]
 
 BUFFER_SIZE = 60000
 BATCH_SIZE = 256
@@ -24,14 +15,20 @@ EPOCHS = 500
 noise_dim = 10
 num_examples_to_generate = 16
 
-# Create and plot toy data set
+# Toy data set
 dat = dt.createToyDataRing()
-#dt.plot_distribution(dat, "Toy data distribution")
-
-# Batch and shuffle the data
 toy_train_dataset = tf.data.Dataset.from_tensor_slices(dat).shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
-train_dataset = tf.data.Dataset.from_tensor_slices(train_images).shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
+dt.plot_distribution(dat, "Toy data distribution")
 
+# Mnist
+'''
+(train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
+train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
+train_images = (train_images - 127.5) / 127.5 # Normalize the images to [-1, 1]
+train_dataset = tf.data.Dataset.from_tensor_slices(train_images).shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
+'''
+
+# Settings
 generator_optimizer = tf.keras.optimizers.Adam(1e-3)
 discriminator_optimizer = tf.keras.optimizers.Adam(1e-3)
 
@@ -78,44 +75,10 @@ def train(dataset, epochs, loss):
         for image_batch in dataset:
             train_step(image_batch, loss)
 
-#        generate_and_save_images(generator, epoch + 1, seed)
-
         print ('Time for epoch {} is {} sec'.format(epoch + 1, time.time()-start))
-
-  # Generate after the final epoch
-  # generate_and_save_images(generator, epochs, seed)
-
-
-def generate_and_save_images(model, epoch, test_input):
-    # Notice `training` is set to False.
-    # This is so all layers run in inference mode (batchnorm).
-
-    predictions = model(test_input, training=False)
-
-    fig = plt.figure(figsize=(4,4))
-
-    for i in range(predictions.shape[0]):
-        plt.subplot(4, 4, i+1)
-        plt.imshow(predictions, cmap='gray')
-        plt.axis('off')
-
-    plt.show()
 
 
 train(toy_train_dataset, EPOCHS, loss_func)
-
-#Draw 10000 samples from trained generator and plot them (only works for 2d)
-a = []
-for c in range(10000):
-    noise = tf.random.normal([1, 10])
-    generated_image = generator(noise, training=False)
-    a.append(generated_image)
-
-#dt.plot_distribution(dat)
-a = tf.convert_to_tensor(tf.reshape(a, [10000, 2]))
-dt.plot_distribution(a)
-
-
 
 '''
 #Test generator and discriminator - before training.

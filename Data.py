@@ -8,7 +8,8 @@ def plot_distribution(samples, title='', cmap='Blues',x="x",y="y"):
 
     df = pd.DataFrame(samples, columns=["x", "y"])
     sns.jointplot(x="x", y="y", data=df, kind="kde")
-    plt.show()
+    plt.savefig('ring_distribution.png')
+    #plt.show()
 
     ''' # From 'Are all GANS created equal':
     samples = samples.cpu().numpy()
