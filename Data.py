@@ -22,7 +22,7 @@ def plot_distribution(samples, title='', cmap='Blues',x="x",y="y"):
     plt.show()'''
 
 
-def draw_samples_and_plot_2d(generator):
+def draw_samples_and_plot_2d(generator, epoch):
     a = []
     for c in range(2000):
         noise = tf.random.normal([1, 10])
@@ -33,10 +33,11 @@ def draw_samples_and_plot_2d(generator):
 
     df = pd.DataFrame(samples, columns=["x", "y"])
     sns.jointplot(x="x", y="y", data=df, kind="kde")
-    plt.show()
+    plt.savefig('image_at_epoch_{:04d}.png'.format(epoch))
+    #plt.show()
 
 
-def createToyDataRing(n_mixtures=8, radius=3, Ntrain=50000, std=0.05):
+def createToyDataRing(n_mixtures=8, radius=3, Ntrain=50176, std=0.05):
     delta_theta = 2 * np.pi / n_mixtures
     centers_x = []
     centers_y = []

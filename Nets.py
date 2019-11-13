@@ -48,7 +48,7 @@ def discriminator_dcgan():
 def generator_toy():
     model = tf.keras.Sequential()
     model.add(layers.Dense(128, input_dim=(10),activation='tanh'))
-    model.add(layers.Dense(64, activation='tanh'))
+    model.add(layers.Dense(128, activation='tanh'))
     model.add(layers.Dense(2, activation='tanh'))
 
     return model
@@ -57,7 +57,7 @@ def generator_toy():
 def discriminator_toy():
     model = tf.keras.Sequential()
     model.add(layers.Dense(128, input_shape=(256,2),activation='tanh'))
-    model.add(layers.Dense(64, activation='tanh'))
+    model.add(layers.Dense(129, activation='tanh'))
     model.add(layers.Dense(2, activation='tanh'))
 
     return model
