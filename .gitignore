@@ -106,3 +106,5 @@ venv.bak/
 *.png
 
 *.h5
+
+*.pkl
