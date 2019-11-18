@@ -1,7 +1,7 @@
 import os
 
 from VAE_Model import VAE as VAE_model
-from keras.datasets import mnist,cifar10
+from keras.datasets import mnist, cifar10
 import numpy as np
 
 
