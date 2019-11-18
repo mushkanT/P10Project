@@ -3,6 +3,7 @@ import os
 from VAE_Model import VAE as VAE_model
 from keras.datasets import mnist,cifar10
 import numpy as np
+import Evaluation
 
 
 def VAE_MNIST(RUN_ID, RUN_FOLDER):
@@ -120,7 +121,8 @@ def VAE_CIFAR(RUN_ID, RUN_FOLDER):
     # y_train = np.concatenate([y_train[train_mask], y_test[test_mask]])
 
     x_train = (x_train.astype('float32') - 127.5) / 127.5
-
+    one_train = x_train[0]
+    Evaluation.evaluate(x_train[0])
     VAE.train(
         x_train,
         batch_size=BATCH_SIZE,
