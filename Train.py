@@ -2,7 +2,6 @@ import tensorflow as tf
 import numpy as np
 from keras import backend as K
 import time
-import Data as dt
 import utils as u
 import Losses as losses
 
@@ -11,10 +10,10 @@ def train_step(images, discriminator, generator, args):
     noise = tf.random.normal([args["batch_size"], args["noise_dim"]])
 
     with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
-        generated_images = generator(noise, training=True)
+        generated_images = generator(noise)
 
-        real_output = discriminator(images, training=True)
-        fake_output = discriminator(generated_images, training=True)
+        real_output = discriminator(images)
+        fake_output = discriminator(generated_images)
 
         if args["loss"] == "wgan-gp":
             disc_loss, gen_loss = losses.wasserstein_gp(images, generated_images, real_output, fake_output, args["batch_size"], 10, discriminator)
@@ -43,9 +42,6 @@ def train_discriminator(dataset, discriminator, generator, args):
                 alpha = tf.random.uniform(shape=[args["batch_size"], 1], minval=0., maxval=1.)
 
                 with tf.GradientTape() as gTape:
-                    # interpolated_images = alpha * images + ((1 - alpha) * generated_images)
-
-                    # WGAN-GP implementation does not correspond with what they wrote in their paper
                     differences = generated_images - images
                     interpolated_images = images + (alpha * differences)
 
@@ -72,39 +68,42 @@ def train_discriminator(dataset, discriminator, generator, args):
 
 
 def train_generator(dataset, discriminator, generator, args):
-    for _ in dataset:
-        noise = tf.random.normal([args["batch_size"], args["noise_dim"]])
+    noise = tf.random.normal([args["batch_size"], args["noise_dim"]])
+    valid = np.ones((256, 2), dtype=np.float32)
+    generator.train_on_batch(noise, valid)
 
-        with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
-            generated_images = generator(noise, training=True)
-            fake_output = discriminator(generated_images, training=True)
+    '''
+    noise = tf.random.normal([args["batch_size"], args["noise_dim"]])
 
-            if args["loss"] == "wgan-gp" or args["wgan"]:
-                gen_loss = -tf.reduce_mean(fake_output)
-            elif args["loss"] == "ce":
-                cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
-                gen_loss = cross_entropy(tf.ones_like(fake_output), fake_output)
+    with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
+        generated_images = generator(noise, training=True)
+        fake_output = discriminator(generated_images, training=True)
 
-        gradients_of_generator = gen_tape.gradient(gen_loss, generator.trainable_variables)
-        args["gen_optimizer"].apply_gradients(zip(gradients_of_generator, generator.trainable_variables))
+        if args["loss"] == "wgan-gp" or args["wgan"]:
+            gen_loss = -tf.reduce_mean(fake_output)
+        elif args["loss"] == "ce":
+            cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+            gen_loss = cross_entropy(tf.ones_like(fake_output), fake_output)
 
+    gradients_of_generator = gen_tape.gradient(gen_loss, generator.trainable_variables)
+    args["gen_optimizer"].apply_gradients(zip(gradients_of_generator, generator.trainable_variables))
+    '''
 
 def train(dataset, discriminator, generator, args):
     for epoch in range(args["epochs"]):
         if epoch % 10 == 0:
-            u.draw_samples_and_plot_2d(generator, epoch)
+            u.draw_samples_and_plot_2d(generator, epoch, args["noise_dim"])
 
         start = time.time()
 
-        '''
         # take n steps with critic before training generator
         for i in range(args["n_critic"]):
             train_discriminator(dataset, discriminator, generator, args)
 
         train_generator(dataset, discriminator, generator, args)
-        '''
 
-        for images in dataset:
-            train_step(images, discriminator, generator, args)
+        #for images in dataset:
+            #train_step(images, discriminator, generator, args)
 
         print('Time for epoch {} is {} sec'.format(epoch + 1, time.time()-start))
+

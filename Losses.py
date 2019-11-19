@@ -1,13 +1,13 @@
 import tensorflow as tf
 
-cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+k_cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 
-def crossEntropy(real_output, fake_output):
-    real_loss = cross_entropy(tf.ones_like(real_output), real_output)
-    fake_loss = cross_entropy(tf.zeros_like(fake_output), fake_output)
+def cross_entropy(real_output, fake_output):
+    real_loss = k_cross_entropy(tf.ones_like(real_output), real_output)
+    fake_loss = k_cross_entropy(tf.zeros_like(fake_output), fake_output)
     D_loss = real_loss + fake_loss
 
-    G_loss = cross_entropy(tf.ones_like(fake_output), fake_output)
+    G_loss = k_cross_entropy(tf.ones_like(fake_output), fake_output)
 
     return D_loss, G_loss
 

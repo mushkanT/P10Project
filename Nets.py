@@ -1,9 +1,9 @@
 import tensorflow as tf
-
+from keras.models import Model, Sequential
 layers = tf.keras.layers
 
 def generator_dcgan():
-    model = tf.keras.Sequential()
+    model = Sequential()
     model.add(layers.Dense(7 * 7 * 256, use_bias=False, input_shape=(100,)))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
@@ -28,7 +28,7 @@ def generator_dcgan():
 
 
 def discriminator_dcgan():
-    model = tf.keras.Sequential()
+    model = Sequential()
     model.add(layers.Conv2D(64, (5, 5), strides=(2, 2), padding='same',
                                      input_shape=[28, 28, 1]))
     model.add(layers.LeakyReLU())
@@ -44,19 +44,21 @@ def discriminator_dcgan():
     return model
 
 
-def generator_toy():
-    model = tf.keras.Sequential()
-    model.add(layers.Dense(128, input_dim=(10),activation='tanh'))
-    model.add(layers.Dense(128, activation='tanh'))
-    model.add(layers.Dense(2, activation='tanh'))
+def generator_toy(n_dim):
+    inputs = layers.Input(shape=(n_dim,), name='digits')
+    x = layers.Dense(128, activation='tanh', name='dense1')(inputs)
+    x = layers.Dense(128, activation='tanh', name='dense2')(x)
+    outputs = layers.Dense(2, activation='tanh', name='preds')(x)
 
+    model = tf.keras.Model(inputs=inputs, outputs=outputs)
     return model
 
 
 def discriminator_toy():
-    model = tf.keras.Sequential()
-    model.add(layers.Dense(128, input_shape=(256,2),activation='tanh'))
-    model.add(layers.Dense(129, activation='tanh'))
-    model.add(layers.Dense(2, activation='tanh'))
+    inputs = layers.Input(shape=(256,2), name='digits')
+    x = layers.Dense(128, activation='tanh', name='dense1')(inputs)
+    x = layers.Dense(128, activation='tanh', name='dense2')(x)
+    outputs = layers.Dense(2, activation='tanh', name='preds')(x)
 
+    model = tf.keras.Model(inputs=inputs, outputs=outputs)
     return model

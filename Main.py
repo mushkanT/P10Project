@@ -5,6 +5,7 @@ import keras as K
 import Nets as nets
 import Data as dt
 import Train as t
+import Losses as losses
 
 # Settings
 args = {}
@@ -13,10 +14,10 @@ args["disc_optimizer"] = tf.keras.optimizers.Adam(1e-3)
 args["loss"]                            = "wgan-gp"  # ce, wgan
 args["batch_size"]                      = 256
 args["epochs"]                          = 500
-args["n_critic"]                        = 2  # update critic 'n_critic' times pr gen update
-args["noise_dim"]                       = 10
+args["n_critic"]                        = 1  # update critic 'n_critic' times pr gen update
+args["noise_dim"]                       = 8
 args["buffer_size"]                     = 60000
-args["num_of_samples_to_generate"]   = 16
+args["num_of_samples_to_generate"]      = 16
 args["lambda"]                          = 10  # wgan-gp penalty scaling factor
 
 # Toy data set
@@ -32,9 +33,26 @@ train_images = (train_images - 127.5) / 127.5 # Normalize the images to [-1, 1]
 train_dataset = tf.data.Dataset.from_tensor_slices(train_images).shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
 '''
 
-# Nets
-generator = nets.generator_toy()
+# Define model architectures
+generator = nets.generator_toy(args["noise_dim"])
 discriminator = nets.discriminator_toy()
+
+
+# Compile generator
+if args["loss"] == "wgan-gp" or args["wgan"]:
+    loss = losses.wasserstein
+elif args["loss"] == "ce":
+    loss = losses.cross_entropy
+else:
+    raise Exception('{} is an invalid loss function'.format(args["loss"]))
+
+generator.compile(optimizer=tf.keras.optimizers.Adam(1e-3), loss=loss)
+
+# Compile discriminator
+
+
+
+
 
 # We will reuse this seed overtime (so it's easier)
 # to visualize progress in the animated GIF)

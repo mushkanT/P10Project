@@ -38,10 +38,10 @@ def plot_distribution(samples, title='', cmap='Blues',x="x",y="y"):
     plt.show()'''
 
 
-def draw_samples_and_plot_2d(generator, epoch):
+def draw_samples_and_plot_2d(generator, epoch, n_dim):
     a = []
     for c in range(2000):
-        noise = tf.random.normal([1, 10])
+        noise = tf.random.normal([1, n_dim])
         generated_image = generator(noise, training=False)
         a.append(generated_image)
 
