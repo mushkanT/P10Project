@@ -1,5 +1,4 @@
 import tensorflow as tf
-import keras.losses as loss
 
 cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 
@@ -14,7 +13,7 @@ def crossEntropy(real_output, fake_output):
 
 
 def wasserstein(real_output, fake_output):
-    D_loss = tf.reduce_mean(real_output) - tf.reduce_mean(fake_output)
+    D_loss = tf.reduce_mean(fake_output) - tf.reduce_mean(real_output)
     G_loss = -tf.reduce_mean(fake_output)
 
     return D_loss, G_loss
@@ -30,7 +29,7 @@ def wasserstein_gp(real_data, generated_data, real_output, fake_output, BATCH_SI
     )
 
     with tf.GradientTape() as gTape:
-        interpolated_images = alpha * real_data + (1-alpha) * generated_data
+        interpolated_images = alpha * real_data + ((1-alpha) * generated_data)
 
         # WGAN-GP implementation does not correspond with what they wrote in their paper
         #differences = generated_data - real_data
