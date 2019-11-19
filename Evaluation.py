@@ -3,6 +3,9 @@ import os
 import dnnlib
 from dnnlib.tflib import tfutil
 import numpy as np
+from precision_recall import knn_precision_recall_features
+
+
 
 def init_tf(random_seed=1234):
     """Initialize TF."""
@@ -27,11 +30,32 @@ def initialize_feature_extractor_incept():
         net = pickle.load(file)
     return net
 
-def evaluate(input_image):
+
+def evaluate(real_images, generated_images, batch_size, feature_model=0):
+    # Ensures that same amount of images in both samples
+    assert(real_images.shape(0) == generated_images.shape(0))
+    assert(len(real_images.shape) == len(generated_images.shape))
+
     init_tf()
 
-    feature_net = initialize_feature_extractor()
+    num_images = real_images.shape(0)
 
-    feature = feature_net.run(input_image, num_gpus=1, assume_frozen=True)
+    if feature_model == 0:
+        feature_net = initialize_feature_extractor()
+    elif feature_model == 1:
+        feature_net = initialize_feature_extractor_incept()
 
-    print(feature)
+    # Calculate features vectors for real image samples
+    ref_features = np.zeros([num_images, feature_net.output.shape[1]], dtype=np.float32)
+    for begin in range(0, num_images, batch_size):
+        end = min(begin + batch_size, num_images)
+        ref_features[begin:end] = feature_net.run(real_images[begin:end], num_gpus=1, assume_frozen=True)
+
+    # Calculate feature vectors for generated image samples
+    eval_features = np.zeros([num_images, feature_net.output.shape[1]], dtype=np.float32)
+    for begin in range(0, num_images, batch_size):
+        end = min(begin+batch_size, num_images)
+        eval_features[begin:end] = feature_net.run(generated_images[begin:end], num_gpus=1, assume_froze=True)
+
+    state = knn_precision_recall_features(ref_features, eval_features)
+    return state
