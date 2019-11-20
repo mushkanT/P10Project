@@ -2,16 +2,107 @@ from __future__ import absolute_import, division, print_function
 import tensorflow as tf
 import sonnet as snt
 
-class Encoder(snt.Module):
-    def __init__(self, in_channel, channel, n_res_block, n_res_channel, stride, name):
-        super(Encoder,self).__init__(name=name)
 
-        if stride == 4:
-            blocks = [
+class Encoder(tf.keras.Model):
+    def __init__(self, num_hiddens, num_residual_layers, num_residual_hiddens, stride,
+                 name=None):
+        """
+        Encoder convolution model for initial latent representation in VQ_VAE model
+
+        :param num_hiddens: Number of filters in convolutional layers
+        :param num_residual_layers: Number of residual layers in residual stack
+        :param num_residual_hiddens: Number of filters in residual layers
+        :param stride: Stride 8, 4 or 2, depending on encoding level (top,middel,bottom)
+        :param name: Name of encoder model
+        """
+        super(Encoder, self).__init__(name=name)
+        self._num_hiddens = num_hiddens
+        self._num_residual_layers = num_residual_layers
+        self._num_residual_hiddens = num_residual_hiddens
+
+        if stride == 8:
+             self.layers = [
+                 tf.keras.layers.Conv2D(
+                     filters=num_hiddens // 2,
+                     kernel_size=4,
+                     strides=8,
+                     padding='same',
+                     name='encoder_conv_1'
+                 ),
+                 tf.keras.layers.Conv2D(
+                    filters=num_hiddens,
+                    kernel_size=4,
+                    strides=2,
+                    padding='same',
+                    name='encoder_conv_2'
+                ),
+                tf.keras.layers.Conv2D(
+                    filters=num_hiddens,
+                    kernel_size=4,
+                    strides=2,
+                    padding='same',
+                    name='encoder_conv_3'
+                ),
+                tf.keras.layers.Conv2D(
+                    filters=num_hiddens,
+                    kernel_size=3,
+                    strides=1,
+                    padding='same',
+                    name="encoder_conv_4"
+                )
+             ]
+        elif stride == 4:
+            self.layers = [
+                tf.keras.layers.Conv2D(
+                    filters=num_hiddens//2,
+                    kernel_size=4,
+                    strides=2,
+                    padding='same'
+                ),
+                tf.keras.layers.Conv2D(
+                    filters=num_hiddens,
+                    kernel_size=4,
+                    strides=2,
+                    padding='same'
+                ),
+                tf.keras.layers.Conv2D(
+                    filters=num_hiddens,
+                    kernel_size=3,
+                    strides=1,
+                    padding='same'
+                )
             ]
+        elif stride == 2:
+            self.layers=[
+                tf.keras.layers.Conv2D(
+                    filters=num_hiddens // 2,
+                    kernel_size=4,
+                    strides=2,
+                    padding='same'
+                ),
+                tf.keras.layers.Conv2D(
+                    filters=num_hiddens,
+                    kernel_size=3,
+                    strides=1,
+                    padding='same'
+                )
+            ]
+        self.residual_stack = ResidualStack(
+            self._num_hiddens,
+            self._num_residual_layers,
+            self._num_residual_hiddens
+        )
 
 
-class ResidualStack(snt.Module):
+    def __call__(self, inputs):
+        x = inputs
+        for i in self.layers:
+            x = tf.nn.relu(self.layers[i](x))
+        return self._residual_stack(x)
+
+
+
+class ResidualStack(tf.keras.Model):
     def __init__(self, num_hiddens, num_residual_layers, num_residual_hiddens,
                  name=None):
         super(ResidualStack, self).__init__(name=name)
@@ -19,103 +110,88 @@ class ResidualStack(snt.Module):
         self._num_residual_layers = num_residual_layers
         self._num_residual_hiddens = num_residual_hiddens
 
-        self._layers = []
+        self.layers = []
+
         for i in range(num_residual_layers):
-            conv3 = snt.Conv2D(
-                output_channels=num_residual_hiddens,
-                kernel_shape=(3, 3),
-                stride=(1, 1),
-                name="res3x3_%d" % i)
-            conv1 = snt.Conv2D(
-                output_channels=num_hiddens,
-                kernel_shape=(1, 1),
-                stride=(1, 1),
-                name="res1x1_%d" % i)
-            self._layers.append((conv3, conv1))
+            conv3 = tf.keras.layers.Conv2D(
+                filters=num_residual_hiddens,
+                kernel_size=3,
+                strides=1,
+                padding='same',
+                name="residual_3x3_%d" % i
+            )
+            conv1 = tf.keras.layers.Conv2D(
+                filters=num_hiddens,
+                kernel_size=3,
+                strides=1,
+                padding='same',
+                name='residual_1x1_%d' % i
+            )
+            self.layers.append((conv3, conv1))
+
 
     def __call__(self, inputs):
-        h = inputs
-        for conv3, conv1 in self._layers:
-            conv3_out = conv3(tf.nn.relu(h))
+        x = inputs
+        for conv3, conv1 in self.layers:
+            conv3_out = conv3(tf.nn.relu(x))
             conv1_out = conv1(tf.nn.relu(conv3_out))
-            h += conv1_out
-        return tf.nn.relu(h)  # Resnet V1 style
+            x += conv1_out
+        return tf.nn.relu(x)
 
 
-class Encoder(snt.Module):
-    def __init__(self, num_hiddens, num_residual_layers, num_residual_hiddens,
+class Decoder(tf.keras.Model):
+    def __init__(self, num_hiddens, num_residual_layers, num_residual_hiddens,stride,
                  name=None):
-        super(Encoder, self).__init__(name=name)
+        super(Decoder,self).__init__(name=name)
         self._num_hiddens = num_hiddens
         self._num_residual_layers = num_residual_layers
         self._num_residual_hiddens = num_residual_hiddens
+        self.residual_stack = ResidualStack(
+            num_hiddens,
+            num_residual_layers,
+            num_residual_hiddens
+        )
+        self.conv1 = tf.keras.layers.Conv2D(
+            filters=num_hiddens,
+            kernel_size=3,
+            strides=1,
+            padding='same',
+            name='decoder_conv_1'
+        )
 
-        self._enc_1 = snt.Conv2D(
-            output_channels=self._num_hiddens // 2,
-            kernel_shape=(4, 4),
-            stride=(2, 2),
-            name="enc_1")
-        self._enc_2 = snt.Conv2D(
-            output_channels=self._num_hiddens,
-            kernel_shape=(4, 4),
-            stride=(2, 2),
-            name="enc_2")
-        self._enc_3 = snt.Conv2D(
-            output_channels=self._num_hiddens,
-            kernel_shape=(3, 3),
-            stride=(1, 1),
-            name="enc_3")
-        self._residual_stack = ResidualStack(
-            self._num_hiddens,
-            self._num_residual_layers,
-            self._num_residual_hiddens)
+        self.layers = [
+            tf.keras.layers.Conv2DTranspose(
+                filters=num_hiddens,
+                kernel_size=4,
+                strides=2,
+                padding='same'
+            ),
+            tf.keras.layers.Conv2DTranspose(
+                filters=num_hiddens//2,
+                kernel_size=4,
+                strides=2,
+                padding='same'
+            )
+        ]
 
-    def __call__(self, x):
-        h = tf.nn.relu(self._enc_1(x))
-        h = tf.nn.relu(self._enc_2(h))
-        h = tf.nn.relu(self._enc_3(h))
-        return self._residual_stack(h)
+        self.conv_t_final = tf.keras.layers.Conv2DTranspose(
+                filters=3,
+                kernel_size=4,
+                strides=2,
+                padding='same'
+        )
 
-
-class Decoder(snt.Module):
-    def __init__(self, num_hiddens, num_residual_layers, num_residual_hiddens,
-                 name=None):
-        super(Decoder, self).__init__(name=name)
-        self._num_hiddens = num_hiddens
-        self._num_residual_layers = num_residual_layers
-        self._num_residual_hiddens = num_residual_hiddens
-
-        self._dec_1 = snt.Conv2D(
-            output_channels=self._num_hiddens,
-            kernel_shape=(3, 3),
-            stride=(1, 1),
-            name="dec_1")
-        self._residual_stack = ResidualStack(
-            self._num_hiddens,
-            self._num_residual_layers,
-            self._num_residual_hiddens)
-        self._dec_2 = snt.Conv2DTranspose(
-            output_channels=self._num_hiddens // 2,
-            output_shape=None,
-            kernel_shape=(4, 4),
-            stride=(2, 2),
-            name="dec_2")
-        self._dec_3 = snt.Conv2DTranspose(
-            output_channels=3,
-            output_shape=None,
-            kernel_shape=(4, 4),
-            stride=(2, 2),
-            name="dec_3")
-
-    def __call__(self, x):
-        h = self._dec_1(x)
-        h = self._residual_stack(h)
-        h = tf.nn.relu(self._dec_2(h))
-        x_recon = self._dec_3(h)
-        return x_recon
+    def __call__(self, inputs):
+        x = inputs
+        x = self.conv1(x)
+        x = self.residual_stack(x)
+        for i in self.layers:
+            x = tf.nn.relu(self.layers[i](x))
+        x = self.conv_t_final(x)
+        return x
 
 
-class VQVAEModel(snt.Module):
+class VQVAEModel(tf.keras.Model):
     def __init__(self, encoder, decoder, vqvae, pre_vq_conv1,
                  data_variance, name=None):
         super(VQVAEModel, self).__init__(name=name)
