@@ -8,9 +8,6 @@ class Encoder(snt.Module):
 
         if stride == 4:
             blocks = [
-                tf.keras.layers.Conv2D(
-                    filters=
-                )
             ]
 
 
