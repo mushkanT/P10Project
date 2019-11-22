@@ -13,18 +13,17 @@ def generate_and_save_images(model, epoch, test_input):
 
     for i in range(predictions.shape[0]):
         plt.subplot(4, 4, i+1)
-        plt.imshow(predictions, cmap='gray')
+        plt.imshow(predictions[i, :, :, 0], cmap='gray')
         plt.axis('off')
 
-    plt.savefig('image_at_epoch_{:04d}.png'.format(epoch))
-    plt.show()
+    plt.savefig('images/generated/image_at_epoch_{:04d}.png'.format(epoch))
+    #plt.show()
 
-def plot_distribution(samples, title='', cmap='Blues',x="x",y="y"):
+def plot_toy_distribution(samples, title='', cmap='Blues',x="x",y="y"):
 
     df = pd.DataFrame(samples, columns=["x", "y"])
     sns.jointplot(x="x", y="y", data=df, kind="kde")
-    #plt.savefig('ring_distribution.png')
-    plt.show()
+    plt.savefig('images/toy/ring_distribution.png')
 
     ''' # From 'Are all GANS created equal':
     samples = samples.cpu().numpy()
@@ -40,17 +39,24 @@ def plot_distribution(samples, title='', cmap='Blues',x="x",y="y"):
 
 def draw_samples_and_plot_2d(generator, epoch, n_dim):
     a = []
-    for c in range(2000):
+    for c in range(3000):
         noise = tf.random.normal([1, n_dim])
-        generated_image = generator(noise, training=False)
+        generated_image = generator(noise)
         a.append(generated_image)
 
-    samples = tf.convert_to_tensor(tf.reshape(a,[2000,2]))
+    samples = tf.convert_to_tensor(tf.reshape(a,[3000,2]))
 
     df = pd.DataFrame(samples, columns=["x", "y"])
     sns.jointplot(x="x", y="y", data=df, kind="kde")
-    plt.savefig('image_at_epoch_{:04d}.png'.format(epoch))
-    #plt.show()
+    plt.savefig('images/toy/image_at_epoch_{:04d}.png'.format(epoch))
+    plt.close()
+
+def plot_loss(gen_loss, disc_loss):
+    plt.plot(gen_loss, label='Generator loss')
+    plt.plot(disc_loss, label='Discriminator loss')
+    plt.legend()
+    plt.savefig('images/plots/oss_plot.png')
+    plt.close()
 
 def weight_init():
     return 0

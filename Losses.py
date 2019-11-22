@@ -23,7 +23,7 @@ def wasserstein_gp(real_data, generated_data, real_output, fake_output, BATCH_SI
     D_loss, G_loss = wasserstein(real_output, fake_output)
 
     alpha = tf.random.uniform(
-        shape=[BATCH_SIZE, 1],
+        shape=[BATCH_SIZE, 1,1,1],
         minval=0.,
         maxval=1.
     )

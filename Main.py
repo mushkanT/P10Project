@@ -1,68 +1,71 @@
-
 import tensorflow as tf
 import numpy as np
-import keras as K
 import Nets as nets
 import Data as dt
 import Train as t
-import Losses as losses
+import utils as u
+import argparse
+
+parser = argparse.ArgumentParser()
 
 # Settings
-args = {}
-args["gen_optimizer"] = tf.keras.optimizers.Adam(1e-3)
-args["disc_optimizer"] = tf.keras.optimizers.Adam(1e-3)
-args["loss"]                            = "wgan-gp"  # ce, wgan
-args["batch_size"]                      = 256
-args["epochs"]                          = 500
-args["n_critic"]                        = 1  # update critic 'n_critic' times pr gen update
-args["noise_dim"]                       = 8
-args["buffer_size"]                     = 60000
-args["num_of_samples_to_generate"]      = 16
-args["lambda"]                          = 10  # wgan-gp penalty scaling factor
+parser.add_argument('--dataset', type=str,            default = 'mnist'       , help=' toy | mnist | cifar10 ')
+parser.add_argument('--n_train', type=int,            default = 60000       , help='training set size, default to mnist')
+parser.add_argument('--n_test', type=int,             default = 10000       , help='test set size, default to mnist')
 
-# Toy data set
-dat = dt.createToyDataRing()
-toy_train_dataset = tf.data.Dataset.from_tensor_slices(dat).shuffle(args["buffer_size"]).batch(args["batch_size"])
-#dt.plot_distribution(dat, "Toy data distribution")
+parser.add_argument('--noise_dim', type=int,          default = 100         , help='size of the latent vector')
 
-# Mnist
-'''
-(train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
-train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
-train_images = (train_images - 127.5) / 127.5 # Normalize the images to [-1, 1]
-train_dataset = tf.data.Dataset.from_tensor_slices(train_images).shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
-'''
+parser.add_argument('--loss', type=str,               default = 'wgan-gp'   , help='wgan-gp | wgan | ce')
+parser.add_argument('--batch_size', type=int,         default = 100)
+parser.add_argument('--epochs', type=int,             default = 1000)
+parser.add_argument('--n_critic', type=int,           default = 1)
+parser.add_argument('--clip', type=float,             default = 0.01        , help='upper bound for clipping')
+parser.add_argument('--gp_lambda', type=int,          default = 10)
+parser.add_argument('--lr_d', type=float,             default = 1e-4)
+parser.add_argument('--lr_g', type=float,             default = 1e-4)
+parser.add_argument('--optim_d', type=str,            default = 'adam'      , help='adam')
+parser.add_argument('--optim_g', type=str,            default = 'adam'      , help='adam')
+parser.add_argument('--num_samples_to_gen', type=int, default = 16)
 
-# Define model architectures
-generator = nets.generator_toy(args["noise_dim"])
-discriminator = nets.discriminator_toy()
+args = parser.parse_args()
 
-
-# Compile generator
-if args["loss"] == "wgan-gp" or args["wgan"]:
-    loss = losses.wasserstein
-elif args["loss"] == "ce":
-    loss = losses.cross_entropy
+# Choose correct model architecture
+if args.dataset == "toy":
+    dat = dt.createToyDataRing()
+    train_dataset = tf.data.Dataset.from_tensor_slices(dat).shuffle(args.n_train).batch(args.batch_size)
+    #u.plot_toy_distribution(dat, "2 dimensional toy data distribution")
+    generator = nets.generator_toy(args.noise_dim)
+    discriminator = nets.discriminator_toy()
+elif args.dataset == "mnist":
+    dat = dt.mnist()
+    train_dataset = tf.data.Dataset.from_tensor_slices(dat).shuffle(args.n_train).batch(args.batch_size)
+    generator = nets.generator_dcgan()
+    discriminator = nets.discriminator_dcgan()
 else:
-    raise Exception('{} is an invalid loss function'.format(args["loss"]))
+    raise Exception("Dataset not available")
 
-generator.compile(optimizer=tf.keras.optimizers.Adam(1e-3), loss=loss)
+# Choose correct optimizers
+if args.optim_d == "adam":
+    args.gen_optimizer = tf.keras.optimizers.Adam(args.lr_d)
 
-# Compile discriminator
+if args.optim_g == "adam":
+    args.disc_optimizer = tf.keras.optimizers.Adam(args.lr_g)
 
-
-
-
+args.dataset_dim = dat.shape[0]
 
 # We will reuse this seed overtime (so it's easier)
 # to visualize progress in the animated GIF)
-seed = tf.random.normal([args["num_of_samples_to_generate"], args["noise_dim"]])
+args.seed = tf.random.normal([args.num_samples_to_gen, args.noise_dim])
 
 if len(tf.config.experimental.list_physical_devices('GPU')) > 0:
     with tf.device('/GPU:0'):
-        t.train(toy_train_dataset, discriminator, generator, args)
+        g_loss, d_loss = t.train(train_dataset, discriminator, generator, args)
 else:
-    t.train(toy_train_dataset, discriminator, generator, args)
+    g_loss, d_loss = t.train(train_dataset, discriminator, generator, args)
+
+u.plot_loss(g_loss, d_loss)
+
+
 
 
 '''
