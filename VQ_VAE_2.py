@@ -142,25 +142,7 @@ class ResidualStack(tf.keras.Model):
             padding='same',
             name='residual_1x1'
         )
-        """
-        self._layers = []
-        for i in range(num_residual_layers):
-            conv3 = tf.keras.layers.Conv2D(
-                filters=num_residual_hiddens,
-                kernel_size=3,
-                strides=1,
-                padding='same',
-                name="residual_3x3_%d" % i
-            )
-            conv1 = tf.keras.layers.Conv2D(
-                filters=num_hiddens,
-                kernel_size=3,
-                strides=1,
-                padding='same',
-                name='residual_1x1_%d' % i
-            )
-            self._layers.append((conv3, conv1))
-        """
+
 
     def __call__(self, inputs):
         x = inputs
@@ -202,6 +184,27 @@ class Decoder(tf.keras.Model):
                 padding='same'
         )
 
+        self.conv_3 = tf.keras.layers.Conv2DTranspose(
+            filters=num_hiddens // 2,
+            kernel_size=4,
+            strides=2,
+            padding='same'
+        )
+
+        self.conv_4 = tf.keras.layers.Conv2DTranspose(
+            filters=num_hiddens // 2,
+            kernel_size=4,
+            strides=2,
+            padding='same'
+        )
+
+        self.conv_5 = tf.keras.layers.Conv2DTranspose(
+            filters=num_hiddens // 2,
+            kernel_size=4,
+            strides=2,
+            padding='same'
+        )
+
 
         self.conv_t_final = tf.keras.layers.Conv2DTranspose(
                 filters=3,
@@ -215,6 +218,9 @@ class Decoder(tf.keras.Model):
         x = self.conv1(x)
         x = self.residual_stack(x)
         x = tf.nn.relu(self.conv_2(x))
+        x = tf.nn.relu(self.conv_3(x))
+        x = tf.nn.relu(self.conv_4(x))
+        x = tf.nn.relu(self.conv_5(x))
         x = self.conv_t_final(x)
         return x
 

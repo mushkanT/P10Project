@@ -2,6 +2,7 @@ import tensorflow as tf
 import VQ_VAE_2
 import sonnet as snt
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Set hyper-parameters.
 batch_size = 32
@@ -45,15 +46,24 @@ decay = 0.99
 
 learning_rate = 3e-4
 
+image_generator = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255)
+
+train_data_gen = image_generator.flow_from_directory(directory='C:/Users/User/Desktop/1024_images/',
+                                                     batch_size=1,
+                                                     target_size=(1024,1024),
+                                                     shuffle=True)
+
+h = next(train_data_gen)
 (x_train, y_train), (x_test, y_test) =tf.keras.datasets.cifar10.load_data()
-# # Data Loading.
+# Data Loading.
 
 x_train = x_train.astype('float32') / 255.0
 x_test = x_test.astype('float32') / 255.0
 
+x_train=h[0]
 
 # # Build modules.
-encoder = VQ_VAE_2.Encoder4Stride(num_hiddens, num_residual_layers, num_residual_hiddens)
+encoder = VQ_VAE_2.Encoder8Stride(num_hiddens, num_residual_layers, num_residual_hiddens)
 decoder = VQ_VAE_2.Decoder(num_hiddens, num_residual_layers, num_residual_hiddens,2)
 pre_vq_conv1 = snt.Conv2D(output_channels=embedding_dim,
                           kernel_shape=(1, 1),
@@ -83,6 +93,8 @@ def train_step(data):
     with tf.GradientTape() as tape:
         model_output = model(data, is_training=True)
     trainable_variables = model.trainable_variables
+    plt.imshow(model_output['x_recon'][0])
+    plt.show()
     grads = tape.gradient(model_output['loss'], trainable_variables)
     optimizer.apply(grads, trainable_variables)
 
@@ -94,16 +106,16 @@ train_recon_errors = []
 train_perplexities = []
 train_vqvae_loss = []
 
+for i in range(10000):
+    train_results = train_step(x_train[0:1])
+    train_losses.append(train_results['loss'])
+    train_recon_errors.append(train_results['recon_error'])
+    train_perplexities.append(train_results['vq_output']['perplexity'])
+    train_vqvae_loss.append(train_results['vq_output']['loss'])
 
-train_results = train_step(x_train[0:20])
-train_losses.append(train_results['loss'])
-train_recon_errors.append(train_results['recon_error'])
-train_perplexities.append(train_results['vq_output']['perplexity'])
-train_vqvae_loss.append(train_results['vq_output']['loss'])
-
-if (0 + 0) % 100 == 0:
-    print('%d. train loss: %f ' % (0 + 1,
-                                   np.mean(train_losses[-100:])) +
-          ('recon_error: %.3f ' % np.mean(train_recon_errors[-100:])) +
-          ('perplexity: %.3f ' % np.mean(train_perplexities[-100:])) +
-          ('vqvae loss: %.3f' % np.mean(train_vqvae_loss[-100:])))
+    if i % 100 == 0:
+        print('%d. train loss: %f ' % (0 + 1,
+                                       np.mean(train_losses[-100:])) +
+              ('recon_error: %.3f ' % np.mean(train_recon_errors[-100:])) +
+              ('perplexity: %.3f ' % np.mean(train_perplexities[-100:])) +
+              ('vqvae loss: %.3f' % np.mean(train_vqvae_loss[-100:])))
