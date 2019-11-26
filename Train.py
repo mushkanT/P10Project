@@ -101,7 +101,7 @@ def train(dataset, discriminator, generator, args):
             gen_loss.append(tf.reduce_mean(train_generator(discriminator, generator, args)))
             disc_loss.append(tf.reduce_mean(disc_loss_n_critic))
 
-        full_training_time += start
+        full_training_time += time.time()-start
 
     return gen_loss, disc_loss, images_while_training, full_training_time
 
