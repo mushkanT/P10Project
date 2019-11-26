@@ -32,8 +32,6 @@ parser.add_argument('--dir', type=str,                default='/user/student.aau
 
 args = parser.parse_args()
 
-args.dir = 'C:/Users/marku/Desktop'
-
 # Write config
 file = open(os.path.join(args.dir, 'config.txt'), 'w')
 file.write(str(args))
@@ -51,6 +49,7 @@ elif args.dataset == "mnist":
     train_dataset = tf.data.Dataset.from_tensor_slices(dat).shuffle(args.n_train).batch(args.batch_size)
     generator = nets.generator_dcgan()
     discriminator = nets.discriminator_dcgan()
+
 else:
     raise Exception("Dataset not available")
 
@@ -76,31 +75,23 @@ else:
 
 
 # Write losses, image values, and full training time + save models
-for i in range(len(g_loss)):
-    tf.print(g_loss[i])
-tf.print('|')
-for i in range(len(d_loss)):
-    tf.print(d_loss[i])
-for i in range(len(images_while_training)):
-    tf.print(images_while_training[i])
-tf.print('|'+str(full_training_time))
-
-'''
 file = open(os.path.join(args.dir, 'losses.txt'), 'w')
 file.write(str(g_loss))
 file.write('|'+str(d_loss))
 file.close()
 
-file = open(os.path.join(args.dir, 'itw.txt'), 'w')
-file.write(str(images_while_training))
+file = open(os.path.join(args.dir, 'itw.txt'), 'a')
+for k in range(len(images_while_training)):
+    for i in range(len(images_while_training[k])):
+        file.write(str(images_while_training[k][i])+' ')
+    file.write('|')
 file.close()
-'''
 
 file = open(os.path.join(args.dir, 'config.txt'), 'a')
 file.write(str(full_training_time))
 file.close()
 
-generator.    save(args.dir+'/generator')
+generator.save(args.dir+'/generator')
 discriminator.save(args.dir+'/discriminator')
 
 #u.plot_loss(g_loss, d_loss)

@@ -1,7 +1,8 @@
 import tensorflow as tf
-#from seaborn import jointplot
-#import matplotlib.pyplot as plt
+from seaborn import jointplot
+import matplotlib.pyplot as plt
 import pandas as pd
+from keras import backend as K
 
 
 def generate_and_save_images(model, epoch, test_input):
@@ -9,7 +10,7 @@ def generate_and_save_images(model, epoch, test_input):
     # This is so all layers run in inference mode (batchnorm).
 
     predictions = model(test_input, training=False)
-    return predictions
+    return predictions.numpy()
 
     '''
     fig = plt.figure(figsize=(4, 4))
@@ -42,16 +43,16 @@ def plot_toy_distribution(samples, title='', cmap='Blues',x="x",y="y"):
     plt.show()
 '''
 
-def draw_samples_and_plot_2d(generator, epoch, n_dim):
+def draw_samples_and_plot_2d(generator, epoch, n_dim, seed=2019):
     a = []
-    for c in range(3000):
-        noise = tf.random.normal([1, n_dim])
-        generated_image = generator(noise)
-        a.append(generated_image)
 
-    samples = tf.convert_to_tensor(tf.reshape(a, [3000, 2]))
-    return samples
+    noise = tf.random.normal([3000, n_dim], seed=seed)
+    generated_image = generator(noise).numpy()
+    a.append(generated_image)
+    return generated_image
+
     '''
+    samples = tf.convert_to_tensor(tf.reshape(a, [3000, 2]))
     df = pd.DataFrame(samples, columns=["x", "y"])
     jointplot(x="x", y="y", data=df, kind="kde")
     plt.savefig('images/toy/image_at_epoch_{:04d}.png'.format(epoch))

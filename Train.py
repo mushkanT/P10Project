@@ -98,8 +98,8 @@ def train(dataset, discriminator, generator, args):
                 batch = next(it)
                 disc_loss_n_critic.append(train_discriminator(batch, discriminator, generator, args))
 
-            gen_loss.append(tf.reduce_mean(train_generator(discriminator, generator, args)))
-            disc_loss.append(tf.reduce_mean(disc_loss_n_critic))
+            gen_loss.append(tf.reduce_mean(train_generator(discriminator, generator, args)).numpy())
+            disc_loss.append(tf.reduce_mean(disc_loss_n_critic).numpy())
 
         full_training_time += time.time()-start
 
