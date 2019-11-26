@@ -1,29 +1,8 @@
 import tensorflow as tf
 import numpy as np
 import time
-import utils as u
+import Utils as u
 import Losses as l
-
-
-def train_step(images, discriminator, generator, args):
-    noise = tf.random.normal([args.batch_size, args.noise_dim])
-
-    with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
-        generated_images = generator(noise)
-
-        real_output = discriminator(images)
-        fake_output = discriminator(generated_images)
-
-        if args.loss == "wgan-gp":
-            disc_loss, gen_loss = l.wasserstein_gp(images, generated_images, real_output, fake_output, args.batch_size, 10, discriminator)
-        elif args.loss == "ce":
-            disc_loss, gen_loss = l.crossEntropy(real_output, fake_output)
-
-    gradients_of_generator = gen_tape.gradient(gen_loss, generator.trainable_variables)
-    gradients_of_discriminator = disc_tape.gradient(disc_loss, discriminator.trainable_variables)
-
-    args.gen_optimizer.apply_gradients(zip(gradients_of_generator, generator.trainable_variables))
-    args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, discriminator.trainable_variables))
 
 
 def train_discriminator(batch, discriminator, generator, args):
@@ -62,7 +41,7 @@ def train_discriminator(batch, discriminator, generator, args):
 
     gradients_of_discriminator = disc_tape.gradient(disc_loss, discriminator.trainable_variables)
     args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, discriminator.trainable_variables))
-    # Clip weights if wgan
+    # Clip weights if wgan loss function
     if args.loss == "wgan":
         for var in discriminator.trainable_variables:
             tf.clip_by_value(var, -args.clip, args.clip)
@@ -92,16 +71,19 @@ def train_generator(discriminator, generator, args):
 def train(dataset, discriminator, generator, args):
     gen_loss = []
     disc_loss = []
+    images_while_training = []
+    full_training_time = 0
 
     batches_pr_epoch = args.dataset_dim // args.batch_size
     n_steps = batches_pr_epoch // args.n_critic
 
     for epoch in range(args.epochs):
-        if epoch % 10 == 0:
-            if args.dataset == "toy":
-                u.draw_samples_and_plot_2d(generator, epoch, args.noise_dim)
-            else:
-                u.generate_and_save_images(generator, epoch, args.seed)
+        if args.images_while_training != 0:
+            if epoch % args.images_while_training == 0:
+                if args.dataset == "toy":
+                    images_while_training.append(u.draw_samples_and_plot_2d(generator, epoch, args.noise_dim))
+                else:
+                    images_while_training.append(u.generate_and_save_images(generator, epoch, args.seed))
 
         # TODO: Should find a better way to do this
         dataset.shuffle(args.n_train)
@@ -116,12 +98,10 @@ def train(dataset, discriminator, generator, args):
                 batch = next(it)
                 disc_loss_n_critic.append(train_discriminator(batch, discriminator, generator, args))
 
-            gen_loss.append(train_generator(discriminator, generator, args))
+            gen_loss.append(tf.reduce_mean(train_generator(discriminator, generator, args)))
             disc_loss.append(tf.reduce_mean(disc_loss_n_critic))
 
-        #for images in dataset:
-            #train_step(images, discriminator, generator, args)
+        full_training_time += start
 
-        print('Time for epoch {} is {} sec'.format(epoch + 1, time.time()-start))
-    return gen_loss, disc_loss
+    return gen_loss, disc_loss, images_while_training, full_training_time
 

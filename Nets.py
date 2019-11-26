@@ -48,7 +48,7 @@ def generator_toy(n_dim):
     inputs = keras.Input(shape=(n_dim,), name='digits')
     x = layers.Dense(128, activation='tanh', name='dense1')(inputs)
     x = layers.Dense(128, activation='tanh', name='dense2')(x)
-    #x = layers.Dense(128, activation='tanh', name='dense3')(x)
+    x = layers.Dense(128, activation='tanh', name='dense3')(x)
     outputs = layers.Dense(2, activation='tanh', name='preds')(x)
 
     model = keras.Model(inputs=inputs, outputs=outputs)
@@ -59,7 +59,7 @@ def discriminator_toy():
     inputs = keras.Input(shape=(256, 2), name='digits')
     x = layers.Dense(128, activation='tanh', name='dense1')(inputs)
     x = layers.Dense(128, activation='tanh', name='dense2')(x)
-    #x = layers.Dense(128, activation='tanh', name='dense3')(x)
+    x = layers.Dense(128, activation='tanh', name='dense3')(x)
     outputs = layers.Dense(2, activation='linear', name='preds')(x)
 
     model = keras.Model(inputs=inputs, outputs=outputs)

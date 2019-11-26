@@ -1,14 +1,17 @@
 import tensorflow as tf
-import seaborn as sns
-import matplotlib.pyplot as plt
+#from seaborn import jointplot
+#import matplotlib.pyplot as plt
 import pandas as pd
+
 
 def generate_and_save_images(model, epoch, test_input):
     # Notice `training` is set to False.
     # This is so all layers run in inference mode (batchnorm).
 
     predictions = model(test_input, training=False)
+    return predictions
 
+    '''
     fig = plt.figure(figsize=(4, 4))
 
     for i in range(predictions.shape[0]):
@@ -18,14 +21,16 @@ def generate_and_save_images(model, epoch, test_input):
 
     plt.savefig('images/generated/image_at_epoch_{:04d}.png'.format(epoch))
     #plt.show()
+    '''
 
+'''
 def plot_toy_distribution(samples, title='', cmap='Blues',x="x",y="y"):
 
     df = pd.DataFrame(samples, columns=["x", "y"])
-    sns.jointplot(x="x", y="y", data=df, kind="kde")
+    jointplot(x="x", y="y", data=df, kind="kde")
     plt.savefig('images/toy/ring_distribution.png')
 
-    ''' # From 'Are all GANS created equal':
+    # From 'Are all GANS created equal':
     samples = samples.cpu().numpy()
     sns.set(font_scale=2)
     f, ax = plt.subplots(figsize=(4, 4))
@@ -34,8 +39,8 @@ def plot_toy_distribution(samples, title='', cmap='Blues',x="x",y="y"):
     plt.ylim([-5, 5])
     plt.axis('off')
     plt.title(title)
-    plt.show()'''
-
+    plt.show()
+'''
 
 def draw_samples_and_plot_2d(generator, epoch, n_dim):
     a = []
@@ -44,19 +49,25 @@ def draw_samples_and_plot_2d(generator, epoch, n_dim):
         generated_image = generator(noise)
         a.append(generated_image)
 
-    samples = tf.convert_to_tensor(tf.reshape(a,[3000,2]))
-
+    samples = tf.convert_to_tensor(tf.reshape(a, [3000, 2]))
+    return samples
+    '''
     df = pd.DataFrame(samples, columns=["x", "y"])
-    sns.jointplot(x="x", y="y", data=df, kind="kde")
+    jointplot(x="x", y="y", data=df, kind="kde")
     plt.savefig('images/toy/image_at_epoch_{:04d}.png'.format(epoch))
     plt.close()
+    '''
 
+'''
 def plot_loss(gen_loss, disc_loss):
     plt.plot(gen_loss, label='Generator loss')
     plt.plot(disc_loss, label='Discriminator loss')
     plt.legend()
     plt.savefig('images/plots/oss_plot.png')
     plt.close()
+'''
+
 
 def weight_init():
     return 0
+
