@@ -10,11 +10,56 @@ from functools import partial, lru_cache
 
 import numpy as np
 import tensorflow as tf
+from tensorflow_core.python.keras import activations
+from tensorflow_core.python.keras import backend
+from tensorflow_core.python.keras import constraints
+from tensorflow_core.python.keras import initializers
+from tensorflow_core.python.keras import regularizers
 import tensorflow_addons as tfa
 
 
 def wn_linear(in_dim, out_dim):
     return tf.keras.layers.Norma.utils.weight_norm(nn.Linear(in_dim, out_dim))
+
+
+class WNConv2D(tf.keras.layers.Conv2D):
+    def __init__(filters,
+               kernel_size,
+               strides=(1, 1),
+               padding='valid',
+               data_format=None,
+               dilation_rate=(1, 1),
+               activation=None,
+               use_bias=True,
+               kernel_initializer='glorot_uniform',
+               bias_initializer='zeros',
+               kernel_regularizer=None,
+               bias_regularizer=None,
+               activity_regularizer=None,
+               kernel_constraint=None,
+               bias_constraint=None,
+               **kwargs):
+
+        super(WNConv2D,self).__init__(
+            rank=2,
+            filters=filters,
+            kernel_size=kernel_size,
+            strides=strides,
+            padding=padding,
+            data_format=data_format,
+            dilation_rate=dilation_rate,
+            activation=activations.get(activation),
+            use_bias=use_bias,
+            kernel_initializer=initializers.get(kernel_initializer),
+            bias_initializer=initializers.get(bias_initializer),
+            kernel_regularizer=regularizers.get(kernel_regularizer),
+            bias_regularizer=regularizers.get(bias_regularizer),
+            activity_regularizer=regularizers.get(activity_regularizer),
+            kernel_constraint=constraints.get(kernel_constraint),
+            bias_constraint=constraints.get(bias_constraint),
+            **kwargs
+        )
+
 
 
 class WNConv2d(tf.keras.Model):

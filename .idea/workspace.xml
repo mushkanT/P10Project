@@ -5,7 +5,8 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DataHandler.py" beforeDir="false" afterPath="$PROJECT_DIR$/DataHandler.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VQ_VAE_2.py" beforeDir="false" afterPath="$PROJECT_DIR$/VQ_VAE_2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PixelSNAIL.py" beforeDir="false" afterPath="$PROJECT_DIR$/PixelSNAIL.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VQ_VAE_2.py" beforeDir="false" afterPath="$PROJECT_DIR$/VQ_VAE_Model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/VQ_VAE_2_Usage.py" beforeDir="false" afterPath="$PROJECT_DIR$/VQ_VAE_2_Usage.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -120,7 +121,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/VQ_VAE_2.py" />
+      <option name="SCRIPT_NAME" value="C:\Users\User\Documents\P9Project\VQ_VAE_Model.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -178,7 +179,8 @@
       <workItem from="1574667681933" duration="227000" />
       <workItem from="1574667944996" duration="16186000" />
       <workItem from="1574694065829" duration="25351000" />
-      <workItem from="1574840096265" duration="10593000" />
+      <workItem from="1574840096265" duration="11012000" />
+      <workItem from="1574855034343" duration="13787000" />
     </task>
     <servers />
   </component>
@@ -202,41 +204,26 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/VQ_VAE_2.py</url>
-          <line>467</line>
-          <option name="timeStamp" value="49" />
+          <url>file://$PROJECT_DIR$/VQ_VAE_2_Usage.py</url>
+          <line>16</line>
+          <option name="timeStamp" value="74" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/VQ_VAE_2_Usage.py</url>
-          <line>31</line>
-          <option name="timeStamp" value="50" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/VQ_VAE_2.py</url>
-          <line>394</line>
-          <option name="timeStamp" value="51" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/VQ_VAE_2.py</url>
-          <line>455</line>
-          <option name="timeStamp" value="52" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/VQ_VAE_2.py</url>
-          <line>454</line>
-          <option name="timeStamp" value="54" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/VQ_VAE_2.py</url>
-          <line>451</line>
-          <option name="timeStamp" value="57" />
+          <line>26</line>
+          <option name="timeStamp" value="75" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+    <watches-manager>
+      <configuration name="PythonConfigurationType">
+        <watch expression="h" />
+      </configuration>
+    </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/P9Project$VQ_VAE_2.coverage" NAME="VQ_VAE_2 Coverage Results" MODIFIED="1574080551734" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/P9Project$VQ_VAE_2_Usage.coverage" NAME="VQ_VAE_2_Usage Coverage Results" MODIFIED="1574845239428" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/P9Project$VQ_VAE_2_Usage.coverage" NAME="VQ_VAE_2_Usage Coverage Results" MODIFIED="1574865936694" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/P9Project$VAE.coverage" NAME="VAE Coverage Results" MODIFIED="1573479866554" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/P9Project$Main.coverage" NAME="Main Coverage Results" MODIFIED="1573566486911" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
