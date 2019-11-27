@@ -1,8 +1,5 @@
 import tensorflow as tf
 
-class datahandler():
-    def __init__(self, batch_size, normalise=True, Shuffle=True):
-
 
 def mnist(normalise=True, norm_setting=0):
     (x_train, x_test), (_, _) = tf.keras.datasets.mnist.load_data()
@@ -17,6 +14,7 @@ def mnist(normalise=True, norm_setting=0):
             x_test = (x_test - 127.5) / 127.5
     return x_train,x_test
 
+
 def cifar10(normalise=True, norm_setting=0):
     (x_train, x_test), (_, _) = tf.keras.datasets.cifar10.load_data()
     if normalise:
@@ -30,12 +28,22 @@ def cifar10(normalise=True, norm_setting=0):
             x_test = (x_test - 127.5) / 127.5
     return x_train, x_test
 
-def custom_data(path, normalise=True, norm_setting=0):
+def custom_data(path, batch_size, target_size, shuffle=True, normalise=True, norm_setting=0):
     if normalise:
         if norm_setting == 0:
-            image_generator = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1. / 255)
+            image_generator = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255.0)
 
             train_data_gen = image_generator.flow_from_directory(directory=str(path),
-                                                         batch_size=1,
-                                                         target_size=(1024, 1024),
-                                                         shuffle=True)
+                                                         batch_size=batch_size,
+                                                         target_size=target_size,
+                                                         shuffle=shuffle)
+            test = next(train_data_gen)
+            return train_data_gen
+        elif norm_setting == 1:
+            image_generator = tf.keras.preprocessing.image.ImageDataGenerator(rescale=(1. - 127.5) / 127.5)
+
+            train_data_gen = image_generator.flow_from_directory(directory=str(path),
+                                                                 batch_size=batch_size,
+                                                                 target_size=target_size,
+                                                                 shuffle=shuffle)
+            return train_data_gen
