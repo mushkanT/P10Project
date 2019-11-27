@@ -2,7 +2,6 @@ import tensorflow as tf
 import numpy as np
 import time
 import Utils as u
-import Losses as l
 
 
 def train_discriminator(batch, discriminator, generator, args):
@@ -81,9 +80,9 @@ def train(dataset, discriminator, generator, args):
         if args.images_while_training != 0:
             if epoch % args.images_while_training == 0:
                 if args.dataset == "toy":
-                    images_while_training.append(u.draw_samples_and_plot_2d(generator, epoch, args.noise_dim))
+                    images_while_training.append(u.draw_2d_samples(generator, args.noise_dim))
                 else:
-                    images_while_training.append(u.generate_and_save_images(generator, epoch, args.seed))
+                    images_while_training.append(u.draw_samples(generator, args.seed))
 
         # TODO: Should find a better way to do this
         dataset.shuffle(args.n_train)

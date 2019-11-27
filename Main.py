@@ -3,10 +3,9 @@ import numpy as np
 import Nets as nets
 import Data as dt
 import Train as t
-import Utils as u
 import argparse
 import os.path
-import sys
+#import o2img as o2i
 
 parser = argparse.ArgumentParser()
 
@@ -14,12 +13,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', type=str,            default = 'toy'       , help=' toy | mnist | cifar10 ')
 parser.add_argument('--n_train', type=int,            default = 60000       , help='training set size, default to mnist')
 parser.add_argument('--n_test', type=int,             default = 10000       , help='test set size, default to mnist')
-
 parser.add_argument('--noise_dim', type=int,          default = 10         , help='size of the latent vector')
-
 parser.add_argument('--loss', type=str,               default = 'wgan-gp'   , help='wgan-gp | wgan | ce')
 parser.add_argument('--batch_size', type=int,         default = 100)
-parser.add_argument('--epochs', type=int,             default = 500)
+parser.add_argument('--epochs', type=int,             default = 1)
 parser.add_argument('--n_critic', type=int,           default = 5)
 parser.add_argument('--clip', type=float,             default = 0.01        , help='upper bound for clipping')
 parser.add_argument('--gp_lambda', type=int,          default = 10)
@@ -33,16 +30,21 @@ parser.add_argument('--dir', type=str,                default='/user/student.aau
 
 args = parser.parse_args()
 
+# local debugging
+#args.dir = 'C:/Users/marku/Desktop'
+#o2i.create_images('C:/Users/marku/Desktop/GAN_training_output', 'toy')
+
 # Write config
 file = open(os.path.join(args.dir, 'config.txt'), 'w')
 file.write(str(args))
 file.close()
 
+
 # Choose correct model architecture
 if args.dataset == "toy":
     dat = dt.createToyDataRing()
     train_dataset = tf.data.Dataset.from_tensor_slices(dat).shuffle(args.n_train).batch(args.batch_size)
-    #u.plot_toy_distribution(dat, "2 dimensional toy data distribution")
+    #o2i.plot_toy_distribution(dat, "2 dimensional toy data distribution")
     generator = nets.generator_toy(args.noise_dim)
     discriminator = nets.discriminator_toy()
 elif args.dataset == "mnist":
@@ -74,8 +76,7 @@ if len(tf.config.experimental.list_physical_devices('GPU')) > 0:
 else:
     g_loss, d_loss, images_while_training, full_training_time = t.train(train_dataset, discriminator, generator, args)
 
-
-# Write losses, image values, and full training time + save models
+# Write losses, image values, full training time and save models
 file = open(os.path.join(args.dir, 'losses.txt'), 'w')
 file.write(str(g_loss))
 file.write('|'+str(d_loss))
@@ -84,7 +85,7 @@ file.close()
 file = open(os.path.join(args.dir, 'itw.txt'), 'a')
 for k in range(len(images_while_training)):
     for i in range(len(images_while_training[k])):
-        file.write(str(images_while_training[k][i])+' ')
+        file.write(str(images_while_training[k][i])+',')
     file.write('|')
 file.close()
 
@@ -95,22 +96,7 @@ file.close()
 generator.save(args.dir+'/generator')
 discriminator.save(args.dir+'/discriminator')
 
-#u.plot_loss(g_loss, d_loss)
 
 
 
 
-'''
-#Test generator and discriminator - before training.
-generator = nets.generator_dcgan()
-
-noise = tf.random.normal([1, 10])
-generated_image = generator(noise, training=False)
-
-plt.imshow(generated_image, cmap='gray')
-plt.show()
-
-discriminator = nets.discriminator_dcgan()
-decision = discriminator(generated_image)
-print (decision)
-'''
