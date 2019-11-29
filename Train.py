@@ -82,7 +82,7 @@ def train(dataset, discriminator, generator, args):
                 if args.dataset == "toy":
                     images_while_training.append(u.draw_2d_samples(generator, args.noise_dim))
                 else:
-                    images_while_training.append(u.draw_samples(generator, args.seed))
+                    images_while_training.append(u.draw_samples(generator, args.seed, args.dataset))
 
         # TODO: Should find a better way to do this
         dataset.shuffle(args.n_train)

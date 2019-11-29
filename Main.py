@@ -16,7 +16,7 @@ parser.add_argument('--n_test', type=int,             default = 10000       , he
 parser.add_argument('--noise_dim', type=int,          default = 10         , help='size of the latent vector')
 parser.add_argument('--loss', type=str,               default = 'wgan-gp'   , help='wgan-gp | wgan | ce')
 parser.add_argument('--batch_size', type=int,         default = 100)
-parser.add_argument('--epochs', type=int,             default = 1)
+parser.add_argument('--epochs', type=int,             default = 500)
 parser.add_argument('--n_critic', type=int,           default = 5)
 parser.add_argument('--clip', type=float,             default = 0.01        , help='upper bound for clipping')
 parser.add_argument('--gp_lambda', type=int,          default = 10)
@@ -32,7 +32,9 @@ args = parser.parse_args()
 
 # local debugging
 #args.dir = 'C:/Users/marku/Desktop'
-#o2i.create_images('C:/Users/marku/Desktop/GAN_training_output', 'toy')
+#args.epochs = 1
+#o2i.load_images('C:/Users/marku/Desktop/GAN_training_output', 'mnist')
+
 
 # Write config
 file = open(os.path.join(args.dir, 'config.txt'), 'w')
@@ -77,17 +79,10 @@ else:
     g_loss, d_loss, images_while_training, full_training_time = t.train(train_dataset, discriminator, generator, args)
 
 # Write losses, image values, full training time and save models
-file = open(os.path.join(args.dir, 'losses.txt'), 'w')
-file.write(str(g_loss))
-file.write('|'+str(d_loss))
-file.close()
 
-file = open(os.path.join(args.dir, 'itw.txt'), 'a')
-for k in range(len(images_while_training)):
-    for i in range(len(images_while_training[k])):
-        file.write(str(images_while_training[k][i])+',')
-    file.write('|')
-file.close()
+np.save(os.path.join(args.dir, 'g_loss'), g_loss)
+np.save(os.path.join(args.dir, 'd_loss'), d_loss)
+np.save(os.path.join(args.dir, 'itw'), images_while_training)
 
 file = open(os.path.join(args.dir, 'config.txt'), 'a')
 file.write(str(full_training_time))

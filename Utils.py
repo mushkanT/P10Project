@@ -1,5 +1,5 @@
 import tensorflow as tf
-
+import numpy as np
 
 def draw_2d_samples(generator, n_dim, seed=2019):
     noise = tf.random.normal([3000, n_dim], seed=seed)
@@ -7,9 +7,10 @@ def draw_2d_samples(generator, n_dim, seed=2019):
     return generated_image
 
 
-def draw_samples(model, test_input):
+def draw_samples(model, test_input, dataset):
     predictions = model(test_input, training=False)
     return predictions.numpy()
+
 
 
 def weight_init():
