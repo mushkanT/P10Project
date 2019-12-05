@@ -3,11 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="762659be-ae85-44ee-a24c-43ee1ac921c2" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DataHandler.py" beforeDir="false" afterPath="$PROJECT_DIR$/DataHandler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PixelSNAIL.py" beforeDir="false" afterPath="$PROJECT_DIR$/PixelSNAIL.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VQ_VAE_2.py" beforeDir="false" afterPath="$PROJECT_DIR$/VQ_VAE_Model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VQ_VAE_2_Usage.py" beforeDir="false" afterPath="$PROJECT_DIR$/VQ_VAE_2_Usage.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -181,6 +176,7 @@
       <workItem from="1574694065829" duration="25351000" />
       <workItem from="1574840096265" duration="11012000" />
       <workItem from="1574855034343" duration="13787000" />
+      <workItem from="1575560973341" duration="604000" />
     </task>
     <servers />
   </component>
