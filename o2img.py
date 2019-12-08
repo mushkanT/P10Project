@@ -76,15 +76,19 @@ def produce_images_itw(dataset, folder_path, data):
             os.mkdir(save_path)
         plot_2d_data(save_path, data)
     elif dataset == 'mnist':
-        data = data.reshape([16, 28, 28, 1])
+        # data = data.reshape([16, 28, 28, 1])
         save_path = folder_path + '/images_itw'
         if not os.path.isdir(save_path):
             os.mkdir(save_path)
-        for i in range(data.shape[0]):
-            plt.subplot(4, 4, i + 1)
-            plt.imshow(data[i, :, :, 0], cmap='gray')
-            plt.axis('off')
-        plt.savefig(save_path + '/itw.png')
+
+        counter = 0
+        for x in data:
+            for i in range(x.shape[0]):
+                plt.subplot(4, 4, i + 1)
+                plt.imshow(x[i, :, :, 0]*127.5+127.5, cmap='gray')
+                plt.axis('off')
+            plt.savefig(save_path + '/itw_' + str(counter) + '.png')
+            counter = counter + 1
         plt.close()
 
 
