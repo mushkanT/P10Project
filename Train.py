@@ -12,9 +12,13 @@ def train_discriminator(batch, discriminator, generator, args):
         fake_output = discriminator(generated_images, training=True)
         real_output = discriminator(batch, training=True)
 
+        # Losses
         if args.loss == "wgan-gp":
             disc_loss = tf.reduce_mean(fake_output) - tf.reduce_mean(real_output)
-            alpha = tf.random.uniform(shape=[args.batch_size, 1, 1, 1], minval=0., maxval=1.)
+            if args.dataset == 'toy':
+                alpha = tf.random.uniform(shape=[args.batch_size, 1], minval=0., maxval=1.)
+            else:
+                alpha = tf.random.uniform(shape=[args.batch_size, 1, 1, 1], minval=0., maxval=1.)
             differences = generated_images - batch
             interpolated_images = batch + (alpha * differences)
 
@@ -31,13 +35,14 @@ def train_discriminator(batch, discriminator, generator, args):
             disc_loss = tf.reduce_mean(fake_output) - tf.reduce_mean(real_output)
 
         elif args.loss == "ce":
-            cross_entropy = tf.keras.l.BinaryCrossentropy(from_logits=True)
+            cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
             real_loss = cross_entropy(tf.ones_like(real_output), real_output)
             fake_loss = cross_entropy(tf.zeros_like(fake_output), fake_output)
             disc_loss = real_loss + fake_loss
         else:
             raise Exception('Cost function does not exists')
 
+    # Apply gradients
     gradients_of_discriminator = disc_tape.gradient(disc_loss, discriminator.trainable_variables)
     args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, discriminator.trainable_variables))
     # Clip weights if wgan loss function
@@ -54,14 +59,16 @@ def train_generator(discriminator, generator, args):
         generated_images = generator(noise, training=True)
         fake_output = discriminator(generated_images, training=True)
 
+        # Losses
         if args.loss == "wgan-gp" or args.loss == "wgan":
             gen_loss = -tf.reduce_mean(fake_output)
         elif args.loss == "ce":
-            cross_entropy = tf.keras.l.BinaryCrossentropy(from_logits=True)
+            cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
             gen_loss = cross_entropy(tf.ones_like(fake_output), fake_output)
         else:
             raise Exception('Cost function does not exists')
 
+    # Apply graidents
     gradients_of_generator = gen_tape.gradient(gen_loss, generator.trainable_variables)
     args.gen_optimizer.apply_gradients(zip(gradients_of_generator, generator.trainable_variables))
     return gen_loss
@@ -77,13 +84,6 @@ def train(dataset, discriminator, generator, args):
     n_steps = batches_pr_epoch // args.n_critic
 
     for epoch in range(args.epochs):
-        if args.images_while_training != 0:
-            if epoch % args.images_while_training == 0:
-                if args.dataset == "toy":
-                    images_while_training.append(u.draw_2d_samples(generator, args.noise_dim))
-                else:
-                    images_while_training.append(u.draw_samples(generator, args.seed, args.dataset))
-
         # TODO: Should find a better way to do this
         dataset.shuffle(args.n_train)
         it = iter(dataset)
@@ -101,6 +101,13 @@ def train(dataset, discriminator, generator, args):
             disc_loss.append(tf.reduce_mean(disc_loss_n_critic).numpy())
 
         full_training_time += time.time()-start
+
+        if args.images_while_training != 0:
+            if epoch % args.images_while_training == 0:
+                if args.dataset == "toy":
+                    images_while_training.append(u.draw_2d_samples(generator, args.noise_dim))
+                else:
+                    images_while_training.append(u.draw_samples(generator, args.seed, args.dataset))
 
     return gen_loss, disc_loss, images_while_training, full_training_time
 

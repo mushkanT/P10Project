@@ -2,6 +2,8 @@ import tensorflow as tf
 from tensorflow import keras
 layers = tf.keras.layers
 
+weight_init = tf.keras.initializers.RandomNormal(stddev=0.02)
+
 
 def generator_dcgan(img_dim, channels, g_dim, z_dim):
     model = keras.Sequential()
@@ -30,16 +32,16 @@ def generator_dcgan(img_dim, channels, g_dim, z_dim):
 
 def discriminator_dcgan(input_dim, channels, d_dim):
     model = keras.Sequential()
-    model.add(layers.Conv2D(d_dim, (3, 3), strides=(2, 2), padding='same', input_shape=[input_dim, input_dim, channels]))
+    model.add(layers.Conv2D(d_dim, (3, 3), strides=(2, 2), kernel_initializer=weight_init, padding='same', input_shape=[input_dim, input_dim, channels]))
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
 
-    model.add(layers.Conv2D(d_dim*2, (3, 3), strides=(2, 2), padding='same'))
+    model.add(layers.Conv2D(d_dim*2, (3, 3), strides=(2, 2), kernel_initializer=weight_init, padding='same'))
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
 
     model.add(layers.Flatten())
-    model.add(layers.Dense(1))
+    model.add(layers.Dense(1, kernel_initializer=weight_init,))
 
     return model
 
@@ -60,7 +62,7 @@ def discriminator_toy():
     x = layers.Dense(128, activation='tanh', name='dense1')(inputs)
     x = layers.Dense(128, activation='tanh', name='dense2')(x)
     x = layers.Dense(128, activation='tanh', name='dense3')(x)
-    outputs = layers.Dense(2, activation='linear', name='preds')(x)
+    outputs = layers.Dense(2, name='preds')(x)
 
     model = keras.Model(inputs=inputs, outputs=outputs)
     return model

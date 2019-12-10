@@ -22,12 +22,6 @@ def generate_and_save_images(model, epoch, test_input):
     # plt.show()
 
 
-def plot_toy_distribution(samples):
-    df = pd.DataFrame(samples, columns=["x", "y"])
-    sns.jointplot(x="x", y="y", data=df, kind="kde")
-    plt.savefig('images/toy/ring_distribution.png')
-
-
 def draw_samples_and_plot_2d(generator, epoch, n_dim, seed=2019):
     a = []
     noise = tf.random.normal([3000, n_dim], seed=seed)
@@ -39,12 +33,22 @@ def draw_samples_and_plot_2d(generator, epoch, n_dim, seed=2019):
     plt.close()
 
 
-def plot_2d_data(path, samples):
-    samples = tf.convert_to_tensor(samples)
-    df = pd.DataFrame(samples, columns=["x", "y"])
+def plot_toy_distribution(dat):
+    df = pd.DataFrame(dat, columns=["x", "y"])
     sns.jointplot(x="x", y="y", data=df, kind="kde")
-    plt.savefig(path+'/image_.png')
+    plt.savefig('C:/Users/marku/Desktop/GAN_training_output/old/Toy_distribution.png')
     plt.close()
+
+
+def plot_2d_data(path, samples, epoch_interval):
+    samples = tf.convert_to_tensor(samples)
+    counter = 0
+    for i in range(samples.shape[0]):
+        df = pd.DataFrame(samples[i], columns=["x", "y"])
+        sns.jointplot(x="x", y="y", data=df, kind="kde")
+        plt.savefig(path+'/image_'+str(counter)+'.png')
+        counter = counter + epoch_interval
+        plt.close()
 
 
 def plot_loss(gen_loss, disc_loss, path):
@@ -59,28 +63,31 @@ def plot_loss(gen_loss, disc_loss, path):
     plt.close()
 
 
-def load_images(path, dataset):
+def load_images(path):
     for folder in os.listdir(path):
+        if folder == 'old':
+            continue
         folder_path = path+'/'+str(folder)
+        config_file = open(folder_path + '/config.txt', 'r').read()
+        dataset = config_file.split(',')[3].split('\'')[1]
+        epoch_interval = config_file.split(',')[8].split('=')[1]
         itw_data = np.load(folder_path + '/itw.npy')
         d_loss = np.load(folder_path + '/d_loss.npy')
         g_loss = np.load(folder_path + '/g_loss.npy')
-        produce_images_itw(dataset, folder_path, itw_data)
+        produce_images_itw(dataset, folder_path, itw_data, int(epoch_interval))
         produce_images_loss(folder_path, d_loss, g_loss)
 
 
-def produce_images_itw(dataset, folder_path, data):
+def produce_images_itw(dataset, folder_path, data, epoch_interval):
     if dataset == 'toy':
         save_path = folder_path + '/images_itw'
         if not os.path.isdir(save_path):
             os.mkdir(save_path)
-        plot_2d_data(save_path, data)
+        plot_2d_data(save_path, data, epoch_interval)
     elif dataset == 'mnist':
-        # data = data.reshape([16, 28, 28, 1])
         save_path = folder_path + '/images_itw'
         if not os.path.isdir(save_path):
             os.mkdir(save_path)
-
         counter = 0
         for x in data:
             for i in range(x.shape[0]):
@@ -88,7 +95,21 @@ def produce_images_itw(dataset, folder_path, data):
                 plt.imshow(x[i, :, :, 0]*127.5+127.5, cmap='gray')
                 plt.axis('off')
             plt.savefig(save_path + '/itw_' + str(counter) + '.png')
-            counter = counter + 1
+            counter = counter + epoch_interval
+        plt.close()
+
+    elif dataset == 'cifar10':
+        save_path = folder_path + '/images_itw'
+        if not os.path.isdir(save_path):
+            os.mkdir(save_path)
+        counter = 0
+        for x in data:
+            for i in range(x.shape[0]):
+                plt.subplot(4, 4, i + 1)
+                plt.imshow(x[i, :, :, :])
+                plt.axis('off')
+            plt.savefig(save_path + '/itw_' + str(counter) + '.png')
+            counter = counter + epoch_interval
         plt.close()
 
 
@@ -97,3 +118,34 @@ def produce_images_loss(folder_path, g_loss, d_loss):
     if not os.path.isdir(save_path):
         os.mkdir(save_path)
     plot_loss(g_loss, d_loss, save_path)
+
+def test_trunc_trick(args):
+    seed = tf.random.normal([args.num_samples_to_gen, args.noise_dim])
+    truncated_seed = tf.random.truncated_normal([args.num_samples_to_gen, args.noise_dim])
+
+    gen = tf.keras.models.load_model('C:/Users/marku/Desktop/GAN_training_output/old/2224/generator')
+    noise = tf.random.normal([5000, 100])
+    mean_noise = tf.reduce_mean(noise, axis=0)
+
+    for z in range(2,10,2):
+        z=z/10
+        #z_hat=[]
+        #for v in range(truncated_seed.shape[0]):
+        z_hat=(mean_noise + z * (seed - mean_noise))
+        truncated_images = gen(z_hat)
+        for i in range(truncated_images.shape[0]):
+            plt.subplot(4, 4, i + 1)
+            plt.imshow(truncated_images[i, :, :, 0] * 127.5 + 127.5)
+            plt.axis('off')
+        plt.savefig('C:/Users/marku/Desktop/GAN_training_output/old/trunc_images'+str(z)+'.png')
+        plt.close()
+
+    images = gen(seed)
+    #truncated_images = gen(truncated_seed)
+
+    for i in range(images.shape[0]):
+        plt.subplot(4, 4, i + 1)
+        plt.imshow(images[i, :, :, 0] * 127.5 + 127.5)
+        plt.axis('off')
+    plt.savefig('C:/Users/marku/Desktop/GAN_training_output/old/truncTrickTest/reg_images.png')
+    plt.close()
