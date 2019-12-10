@@ -1,7 +1,7 @@
 import tensorflow as tf
 import VQ_VAE_Model
 import numpy as np
-import DataHandler
+from Utils import DataHandler
 
 
 def train_step(data, optimizer, model):

@@ -1,6 +1,4 @@
-import os
 import argparse
-import VAE_Usage
 
 parser = argparse.ArgumentParser()
 

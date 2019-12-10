@@ -1,10 +1,56 @@
 import tensorflow as tf
 import numpy as np
-import functools
+from functools import partial, lru_cache
 from tensorflow_addons import layers.WeightNormalization
 
 def wn_linear(in_dim, out_dim):
-    return nn.utils.weight_norm(nn.Linear(in_dim, out_dim))
+    return tfa.layers.WeightNormalization(tf.keras.layers.Dense(out_dim, in_dim))
+
+def glu(kernel_shape, layer_input, layer_name, residual=None):
+    """ Gated Linear Unit """
+    # Pad the left side to prevent kernels from viewing future context
+    kernel_width = kernel_shape[1]
+    left_pad = kernel_width - 1
+    paddings = [[0,0],[0,0],[left_pad,0],[0,0]]
+    padded_input = tf.pad(layer_input, paddings, "CONSTANT")
+
+    # Kaiming intialization
+    stddev = np.sqrt(2.0 / (kernel_shape[1] * kernel_shape[2]))
+
+    # First conv layer
+    W_g = tf.Variable(stddev, dtype=tf.float32)
+    W_v = tf.Variable(tf.random_normal(kernel_shape, stddev=stddev), name="W%s" % layer_name)
+    W =  (W_g / tf.nn.l2_normalize(W_v, 0)) * W_v
+    b = tf.Variable(tf.zeros([kernel_shape[2] * kernel_shape[3]]), name="b%s" % layer_name)
+    conv1 = tf.nn.depthwise_conv2d(
+        padded_input,
+        W,
+        strides=[1, 1, 1, 1],
+        padding="VALID",
+        name="conv1")
+    conv1 = tf.nn.bias_add(conv1, b)
+
+    # Second gating sigmoid layer
+    V_g = tf.Variable(stddev, dtype=tf.float32)
+    V_v = tf.Variable(tf.random_normal(kernel_shape, stddev=stddev), name="V%s" % layer_name)
+    V = (V_g / tf.nn.l2_normalize(V_v, 0)) * V_v
+    c = tf.Variable(tf.zeros([kernel_shape[2] * kernel_shape[3]]), name="c%s" % layer_name)
+    conv2 = tf.nn.depthwise_conv2d(
+        padded_input,
+        V,
+        strides=[1, 1, 1, 1],
+        padding="VALID",
+        name="conv2")
+    conv2 = tf.nn.bias_add(conv2, c)
+
+    # Preactivation residual
+    if residual is not None:
+        conv1 = tf.add(conv1, residual)
+        conv2 = tf.add(conv2, residual)
+
+    h = tf.multiply(conv1, tf.sigmoid(conv2, name="sig"))
+
+    return h
 
 
 class WNConv2d(tf.keras.Layer):
@@ -20,7 +66,7 @@ class WNConv2d(tf.keras.Layer):
     ):
         super().__init__()
 
-        self.conv = nn.utils.weight_norm(
+        self.conv = tfa.layers.WeightNormalization(
             tf.keras.layers.Conv2D(
                 filters=out_channel,
                 kernel_size=kernel_size,
@@ -72,20 +118,21 @@ class CausalConv2d(tf.keras.Layer):
             kernel_size = [kernel_size] * 2
 
         self.kernel_size = kernel_size
+        kernel_height = kernel_size[0]
+        kernel_width = kernel_size[1]
 
         if padding == 'downright':
-            pad = [kernel_size[1] - 1, 0, kernel_size[0] - 1, 0]
+            pad =[[0,0],[kernel_width-1,0],[kernel_height -1 , 0], [0,0]]
 
         elif padding == 'down' or padding == 'causal':
-            pad = kernel_size[1] // 2
+            kw_floor = kernel_width // 2
 
-            pad = [pad, pad, kernel_size[0] - 1, 0]
+            pad =[[0,0], [kw_floor, kw_floor], [kernel_height - 1, 0], [0,0]]
 
         self.causal = 0
         if padding == 'causal':
             self.causal = kernel_size[1] // 2
-
-        self.pad = nn.ZeroPad2d(pad)
+        self.pad = pad
 
         self.conv = WNConv2d(
             in_channel,
@@ -97,7 +144,7 @@ class CausalConv2d(tf.keras.Layer):
         )
 
     def __call__(self, input):
-        out = self.pad(input)
+        out = tf.pad(input,self.pad)
 
         if self.causal > 0:
             self.conv.conv.weight_v.data[:, :, -1, self.causal :].zero_()
@@ -107,14 +154,14 @@ class CausalConv2d(tf.keras.Layer):
         return out
 
 
-class GatedResBlock(nn.Module):
+class GatedResBlock(tf.keras.Layer):
     def __init__(
         self,
         in_channel,
         channel,
         kernel_size,
         conv='wnconv2d',
-        activation=nn.ELU,
+        activation=tf.keras.activations.elu,
         dropout=0.1,
         auxiliary_channel=0,
         condition_dim=0,
@@ -130,13 +177,13 @@ class GatedResBlock(nn.Module):
         elif conv == 'causal':
             conv_module = partial(CausalConv2d, padding='causal')
 
-        self.activation = activation(inplace=True)
+        self.activation = activation
         self.conv1 = conv_module(in_channel, channel, kernel_size)
 
         if auxiliary_channel > 0:
             self.aux_conv = WNConv2d(auxiliary_channel, channel, 1)
 
-        self.dropout = nn.Dropout(dropout)
+        self.dropout = tf.keras.layers.Dropout(dropout)
 
         self.conv2 = conv_module(channel, in_channel * 2, kernel_size)
 
@@ -144,7 +191,6 @@ class GatedResBlock(nn.Module):
             # self.condition = nn.Linear(condition_dim, in_channel * 2, bias=False)
             self.condition = WNConv2d(condition_dim, in_channel * 2, 1, bias=False)
 
-        self.gate = nn.GLU(1)
 
     def __call__(self, input, aux_input=None, condition=None):
         out = self.conv1(self.activation(input))
@@ -161,13 +207,13 @@ class GatedResBlock(nn.Module):
             out += condition
             # out = out + condition.view(condition.shape[0], 1, 1, condition.shape[1])
 
-        out = self.gate(out)
+        out = glu([1,1,1,1],out)
         out += input
 
         return out
 
 
-@functools.lru_cache(maxsize=64)
+@lru_cache(maxsize=64)
 def causal_mask(size):
     shape = [size, size]
     mask = np.triu(np.ones(shape), k=1).astype(np.uint8).T

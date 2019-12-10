@@ -5,10 +5,9 @@ from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint
 from keras.utils import plot_model
 
-from callbacks import CustomCallback, step_decay_schedule
+from Utils.callbacks import CustomCallback, step_decay_schedule
 
 import numpy as np
-import json
 import os
 import pickle
 

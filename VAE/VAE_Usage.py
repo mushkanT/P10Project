@@ -1,8 +1,7 @@
 import os
 
-from VAE_Model import VAE as VAE_model
+from VAE.VAE_Model import VAE as VAE_model
 from keras.datasets import mnist, cifar10
-import numpy as np
 
 
 def VAE_MNIST(RUN_ID, RUN_FOLDER):
