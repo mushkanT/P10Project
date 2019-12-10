@@ -53,15 +53,18 @@ def train_vq_vae(optimizer, image_size, epochs=500, batch_size=100, data_path='m
         train_data, test_data = DataHandler.mnist()
         train_data = tf.pad(train_data, [[0,0], [2,2], [2,2], [0,0]])
         num_images = train_data.shape[0]
-        return train_loop(optimizer,num_images,batch_size,epochs,train_data,model)
+        return train_loop(optimizer, num_images, batch_size, epochs, train_data, model)
     elif data_path == 'cifar10':
         train_data, test_data = DataHandler.cifar10()
         num_images = train_data.shape[0]
-        return train_loop(optimizer,num_images,batch_size,epochs,train_data,model)
+        return train_loop(optimizer, num_images, batch_size, epochs, train_data, model)
     else:
         data_generator = DataHandler.custom_data(data_path, batch_size, (image_size, image_size))
         num_images = data_generator.n
-        return train_loop(optimizer,num_images,batch_size,epochs, None, model, data_generator=data_generator)
+        return train_loop(optimizer, num_images, batch_size, epochs, None, model, data_generator=data_generator)
+
+    model.save('VQ_VAE_001.h5')
+
 
 if __name__ == '__main__':
     train_vq_vae(tf.keras.optimizers.Adam(learning_rate=1e-4), 1024, batch_size=1, data_path='C:/users/user/desktop/1024_images/')
