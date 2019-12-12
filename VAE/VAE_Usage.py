@@ -60,6 +60,8 @@ def VAE_CIFAR(RUN_ID, RUN_FOLDER, lr, r_loss, batch_size, epochs, print_n_batche
     SECTION = 'vae'
     DATA_NAME = 'CIFAR10'
     RUN_FOLDER += SECTION + '/'
+    if not os.path.exists(RUN_FOLDER):
+        os.mkdir(RUN_FOLDER)
     RUN_FOLDER += '_'.join([RUN_ID, DATA_NAME])
 
     if not os.path.exists(RUN_FOLDER):
