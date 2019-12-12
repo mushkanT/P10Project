@@ -1,7 +1,7 @@
 import tensorflow as tf
 import VQ_VAE_Model
 import numpy as np
-from Utils import DataHandler
+import DataHandler
 
 
 def train_step(data, optimizer, model):
@@ -46,8 +46,6 @@ def train_loop(optimizer, num_images, batch_size, epochs, train_data, model, dat
 
 def train_vq_vae(optimizer, image_size, epochs=500, batch_size=100, data_path='mnist'):
     model = VQ_VAE_Model.VQVAEModel(image_size)
-
-
     if data_path == 'mnist':
         train_data, test_data = DataHandler.mnist()
         train_data = tf.pad(train_data, [[0,0], [2,2], [2,2], [0,0]])
