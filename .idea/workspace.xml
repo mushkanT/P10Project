@@ -4,8 +4,6 @@
     <list default="true" id="762659be-ae85-44ee-a24c-43ee1ac921c2" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/VAE/VAE_Model.py" beforeDir="false" afterPath="$PROJECT_DIR$/VAE/VAE_Model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VAE/VAE_Usage.py" beforeDir="false" afterPath="$PROJECT_DIR$/VAE/VAE_Usage.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VAE/callbacks.py" beforeDir="false" afterPath="$PROJECT_DIR$/VAE/callbacks.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -218,7 +216,7 @@
       <workItem from="1575963273352" duration="21423000" />
       <workItem from="1576060669227" duration="26754000" />
       <workItem from="1576094435419" duration="5095000" />
-      <workItem from="1576145335013" duration="2597000" />
+      <workItem from="1576145335013" duration="3348000" />
     </task>
     <servers />
   </component>
