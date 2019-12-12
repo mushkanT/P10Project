@@ -1,23 +1,24 @@
 import tensorflow as tf
 import numpy as np
 
+
 def draw_2d_samples(generator, n_dim, seed=2019):
     noise = tf.random.normal([3000, n_dim], seed=seed)
     generated_image = generator(noise).numpy()
     return generated_image
 
 
-def draw_samples(model, test_input, dataset):
+def draw_samples(model, test_input):
     predictions = model(test_input, training=False)
     return predictions.numpy()
 
 
-
-def weight_init():
-    return 0
-
-
-
+def generate_latent_vector_infogan(args):
+    noise = tf.random.normal([args.batch_size, args.noise_dim])
+    c = np.random.randint(0, args.c_dim, args.batch_size)
+    c = tf.keras.utils.to_categorical(c, num_classes=args.c_dim)
+    latent_vector = np.hstack((noise, c))
+    return latent_vector, c
 
 
 '''

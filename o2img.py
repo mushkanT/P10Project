@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os
 import numpy as np
+from keras.utils.vis_utils import plot_model
 
 
 def generate_and_save_images(model, epoch, test_input):
@@ -54,12 +55,30 @@ def plot_2d_data(path, samples, epoch_interval):
 def plot_loss(gen_loss, disc_loss, path):
     gen_loss = tf.convert_to_tensor(gen_loss)
     disc_loss = tf.convert_to_tensor(disc_loss)
+
+    # Plot both
     plt.plot(gen_loss, label='Generator loss')
     plt.plot(disc_loss, label='Discriminator loss')
     plt.xlabel('Batches')
     plt.ylabel('Loss')
     plt.legend()
-    plt.savefig(path+'/loss.png')
+    plt.savefig(path+'/loss_both.png')
+    plt.close()
+
+    # Plot gen
+    plt.plot(gen_loss, label='Generator loss')
+    plt.xlabel('Batches')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.savefig(path+'/loss_gen.png')
+    plt.close()
+
+    # Plot disc
+    plt.plot(disc_loss, label='Discriminator loss', color='tab:orange')
+    plt.xlabel('Batches')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.savefig(path+'/loss_disc.png')
     plt.close()
 
 
