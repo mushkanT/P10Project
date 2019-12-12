@@ -177,7 +177,8 @@ class VAE:
             shuffle=True,
             epochs=epochs,
             initial_epoch=init_epoch,
-            callbacks=callbacks_list
+            callbacks=callbacks_list,
+            verbose=0
         )
 
         loss_file = os.path.join(run_folder,'loss')
@@ -209,7 +210,8 @@ class VAE:
             , epochs=epochs
             , initial_epoch=initial_epoch
             , callbacks=callbacks_list
-            , steps_per_epoch=steps_per_epoch
+            , steps_per_epoch=steps_per_epoch,
+            verbose=0
         )
 
     def plot_model(self, run_folder):

@@ -14,6 +14,8 @@ class CustomCallback(Callback):
         self.loss = []
         self.r_loss = []
         self.kl_loss = []
+        self.z = np.random.normal(size=(16, self.vae.z_dim))
+
 
     def on_batch_end(self, batch, logs={}):
         self.loss.append(logs.get('loss'))
@@ -21,8 +23,7 @@ class CustomCallback(Callback):
         self.kl_loss.append(logs.get('vae_kl_loss'))
 
         if batch % self.print_every_n_batches == 0:
-            z_new = np.random.normal(size=(16, self.vae.z_dim))
-            reconst = self.vae.decoder.predict(z_new)
+            reconst = self.vae.decoder.predict(self.z)
             filepath = os.path.join(self.run_folder, 'images',
                                     'img_' + str(self.epoch).zfill(3) + '_' + str(batch) )
             np.save(filepath, reconst)
