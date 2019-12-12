@@ -44,7 +44,7 @@ def VAE_MNIST(RUN_ID, RUN_FOLDER, lr, r_loss, batch_size, epochs, print_n_batche
 
     VAE.compile(learning_rate=lr, r_loss_factor=r_loss)
 
-    (x_train, x_test) = datahandler.mnist(norm_setting=1)
+    (x_train, x_test) = datahandler.mnist(norm_setting=0)
 
     VAE.train(
         x_train,
@@ -94,7 +94,7 @@ def VAE_CIFAR(RUN_ID, RUN_FOLDER, lr, r_loss, batch_size, epochs, print_n_batche
 
     VAE.compile(learning_rate=lr, r_loss_factor=r_loss)
 
-    (x_train, x_test) = datahandler.cifar10(norm_setting=1)
+    (x_train, x_test) = datahandler.cifar10(norm_setting=0)
 
     VAE.train(
         x_train,
