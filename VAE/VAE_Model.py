@@ -4,16 +4,14 @@ from keras import backend as K
 from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint
 from keras.utils import plot_model
-
 from callbacks import CustomCallback, step_decay_schedule
 
 import numpy as np
-import json
 import os
 import pickle
 
 
-class VAE():
+class VAE:
     def __init__(self,
                  input_dim,
                  encoder_conv_filters,
@@ -160,7 +158,7 @@ class VAE():
                 , self.use_dropout
             ], f)
 
-        self.plot_model(folder)
+        #self.plot_model(folder)
 
     def load_weights(self, filepath):
         self.model.load_weights(filepath)
@@ -170,11 +168,7 @@ class VAE():
         custom_callback = CustomCallback(run_folder, print_n_batches, init_epoch, self)
         lr_sched = step_decay_schedule(initial_lr=self.learning_rate, decay_factor=lr_decay, step_size=1)
 
-        checkpoint_filepath = os.path.join(run_folder, "weights/weights-{epoch:03d}-{loss:.2f}.h5")
-        checkpoint1 = ModelCheckpoint(checkpoint_filepath, save_weights_only= True, verbose=1)
-        checkpoint2 = ModelCheckpoint(os.path.join(run_folder, 'weights/weights.h5'), save_weights_only= True, verbose=1)
-
-        callbacks_list = [checkpoint1, checkpoint2, custom_callback, lr_sched]
+        callbacks_list = [custom_callback, lr_sched]
 
         self.model.fit(
             x_train,
@@ -183,8 +177,20 @@ class VAE():
             shuffle=True,
             epochs=epochs,
             initial_epoch=init_epoch,
-            callbacks=callbacks_list
+            callbacks=callbacks_list,
+            verbose=0
         )
+
+        loss_file = os.path.join(run_folder,'loss')
+        r_loss_file = os.path.join(run_folder,'r_loss')
+        kl_loss_file = os.path.join(run_folder,'kl_loss')
+
+        np.save(loss_file,custom_callback.loss)
+        np.save(r_loss_file,custom_callback.r_loss)
+        np.save(kl_loss_file,custom_callback.kl_loss)
+
+        model_file = os.path.join(run_folder,'model.h5')
+        self.model.save(model_file)
 
     def train_with_generator(self, data_flow, epochs, steps_per_epoch, run_folder, print_every_n_batches=100,
                              initial_epoch=0, lr_decay=1, ):
@@ -198,15 +204,14 @@ class VAE():
 
         callbacks_list = [checkpoint1, checkpoint2, custom_callback, lr_sched]
 
-        self.model.save_weights(os.path.join(run_folder, 'weights/weights.h5'))
-
         self.model.fit_generator(
             data_flow
             , shuffle=True
             , epochs=epochs
             , initial_epoch=initial_epoch
             , callbacks=callbacks_list
-            , steps_per_epoch=steps_per_epoch
+            , steps_per_epoch=steps_per_epoch,
+            verbose=0
         )
 
     def plot_model(self, run_folder):
