@@ -19,14 +19,34 @@ def createToyDataRing(n_mixtures=10, radius=3, Ntrain=5120, std=0.05): #50176
     sample_centers = centers[ith_center, :]
 
     sample_points = np.random.normal(loc=sample_centers, scale=std).astype('float32')
+
     dat = tf.convert_to_tensor(sample_points)
     return dat
 
-def mnist():
-    (train_images, train_labels), (_, _) = tf.keras.datasets.mnist.load_data()
-    selected_ix = train_labels == 7
-    train_images = train_images[selected_ix]
-    np.array(train_images)
+
+def mnist(restrict=False):
+    (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
+    if restrict:
+        selected_ix = train_labels == 7
+        selected_ix_test = test_labels == 7
+        train_images = train_images[selected_ix]
+        test_images = test_images[selected_ix_test]
+        train_images = np.concatenate([train_images, test_images])
     train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
-    train_images = (train_images - 127.5) / 127.5 # Normalize the images to [-1, 1]
+    # Transform from 28x28 to 32x32
+    padding = tf.constant([[0,0], [2,2], [2,2], [0,0]])
+    train_images = tf.pad(train_images, padding, "CONSTANT")
+    train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
+    return train_images
+
+
+def cifar10(restrict=False):
+    (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.cifar10.load_data()
+    if restrict:
+        train_mask = [y[0] == 7 for y in train_labels]
+        test_mask = [y[0] == 7 for y in test_labels]
+        train_images = train_images[train_mask]
+        test_images = test_images[test_mask]
+        train_images = np.concatenate([train_images, test_images])
+    train_images = train_images / 255  # Normalize the images to [0, 1]
     return train_images
