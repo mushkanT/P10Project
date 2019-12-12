@@ -108,3 +108,5 @@ venv.bak/
 *.h5
 
 *.pkl
+
+.idea/workspace.xml
