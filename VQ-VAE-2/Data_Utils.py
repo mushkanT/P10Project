@@ -8,17 +8,6 @@ import tensorflow as tf
 CodeRow = namedtuple('CodeRow', ['top', 'bottom', 'filename'])
 
 
-class ImageFileDataset(datasets.ImageFolder):
-    def __getitem__(self, index):
-        sample, target = super().__getitem__(index)
-        path, _ = self.samples[index]
-        dirs, filename = os.path.split(path)
-        _, class_name = os.path.split(dirs)
-        filename = os.path.join(class_name, filename)
-
-        return sample, target, filename
-
-
 class LMDBDataset(tf.data.Dataset):
     def __init__(self, path):
         self.env = lmdb.open(

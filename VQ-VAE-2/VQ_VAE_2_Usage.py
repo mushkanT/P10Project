@@ -10,7 +10,6 @@ def train_step(data, optimizer, model):
     trainable_variables = model.trainable_variables
     grads = tape.gradient(model_output['loss'], trainable_variables)
     optimizer.apply_gradients(zip(grads, trainable_variables))
-
     return model_output
 
 def train_loop(optimizer, num_images, batch_size, epochs, train_data, model, data_generator=None):

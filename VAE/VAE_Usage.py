@@ -1,14 +1,15 @@
 import os
+from VAE_Model import VAE as VAE_model
+import argparse
+import DataHandler as datahandler
 
-from VAE.VAE_Model import VAE as VAE_model
-from keras.datasets import mnist, cifar10
-
-
-def VAE_MNIST(RUN_ID, RUN_FOLDER):
+def VAE_MNIST(RUN_ID, RUN_FOLDER, lr, r_loss, batch_size, epochs, print_n_batches, init_epoch):
     # run params
     SECTION = 'vae'
     DATA_NAME = 'MNIST'
     RUN_FOLDER += SECTION + '/'
+    if not os.path.exists(RUN_FOLDER):
+        os.mkdir(RUN_FOLDER)
     RUN_FOLDER += '_'.join([RUN_ID, DATA_NAME])
 
     if not os.path.exists(RUN_FOLDER):
@@ -16,6 +17,8 @@ def VAE_MNIST(RUN_ID, RUN_FOLDER):
         os.mkdir(os.path.join(RUN_FOLDER, 'viz'))
         os.mkdir(os.path.join(RUN_FOLDER, 'images'))
         os.mkdir(os.path.join(RUN_FOLDER, 'weights'))
+    else:
+        raise Exception('Run folder with id:' + RUN_ID + ' already found. Please choose new ID')
 
     # 'load' or 'build'
     mode = 'build'
@@ -39,32 +42,20 @@ def VAE_MNIST(RUN_ID, RUN_FOLDER):
     VAE.encoder.summary()
     VAE.decoder.summary()
 
-    L_RATE = 0.0005
-    R_LOSS_FACTOR = 1000
+    VAE.compile(learning_rate=lr, r_loss_factor=r_loss)
 
-    VAE.compile(learning_rate=L_RATE, r_loss_factor=R_LOSS_FACTOR)
-
-    BATCH_SIZE = 100
-    EPOCHS = 50
-    PRINT_N_BATCHES = 100
-    INIT_EPOCH = 0
-
-    (x_train, y_train), (x_test, y_test) = mnist.load_data()
-    x_train = x_train.astype('float32') / 255.
-    x_train = x_train.reshape(x_train.shape + (1,))
-    x_test = x_test.astype('float32') / 255.
-    x_test = x_test.reshape(x_test.shape + (1,))
+    (x_train, x_test) = datahandler.mnist(norm_setting=1)
 
     VAE.train(
         x_train,
-        batch_size=BATCH_SIZE,
-        epochs=EPOCHS,
+        batch_size=batch_size,
+        epochs=epochs,
         run_folder=RUN_FOLDER,
-        print_n_batches=PRINT_N_BATCHES,
-        init_epoch=INIT_EPOCH
+        print_n_batches=print_n_batches,
+        init_epoch=init_epoch
     )
 
-def VAE_CIFAR(RUN_ID, RUN_FOLDER):
+def VAE_CIFAR(RUN_ID, RUN_FOLDER, lr, r_loss, batch_size, epochs, print_n_batches, init_epoch):
     # run params
     SECTION = 'vae'
     DATA_NAME = 'CIFAR10'
@@ -99,34 +90,41 @@ def VAE_CIFAR(RUN_ID, RUN_FOLDER):
     VAE.encoder.summary()
     VAE.decoder.summary()
 
-    L_RATE = 0.0005
-    R_LOSS_FACTOR = 10000
+    VAE.compile(learning_rate=lr, r_loss_factor=r_loss)
 
-    VAE.compile(learning_rate=L_RATE, r_loss_factor=R_LOSS_FACTOR)
-
-    BATCH_SIZE = 100
-    EPOCHS = 50
-    PRINT_N_BATCHES = 100
-    INIT_EPOCH = 0
-    label = 1
-
-    (x_train, y_train), (x_test, y_test) = cifar10.load_data()
-
-    # train_mask = [y[0]==label for y in y_train]
-    # test_mask = [y[0]==label for y in y_test]
-
-    # x_train = np.concatenate([x_train[train_mask], x_test[test_mask]])
-    # y_train = np.concatenate([y_train[train_mask], y_test[test_mask]])
-
-    x_train = (x_train.astype('float32') - 127.5) / 127.5
+    (x_train, x_test) = datahandler.cifar10(norm_setting=1)
 
     VAE.train(
         x_train,
-        batch_size=BATCH_SIZE,
-        epochs=EPOCHS,
+        batch_size=batch_size,
+        epochs=epochs,
         run_folder=RUN_FOLDER,
-        print_n_batches=PRINT_N_BATCHES,
-        init_epoch=INIT_EPOCH
+        print_n_batches=print_n_batches,
+        init_epoch=init_epoch
     )
+
+
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', type=str, default='mnist', help='Can be mnist|cifar10')
+    parser.add_argument('--lr', type=float, default='1e-4', help='Learning rate')
+    parser.add_argument('--r_loss_factor', type=float, default=10000, help='dunno')
+    parser.add_argument('--epochs', type=int, default=50, help='number of epochs')
+    parser.add_argument('--print_n_batches', type=int, default=600, help='Prints status every n\'th batch')
+    parser.add_argument('--init_epoch', type=int, default=0, help='Determine start epoch')
+    parser.add_argument('--batch_size', type=int, default=100, help='Batch size')
+    parser.add_argument('--run_id', type=str, help='ID of current run')
+    parser.add_argument('--run_folder', type=str, help='folder that contains run generated items (images, weights etc.)')
+
+    args = parser.parse_args()
+
+    if args.dataset == 'mnist':
+        VAE_MNIST(args.run_id, args.run_folder, args.lr, args.r_loss_factor, args.batch_size, args.epochs, args.print_n_batches, args.init_epoch)
+    elif args.dataset == 'cifar10':
+        VAE_CIFAR(args.run_id, args.run_folder, args.lr, args.r_loss_factor, args.batch_size, args.epochs, args.print_n_batches, args.init_epoch)
+    else:
+        raise('Dataset not supported')
 
 
