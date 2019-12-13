@@ -43,7 +43,7 @@ def train_loop(optimizer, num_images, batch_size, epochs, train_data, model, dat
                       ('recon_error: %.3f ' % np.mean(train_recon_errors[-100:])) +
                       ('vqvae loss: %.3f' % np.mean(train_vqvae_loss[-100:])))
 
-    return train_losses, train_recon_errors, train_vqvae_loss, train_recons
+    return [train_losses, train_recon_errors, train_vqvae_loss, train_recons]
 
 
 def train_vq_vae(optimizer, image_size, output_path, epochs=500, batch_size=100, data_path='mnist'):
@@ -65,14 +65,15 @@ def train_vq_vae(optimizer, image_size, output_path, epochs=500, batch_size=100,
 
     loss_file = os.path.join(output_path, 'loss')
     r_loss_file = os.path.join(output_path, 'r_loss')
-    kl_loss_file = os.path.join(output_path, 'kl_loss')
+    vq_loss_file = os.path.join(output_path, 'vq_loss')
+    recons_file = os.path.join(output_path, 'recons')
 
-    #np.save(loss_file, train_metrics['loss'])
-    #np.save(r_loss_file, custom_callback.r_loss)
-    #np.save(kl_loss_file, custom_callback.kl_loss)
+    np.save(loss_file, train_metrics[0])
+    np.save(r_loss_file, train_metrics[1])
+    np.save(vq_loss_file, train_metrics[2])
+    np.save(recons_file, train_metrics[3])
 
     model_file = os.path.join(output_path, 'model.h5')
-    #self.model.save(model_file)
     model.save(model_file)
 
 
@@ -100,6 +101,3 @@ if __name__ == '__main__':
         epochs=args.epochs,
         output_path=args.run_folder
     )
-
-    train_vq_vae(tf.keras.optimizers.Adam(learning_rate=1e-4), args.img_size, batch_size=1, data_path='C:/users/user/desktop/1024_images/')
-
