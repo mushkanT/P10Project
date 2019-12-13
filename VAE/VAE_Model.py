@@ -181,15 +181,15 @@ class VAE:
             verbose=0
         )
 
-        loss_file = os.path.join(run_folder,'loss')
-        r_loss_file = os.path.join(run_folder,'r_loss')
-        kl_loss_file = os.path.join(run_folder,'kl_loss')
+        loss_file = os.path.join(run_folder, 'loss')
+        r_loss_file = os.path.join(run_folder, 'r_loss')
+        kl_loss_file = os.path.join(run_folder, 'kl_loss')
 
-        np.save(loss_file,custom_callback.loss)
-        np.save(r_loss_file,custom_callback.r_loss)
-        np.save(kl_loss_file,custom_callback.kl_loss)
+        np.save(loss_file, custom_callback.loss)
+        np.save(r_loss_file, custom_callback.r_loss)
+        np.save(kl_loss_file, custom_callback.kl_loss)
 
-        model_file = os.path.join(run_folder,'model.h5')
+        model_file = os.path.join(run_folder, 'model.h5')
         self.model.save(model_file)
 
     def train_with_generator(self, data_flow, epochs, steps_per_epoch, run_folder, print_every_n_batches=100,

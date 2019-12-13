@@ -2,11 +2,13 @@ import os
 from VAE_Model import VAE as VAE_model
 import argparse
 import DataHandler as datahandler
+from scipy.io import loadmat
+from numpy import pad
 
-def VAE_MNIST(RUN_ID, RUN_FOLDER, lr, r_loss, batch_size, epochs, print_n_batches, init_epoch, z_dim):
+def VAE_grey(RUN_ID, RUN_FOLDER, lr, r_loss, batch_size, epochs, print_n_batches, init_epoch, z_dim, data_name):
     # run params
     SECTION = 'vae'
-    DATA_NAME = 'MNIST'
+    DATA_NAME = data_name if data_name == 'MNIST' else 'FREY_FACE'
     RUN_FOLDER += SECTION + '/'
     if not os.path.exists(RUN_FOLDER):
         os.mkdir(RUN_FOLDER)
@@ -43,8 +45,16 @@ def VAE_MNIST(RUN_ID, RUN_FOLDER, lr, r_loss, batch_size, epochs, print_n_batche
     VAE.decoder.summary()
 
     VAE.compile(learning_rate=lr, r_loss_factor=r_loss)
-
-    (x_train, x_test) = datahandler.mnist(norm_setting=0)
+    if data_name == 'MNIST':
+        (x_train, x_test) = datahandler.mnist(norm_setting=0)
+    else:
+        img_size = (28,20,1)
+        data = loadmat(data_name)
+        data = data['ff']
+        data = data.transpose()
+        data = data.reshape((-1, *img_size))
+        data = pad(data,[(0,0),(0,0),(4,4),(0,0)])
+        x_train = data/255.
 
     VAE.train(
         x_train,
@@ -116,10 +126,11 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=50, help='number of epochs')
     parser.add_argument('--print_n_batches', type=int, default=None, help='Prints status every n\'th batch. Default is None which is once per epoch')
     parser.add_argument('--init_epoch', type=int, default=0, help='Determine start epoch')
-    parser.add_argument('--batch_size', type=int, default=100, help='Batch size')
+    parser.add_argument('--batch_size', type=int, default=32, help='Batch size')
     parser.add_argument('--run_id', type=str, help='ID of current run')
     parser.add_argument('--run_folder', type=str, help='folder that contains run generated items (images, weights etc.)')
     parser.add_argument('--z_dim', type=int, default=50, help='Size of latent dimensions for encoding')
+    parser.add_argument('--data_folder', type=str, default='MNIST')
 
     args = parser.parse_args()
 
@@ -128,7 +139,12 @@ if __name__ == '__main__':
     if args.dataset == 'mnist':
         if args.print_n_batches is None:
             args.print_n_batches = 60000 // args.batch_size
-        VAE_MNIST(args.run_id, args.run_folder, args.lr, args.r_loss_factor, args.batch_size, args.epochs, args.print_n_batches, args.init_epoch, args.z_dim)
+        VAE_grey(args.run_id, args.run_folder, args.lr, args.r_loss_factor, args.batch_size, args.epochs, args.print_n_batches, args.init_epoch, args.z_dim, 'MNIST')
+    elif args.dataset == 'freyface':
+        if args.print_n_batches is None:
+            args.print_n_batches = 1965 // args.batch_size
+        VAE_grey(args.run_id, args.run_folder, args.lr, args.r_loss_factor, args.batch_size, args.epochs,
+                  args.print_n_batches, args.init_epoch, args.z_dim, args.data_folder)
     elif args.dataset == 'cifar10':
         if args.print_n_batches is None:
             args.print_n_batches = 50000 // args.batch_size
