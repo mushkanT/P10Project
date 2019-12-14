@@ -42,7 +42,7 @@ def tfgan_disc(args):
     model.add(layers.Dropout(0.3))
 
     model.add(layers.Flatten())
-    model.add(layers.Dense(1, kernel_initializer=weight_init,))
+    model.add(layers.Dense(1, kernel_initializer=weight_init))
     return model
 
 
@@ -116,26 +116,33 @@ dcgan_batchnorm_weight_init = tf.keras.initializers.RandomNormal(mean=0.0, stdde
 def dcgan_gen(args):
     g_dim = args.g_dim
     z_dim = args.noise_dim
+    img_dim = args.dataset_dim[1]
+    img_resize = img_dim//(2*2*2*2*3)
     channels = args.dataset_dim[3]
 
     model = keras.Sequential()
-    model.add(layers.Conv2DTranspose(g_dim*8, (4, 4), strides=(1, 1), padding='valid', kernel_initializer=dcgan_weight_init, use_bias=False, input_shape=(z_dim,)))
+    model.add(layers.Dense(img_resize*img_resize*g_dim, use_bias=False, kernel_initializer=weight_init, input_shape=(z_dim,)))
+    model.add(layers.BatchNormalization())
+    model.add(layers.ReLU())
+    model.add(layers.Reshape((img_resize, img_resize, g_dim)))
+
+    model.add(layers.Conv2DTranspose(g_dim*8, (4, 4), strides=(1, 1), kernel_initializer=dcgan_weight_init, use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.ReLU())
 
-    model.add(layers.Conv2DTranspose(g_dim*4, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=dcgan_weight_init, use_bias=False))
+    model.add(layers.Conv2DTranspose(g_dim*4, (4, 4), strides=(2, 2), padding='same', kernel_initializer=dcgan_weight_init, use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.ReLU())
 
-    model.add(layers.Conv2DTranspose(g_dim*2, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=dcgan_weight_init, use_bias=False))
+    model.add(layers.Conv2DTranspose(g_dim*2, (4, 4), strides=(2, 2), padding='same', kernel_initializer=dcgan_weight_init, use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.ReLU())
 
-    model.add(layers.Conv2DTranspose(g_dim, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=dcgan_weight_init, use_bias=False))
+    model.add(layers.Conv2DTranspose(g_dim, (4, 4), strides=(2, 2), padding='same', kernel_initializer=dcgan_weight_init, use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.ReLU())
 
-    model.add(layers.Conv2DTranspose(channels, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=dcgan_weight_init, use_bias=False, activation='tanh'))
+    model.add(layers.Conv2DTranspose(channels, (4, 4), strides=(2, 2), padding='same', kernel_initializer=dcgan_weight_init, use_bias=False, activation='tanh'))
     return model
 
 
@@ -145,23 +152,23 @@ def dcgan_disc(args):
     channels = args.dataset_dim[3]
 
     model = keras.Sequential()
-    model.add(layers.Conv2D(d_dim, (4, 4), strides=(2, 2), padding='valid', kernel_initilizer=dcgan_weight_init, use_bias=False, input_shape=[input_dim, input_dim, channels]))
+    model.add(layers.Conv2D(d_dim, (4, 4), strides=(2, 2), padding='same', kernel_initializer=dcgan_weight_init, use_bias=False, input_shape=[input_dim, input_dim, channels]))
     model.add(layers.LeakyReLU(0.2))
 
-    model.add(layers.Conv2D(d_dim*2, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=dcgan_weight_init, use_bias=False))
+    model.add(layers.Conv2D(d_dim*2, (4, 4), strides=(2, 2), padding='same', kernel_initializer=dcgan_weight_init, use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU(0.2))
 
-    model.add(layers.Conv2D(d_dim*4, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=dcgan_weight_init, use_bias=False))
+    model.add(layers.Conv2D(d_dim*4, (4, 4), strides=(2, 2), padding='same', kernel_initializer=dcgan_weight_init, use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU(0.2))
 
-    model.add(layers.Conv2D(d_dim*8, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=dcgan_weight_init, use_bias=False))
+    model.add(layers.Conv2D(d_dim*8, (4, 4), strides=(2, 2), padding='same', kernel_initializer=dcgan_weight_init, use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU(0.2))
 
-    model.add(layers.Conv2D(1, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=dcgan_weight_init, use_bias=False, activation='sigmoid'))
-
+    model.add(layers.Flatten())
+    model.add(layers.Dense(channels, kernel_initializer=dcgan_weight_init))
     return model
 
 

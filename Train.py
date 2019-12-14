@@ -34,12 +34,13 @@ class GANTrainer(object):
                 else:
                     alpha = tf.random.uniform(shape=[args.batch_size, 1, 1, 1], minval=0., maxval=1.)
 
-                generated_images = tf.dtypes.cast(generated_images, dtype=tf.float64)
+                if args.dataset == 'cifar10' and args.scale_data == 0:
+                    generated_images = tf.dtypes.cast(generated_images, dtype=tf.float64)
 
                 with tf.GradientTape() as gTape:
                     differences = generated_images - batch
                     interpolated_images = batch + (alpha * differences)
-                    # gTape.watch(interpolated_images)
+                    gTape.watch(interpolated_images)
                     disc_interpolates = self.discriminator(interpolated_images)
 
                 gradients = gTape.gradient(disc_interpolates, interpolated_images)
@@ -112,10 +113,6 @@ class GANTrainer(object):
             real_loss = cross_entropy(tf.ones_like(real_output), real_output)
             fake_loss = cross_entropy(tf.zeros_like(fake_output), fake_output)
             disc_loss = real_loss + fake_loss
-
-
-
-
 
         return disc_loss
 
