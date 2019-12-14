@@ -7,6 +7,7 @@ import argparse
 import os.path
 #import o2img as o2i
 
+
 parser = argparse.ArgumentParser()
 
 # Settings
@@ -26,12 +27,13 @@ parser.add_argument('--images_while_training', type=int, default = 50           
 parser.add_argument('--dir', type=str,                   default = '/user/student.aau.dk/mjuuln15/output_data'            , help='Directory to save images, models, weights etc')
 parser.add_argument('--g_dim', type=int,                 default = 64            , help='generator layer dimensions')
 parser.add_argument('--d_dim', type=int,                 default = 64             , help='discriminator layer dimensions')
-parser.add_argument('--gan_type', type=str,              default = 'tfgan'        , help='dcgan | infogan | tfgan | presgan')
+parser.add_argument('--gan_type', type=str,              default = 'dcgan'        , help='dcgan | infogan | tfgan | presgan')
 parser.add_argument('--c_cat', type=int,                 default = 10              , help='Amount of control variables for infogan')
 parser.add_argument('--c_cont', type=int,                default = 2                , help = 'Amount of continuous control variables for infogan')
 parser.add_argument('--img_dim', type=int,               default = 32           , help='Dataset image dimension')
 parser.add_argument('--noise_dim', type=int,             default = 10           , help='size of the latent vector')
 parser.add_argument('--limit_dataset', type=bool,        default = False        , help='True to limit mnist/cifar dataset to one class')
+parser.add_argument('--scale_data', type=int,            default = 0            , help='Scale images in dataset to MxM')
 
 args = parser.parse_args()
 
@@ -39,7 +41,7 @@ args = parser.parse_args()
 args.seed = tf.random.uniform([args.num_samples_to_gen, args.noise_dim],-1.,1)
 
 # Debugging
-#args.dataset = 'lsun'
+#args.dataset = 'mnist'
 #args.noise_dim = 100
 #args.epochs = 200
 #args.n_critic = 1
@@ -65,9 +67,13 @@ if args.dataset == "toy":
     train_dataset = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size)
 elif args.dataset == "mnist":
     dat = dt.mnist(args.limit_dataset)
+    if args.scale_data != 0:
+        dat = tf.image.resize(dat, [args.scale_data, args.scale_data])
     train_dataset = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size)
 elif args.dataset == 'cifar10':
     dat = dt.cifar10(args.limit_dataset)
+    if args.scale_data != 0:
+        dat = tf.image.resize(dat, [args.scale_data, args.scale_data])
     train_dataset = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size)
 elif args.dataset == 'lsun':
     dat = dt.lsun(args.batch_size, args.limit_dataset)

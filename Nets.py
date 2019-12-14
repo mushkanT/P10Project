@@ -2,13 +2,11 @@ import tensorflow as tf
 from tensorflow import keras
 layers = tf.keras.layers
 
-#weight_init = tf.keras.initializers.RandomNormal(stddev=0.02)
-weight_init = tf.keras.initializers.he_normal(seed=2019)
 
+weight_init = tf.keras.initializers.RandomNormal(stddev=0.02)
 def tfgan_gen(args):
     g_dim = args.g_dim
     z_dim = args.noise_dim
-    img_dim = args.img_dim
     channels = args.dataset_dim[3]
 
     model = keras.Sequential()
@@ -30,7 +28,7 @@ def tfgan_gen(args):
 
 
 def tfgan_disc(args):
-    input_dim = args.img_dim
+    input_dim = args.dataset_dim[1]
     d_dim = args.d_dim
     channels = args.dataset_dim[3]
 
@@ -113,68 +111,58 @@ def infogan_disc(args):
 
 
 # Presgan implementation of dcgan
-conv_weight_init = tf.keras.initializers.RandomNormal(mean=0.0, stddev=0.02)
-batchnorm_weight_init = tf.keras.initializers.RandomNormal(mean=0.0, stddev=0.02)
-def presgan_gen(args):
+dcgan_weight_init = tf.keras.initializers.RandomNormal(mean=0.0, stddev=0.02)
+dcgan_batchnorm_weight_init = tf.keras.initializers.RandomNormal(mean=0.0, stddev=0.02)
+def dcgan_gen(args):
     g_dim = args.g_dim
     z_dim = args.noise_dim
-    img_dim = args.img_dim
     channels = args.dataset_dim[3]
 
     model = keras.Sequential()
-    model.add(layers.Conv2DTranspose(g_dim*8, (4, 4), strides=(1, 1), padding='valid', kernel_initializer=conv_weight_init, use_bias=False, input_shape=(z_dim,)))
+    model.add(layers.Conv2DTranspose(g_dim*8, (4, 4), strides=(1, 1), padding='valid', kernel_initializer=dcgan_weight_init, use_bias=False, input_shape=(z_dim,)))
     model.add(layers.BatchNormalization())
     model.add(layers.ReLU())
 
-    model.add(layers.Conv2DTranspose(g_dim*4, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=conv_weight_init, use_bias=False))
+    model.add(layers.Conv2DTranspose(g_dim*4, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=dcgan_weight_init, use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.ReLU())
 
-    model.add(layers.Conv2DTranspose(g_dim*2, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=conv_weight_init, use_bias=False))
+    model.add(layers.Conv2DTranspose(g_dim*2, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=dcgan_weight_init, use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.ReLU())
 
-    model.add(layers.Conv2DTranspose(g_dim, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=conv_weight_init, use_bias=False))
+    model.add(layers.Conv2DTranspose(g_dim, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=dcgan_weight_init, use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.ReLU())
 
-    model.add(layers.Conv2DTranspose(channels, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=conv_weight_init, use_bias=False, activation='tanh'))
+    model.add(layers.Conv2DTranspose(channels, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=dcgan_weight_init, use_bias=False, activation='tanh'))
     return model
-
-
-def presgan_disc(args):
-    d_dim = args.d_dim
-    input_dim = args.img_dim
-    channels = args.dataset_dim[3]
-
-    model = keras.Sequential()
-    model.add(layers.Conv2D(d_dim, (4, 4), strides=(2, 2), padding='valid', kernel_initilizer=conv_weight_init, use_bias=False, input_shape=[input_dim, input_dim, channels]))
-    model.add(layers.LeakyReLU(0.2))
-
-    model.add(layers.Conv2D(d_dim*2, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=conv_weight_init, use_bias=False))
-    model.add(layers.BatchNormalization())
-    model.add(layers.LeakyReLU(0.2))
-
-    model.add(layers.Conv2D(d_dim*4, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=conv_weight_init, use_bias=False))
-    model.add(layers.BatchNormalization())
-    model.add(layers.LeakyReLU(0.2))
-
-    model.add(layers.Conv2D(d_dim*8, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=conv_weight_init, use_bias=False))
-    model.add(layers.BatchNormalization())
-    model.add(layers.LeakyReLU(0.2))
-
-    model.add(layers.Conv2D(1, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=conv_weight_init, use_bias=False, activation='sigmoid'))
-
-    return model
-
-
-# init norm dist, std=0.02, lrelu leak = 0.2, lr=0.0002, b1 = 0.5
-def dcgan_gen(args):
-    return 1
 
 
 def dcgan_disc(args):
-    return 1
+    d_dim = args.d_dim
+    input_dim = args.dataset_dim[1]
+    channels = args.dataset_dim[3]
+
+    model = keras.Sequential()
+    model.add(layers.Conv2D(d_dim, (4, 4), strides=(2, 2), padding='valid', kernel_initilizer=dcgan_weight_init, use_bias=False, input_shape=[input_dim, input_dim, channels]))
+    model.add(layers.LeakyReLU(0.2))
+
+    model.add(layers.Conv2D(d_dim*2, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=dcgan_weight_init, use_bias=False))
+    model.add(layers.BatchNormalization())
+    model.add(layers.LeakyReLU(0.2))
+
+    model.add(layers.Conv2D(d_dim*4, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=dcgan_weight_init, use_bias=False))
+    model.add(layers.BatchNormalization())
+    model.add(layers.LeakyReLU(0.2))
+
+    model.add(layers.Conv2D(d_dim*8, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=dcgan_weight_init, use_bias=False))
+    model.add(layers.BatchNormalization())
+    model.add(layers.LeakyReLU(0.2))
+
+    model.add(layers.Conv2D(1, (4, 4), strides=(2, 2), padding='valid', kernel_initializer=dcgan_weight_init, use_bias=False, activation='sigmoid'))
+
+    return model
 
 
 def toy_gen(n_dim):
@@ -182,7 +170,7 @@ def toy_gen(n_dim):
     x = layers.Dense(128, activation='tanh', name='dense1')(inputs)
     x = layers.Dense(128, activation='tanh', name='dense2')(x)
     x = layers.Dense(128, activation='tanh', name='dense3')(x)
-    outputs = layers.Dense(2, activation='tanh', name='preds')(x)
+    outputs = layers.Dense(2, activation='linear', name='preds')(x)
     model = keras.Model(inputs=inputs, outputs=outputs)
     return model
 

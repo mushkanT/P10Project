@@ -19,7 +19,7 @@ class GANTrainer(object):
         self.dataset = dataset
 
     def train_discriminator(self, batch, args):
-        noise = tf.random.uniform(shape=[args.batch_size, args.noise_dim], minval=-1., maxval=1.)
+        noise = tf.random.normal(shape=[args.batch_size, args.noise_dim])
 
         with tf.GradientTape() as disc_tape:
             generated_images = self.generator(noise, training=False)
