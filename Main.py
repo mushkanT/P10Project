@@ -6,7 +6,7 @@ import Train as t
 import argparse
 import os.path
 #import o2img as o2i
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 
 parser = argparse.ArgumentParser()
@@ -42,15 +42,15 @@ args = parser.parse_args()
 args.seed = tf.random.uniform([args.num_samples_to_gen, args.noise_dim],-1.,1)
 
 # Debugging
-args.dataset = 'cifar10'
-args.scale_data = 64
+#args.dataset = 'cifar10'
+#args.scale_data = 64
 #args.noise_dim = 100
 #args.epochs = 200
-args.n_critic = 1
+#args.n_critic = 1
 #args.loss='ce'
 #args.images_while_training = 20
 #args.limit_dataset = True
-args.dir = 'C:/Users/marku/Desktop'
+#args.dir = 'C:/Users/marku/Desktop'
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
 #o2i.test_trunc_trick(args)
 
@@ -76,11 +76,6 @@ elif args.dataset == 'cifar10':
     dat = dt.cifar10(args.limit_dataset)
     if args.scale_data != 0:
         dat = tf.image.resize(dat, [args.scale_data, args.scale_data])
-
-    for i in range(dat[:16].shape[0]):
-        plt.subplot(4, 4, i + 1)
-        plt.imshow(dat[16:][i, :, :, :])
-        plt.axis('off')
     train_dataset = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size)
 elif args.dataset == 'lsun':
     dat = dt.lsun(args.batch_size, args.limit_dataset)
@@ -90,9 +85,9 @@ args.dataset_dim = dat.shape
 
 # Choose optimizers
 if args.optim_d == "adam":
-    args.gen_optimizer = tf.keras.optimizers.Adam(learning_rate=args.lr_d, beta_1=0.5, beta_2=0.9)
+    args.gen_optimizer = tf.keras.optimizers.Adam(learning_rate=args.lr_d, beta_1=0.5)
 if args.optim_g == "adam":
-    args.disc_optimizer = tf.keras.optimizers.Adam(learning_rate=args.lr_g, beta_1=0.5, beta_2=0.9)
+    args.disc_optimizer = tf.keras.optimizers.Adam(learning_rate=args.lr_g, beta_1=0.5)
 else:
     raise NotImplementedError()
 
