@@ -34,7 +34,7 @@ class GANTrainer(object):
                 else:
                     alpha = tf.random.uniform(shape=[args.batch_size, 1, 1, 1], minval=0., maxval=1.)
 
-                generated_images = tf.dtypes.cast(batch, dtype=tf.float64)
+                generated_images = tf.dtypes.cast(generated_images, dtype=tf.float64)
 
                 with tf.GradientTape() as gTape:
                     differences = generated_images - batch

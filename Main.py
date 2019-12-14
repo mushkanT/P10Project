@@ -5,8 +5,7 @@ import Data as dt
 import Train as t
 import argparse
 import os.path
-import o2img as o2i
-import tensorflow_datasets as tfds
+#import o2img as o2i
 
 parser = argparse.ArgumentParser()
 
@@ -40,14 +39,14 @@ args = parser.parse_args()
 args.seed = tf.random.uniform([args.num_samples_to_gen, args.noise_dim],-1.,1)
 
 # Debugging
-args.dataset = 'lsun'
+#args.dataset = 'lsun'
 #args.noise_dim = 100
-args.epochs = 200
+#args.epochs = 200
 #args.n_critic = 1
-args.loss='ce'
-args.images_while_training = 20
+#args.loss='ce'
+#args.images_while_training = 20
 #args.limit_dataset = True
-args.dir = 'C:/Users/marku/Desktop'
+#args.dir = 'C:/Users/marku/Desktop'
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
 #o2i.test_trunc_trick(args)
 
