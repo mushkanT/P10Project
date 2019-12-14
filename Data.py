@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import tensorflow_datasets as tfds
 
 def createToyDataRing(n_mixtures=10, radius=3, Ntrain=5120, std=0.05): #50176
     delta_theta = 2 * np.pi / n_mixtures
@@ -50,3 +51,8 @@ def cifar10(restrict=False):
         train_images = np.concatenate([train_images, test_images])
     train_images = train_images / 255  # Normalize the images to [0, 1]
     return train_images
+
+def lsun(batch_size, restrict=False):
+    train_dataset = tfds.load(name="lsun/bedroom")
+    train_dataset.batch(batch_size).repeat()
+    return train_dataset

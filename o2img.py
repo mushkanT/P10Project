@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os
 import numpy as np
-from keras.utils.vis_utils import plot_model
 
 
 def generate_and_save_images(model, epoch, test_input):
@@ -88,8 +87,8 @@ def load_images(path):
             continue
         folder_path = path+'/'+str(folder)
         config_file = open(folder_path + '/config.txt', 'r').read()
-        dataset = config_file.split(',')[3].split('\'')[1]
-        epoch_interval = config_file.split(',')[8].split('=')[1]
+        dataset = config_file.split(',')[4].split('\'')[1]
+        epoch_interval = config_file.split(',')[10].split('=')[1]
         itw_data = np.load(folder_path + '/itw.npy')
         d_loss = np.load(folder_path + '/d_loss.npy')
         g_loss = np.load(folder_path + '/g_loss.npy')

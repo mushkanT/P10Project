@@ -3,6 +3,7 @@ import numpy as np
 import time
 import Utils as u
 
+TINY = 1e-8
 
 class GANTrainer(object):
 
@@ -18,10 +19,10 @@ class GANTrainer(object):
         self.dataset = dataset
 
     def train_discriminator(self, batch, args):
-        noise = tf.random.normal([args.batch_size, args.noise_dim])
+        noise = tf.random.uniform(shape=[args.batch_size, args.noise_dim], minval=-1., maxval=1.)
 
         with tf.GradientTape() as disc_tape:
-            generated_images = self.generator(noise, training=True)
+            generated_images = self.generator(noise, training=False)
             fake_output = self.discriminator(generated_images, training=True)
             real_output = self.discriminator(batch, training=True)
 
@@ -32,11 +33,13 @@ class GANTrainer(object):
                     alpha = tf.random.uniform(shape=[args.batch_size, 1], minval=0., maxval=1.)
                 else:
                     alpha = tf.random.uniform(shape=[args.batch_size, 1, 1, 1], minval=0., maxval=1.)
-                differences = generated_images - batch
-                interpolated_images = batch + (alpha * differences)
+
+                generated_images = tf.dtypes.cast(batch, dtype=tf.float64)
 
                 with tf.GradientTape() as gTape:
-                    gTape.watch(interpolated_images)
+                    differences = generated_images - batch
+                    interpolated_images = batch + (alpha * differences)
+                    # gTape.watch(interpolated_images)
                     disc_interpolates = self.discriminator(interpolated_images)
 
                 gradients = gTape.gradient(disc_interpolates, interpolated_images)
@@ -52,6 +55,7 @@ class GANTrainer(object):
                 real_loss = cross_entropy(tf.ones_like(real_output), real_output)
                 fake_loss = cross_entropy(tf.zeros_like(fake_output), fake_output)
                 disc_loss = real_loss + fake_loss
+
             else:
                 raise Exception('Cost function does not exists')
 
@@ -69,7 +73,7 @@ class GANTrainer(object):
 
         with tf.GradientTape() as gen_tape:
             generated_images = self.generator(noise, training=True)
-            fake_output = self.discriminator(generated_images, training=True)
+            fake_output = self.discriminator(generated_images, training=False)
 
             # Losses
             if args.loss == "wgan-gp" or args.loss == "wgan":
@@ -80,13 +84,40 @@ class GANTrainer(object):
             else:
                 raise Exception('Cost function does not exists')
 
-        # Apply graidents
+        # Apply gradients
         gradients_of_generator = gen_tape.gradient(gen_loss, self.generator.trainable_variables)
         args.gen_optimizer.apply_gradients(zip(gradients_of_generator, self.generator.trainable_variables))
         return gen_loss
 
-    def train_discriminator_infogan(self):
-        return 1
+    def train_discriminator_infogan(self, batch, args):
+        noise = tf.random.normal([args.batch_size, args.noise_dim])
+
+        # Select control variable distributions
+        # Categorical variables:
+        C_cat = np.random.multinomial()
+
+        # Continuous variables:
+        c_cont_list = []
+        for i in range(args.c_cont):
+            c_cont_list.append(tf.random.uniform(shape=[args.batch_size,args.c_cat]))
+
+
+        with tf.GradientTape() as disc_tape:
+            generated_images = self.generator(noise, training=False)
+            fake_output = self.discriminator(generated_images, training=True)
+            real_output = self.discriminator(batch, training=True)
+
+            # Original GAN loss
+            cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+            real_loss = cross_entropy(tf.ones_like(real_output), real_output)
+            fake_loss = cross_entropy(tf.zeros_like(fake_output), fake_output)
+            disc_loss = real_loss + fake_loss
+
+
+
+
+
+        return disc_loss
 
     def train_generator_infogan(self):
         return 1
@@ -107,10 +138,17 @@ class GANTrainer(object):
             train_d = self.train_discriminator_infogan
             train_g = self.train_generator_infogan
 
+        # Image before training
+        if args.images_while_training != 0:
+            if args.dataset == "toy":
+                images_while_training.append(u.draw_2d_samples(self.generator, args.noise_dim))
+            else:
+                images_while_training.append(u.draw_samples(self.generator, args.seed))
+
         for epoch in range(args.epochs):
 
             # TODO: Should find a better way to do this
-            self.dataset.shuffle(args.dataset_dim[0])
+            #self.dataset.shuffle(args.dataset_dim[0])
             it = iter(self.dataset)
             start = time.time()
 
@@ -126,6 +164,7 @@ class GANTrainer(object):
 
             full_training_time += time.time()-start
 
+            # Generate samples and save
             if args.images_while_training != 0:
                 if epoch % args.images_while_training == 0:
                     if args.dataset == "toy":
