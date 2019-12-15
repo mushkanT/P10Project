@@ -54,7 +54,7 @@ args = parser.parse_args()
 #o2i.test_trunc_trick(args)
 
 # We will reuse this seed overtime for visualization
-args.seed = tf.random.uniform([args.num_samples_to_gen, args.noise_dim])
+args.seed = tf.random.normal([args.num_samples_to_gen, args.noise_dim])
 # Set random seed for reproducability
 tf.random.set_seed(2019)
 
@@ -62,25 +62,28 @@ tf.random.set_seed(2019)
 if args.dataset == "toy":
     dat = dt.createToyDataRing()
     #o2i.plot_toy_distribution(dat)
-    train_dataset = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+    dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
 elif args.dataset == "mnist":
     dat = dt.mnist(args.limit_dataset)
     if args.scale_data != 0:
         dat = tf.image.resize(dat, [args.scale_data, args.scale_data])
-    train_dataset = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+    dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
 elif args.dataset == 'cifar10':
     dat = dt.cifar10(args.limit_dataset)
     if args.scale_data != 0:
         dat = tf.image.resize(dat, [args.scale_data, args.scale_data])
-    train_dataset = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+    dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
 elif args.dataset == 'lsun':
     dat = dt.lsun(args.limit_dataset)
     dat = dat.shuffle(100000).batch(args.batch_size)
-    dat = dat.map(lambda x: tf.image.resize(x['image'], [args.scale_data, args.scale_data]))
+    if args.scale_data != 0:
+        dat = dat.map(lambda x: tf.image.resize(x['image'], [args.scale_data, args.scale_data]))
     dat = dat.repeat()
 else:
     raise NotImplementedError()
-args.dataset_dim = dat.shape
+
+# Poor temporary fix
+args.dataset_dim = dat.element_spec.shape if not args.dataset == 'lsun' else [3000000, 64, 64, 3]
 
 # Choose optimizers
 if args.optim_d == "adam":
@@ -116,11 +119,11 @@ u.write_config(args)
 if len(tf.config.experimental.list_physical_devices('GPU')) > 0:
     with tf.device('/GPU:0'):
         print('Using GPU')
-        ganTrainer = t.GANTrainer(generator, discriminator, auxiliary, train_dataset)
+        ganTrainer = t.GANTrainer(generator, discriminator, auxiliary, dat)
         g_loss, d_loss, images_while_training, full_training_time = ganTrainer.train(args)
 else:
     print('Using CPU')
-    ganTrainer = t.GANTrainer(generator, discriminator, auxiliary, train_dataset)
+    ganTrainer = t.GANTrainer(generator, discriminator, auxiliary, dat)
     g_loss, d_loss, images_while_training, full_training_time = ganTrainer.train(args)
 
 # Write losses, image values, full training time and save models
