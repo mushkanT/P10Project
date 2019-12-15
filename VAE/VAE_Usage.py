@@ -4,6 +4,7 @@ import argparse
 import DataHandler as datahandler
 from scipy.io import loadmat
 from numpy import pad
+import tensorflow as tf
 
 def VAE_grey(RUN_ID, RUN_FOLDER, lr, r_loss, batch_size, epochs, print_n_batches, init_epoch, z_dim, data_name):
     # run params
@@ -35,6 +36,7 @@ def VAE_grey(RUN_ID, RUN_FOLDER, lr, r_loss, batch_size, epochs, print_n_batches
         decoder_conv_t_strides=[1, 2, 2, 1],
         z_dim=z_dim
     )
+
 
     if mode == 'build':
         VAE.save(RUN_FOLDER)

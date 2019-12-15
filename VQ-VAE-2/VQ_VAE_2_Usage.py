@@ -51,7 +51,6 @@ def train_vq_vae(optimizer, image_size, output_path, epochs=500, batch_size=100,
     if not os.path.exists(RUN_FOLDER):
         os.mkdir(RUN_FOLDER)
 
-
     model = VQ_VAE_Model.VQVAEModel(image_size)
     if data_path == 'mnist':
         train_data, test_data = DataHandler.mnist()
@@ -78,7 +77,7 @@ def train_vq_vae(optimizer, image_size, output_path, epochs=500, batch_size=100,
     np.save(vq_loss_file, train_metrics[2])
     np.save(recons_file, train_metrics[3])
 
-    model_file = os.path.join(RUN_FOLDER, 'model.h5')
+    model_file = os.path.join(RUN_FOLDER, 'model')
     model.save(model_file)
 
 
