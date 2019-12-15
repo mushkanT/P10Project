@@ -50,8 +50,8 @@ def train_vq_vae(optimizer, image_size, output_path, epochs=500, batch_size=100,
     RUN_FOLDER += SECTION + '/'
     if not os.path.exists(RUN_FOLDER):
         os.mkdir(RUN_FOLDER)
-
-    model = VQ_VAE_Model.VQVAEModel(image_size)
+    Input = tf.keras.layers.Input(shape=(None,image_size,image_size,1))
+    model = VQ_VAE_Model.VQVAEModel(inputs=Input,image_size=image_size)
     if data_path == 'mnist':
         train_data, test_data = DataHandler.mnist()
         train_data = tf.pad(train_data, [[0,0], [2,2], [2,2], [0,0]])

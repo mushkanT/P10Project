@@ -55,6 +55,7 @@ class Encoder8Stride(Encoder):
         )
 
     def __call__(self, input):
+        input_layer = tf.keras.layers.Input(shape=())
         x = input
         x = tf.nn.relu(self.conv1(x))
         x = tf.nn.relu(self.conv2(x))
@@ -446,8 +447,9 @@ class VQVAEModel(tf.keras.Model):
         return dec
 
     def __call__(self, input, is_training):
+        input_layer = tf.keras.Input(shape=(self.image_size,))
         if self.image_size > 512:
-            quantized_top, quantized_middle, quantized_bottom = self.encode3layer(input)
+            quantized_top, quantized_middle, quantized_bottom = self.encode3layer(input_layer(input))
             dec = self.decode3layer(quantized_top, quantized_middle, quantized_bottom)
             recon_error = tf.reduce_mean((dec - input) ** 2)
             mean_latent_loss = (quantized_bottom['loss'] + quantized_middle['loss'] + quantized_top['loss']) / 2
@@ -459,7 +461,7 @@ class VQVAEModel(tf.keras.Model):
                 'mean_latent_loss': mean_latent_loss
             }
         else:
-            quantized_top, quantized_bottom = self.encode2layer(input)
+            quantized_top, quantized_bottom = self.encode2layer(input_layer(input))
             dec = self.decode2layer(quantized_top, quantized_bottom)
             recon_error = tf.reduce_mean((dec - input) ** 2)
             mean_latent_loss = (quantized_bottom['loss'] + quantized_top['loss']) / 2
