@@ -20,13 +20,11 @@ def train_loop(optimizer, num_images, batch_size, epochs, train_data, model, dat
     train_vqvae_loss = []
     train_recons = []
     for i in range(epochs):
-        print('Epoch %d' % (i))
         if data_generator is not None:
             data_generator.reset()
         iter_count = 0
         for begin in range(0, num_images, batch_size):
             iter_count += 1
-            print('iteration - %d' % (iter_count))
             if data_generator is not None:
                 train_data = next(data_generator)[0]
                 train_results = train_step(train_data, optimizer, model)
@@ -36,7 +34,7 @@ def train_loop(optimizer, num_images, batch_size, epochs, train_data, model, dat
             train_losses.append(train_results['loss'])
             train_recon_errors.append(train_results['recon_error'])
             train_vqvae_loss.append(train_results['mean_latent_loss'])
-            if iter_count % 100 == 0:
+            if iter_count % 600 == 0:
                 train_recons.append(train_results['x_recon'])
                 print('%d. train loss: %f ' % (0 + 1,
                                                np.mean(train_losses[-100:])) +
@@ -47,8 +45,14 @@ def train_loop(optimizer, num_images, batch_size, epochs, train_data, model, dat
 
 
 def train_vq_vae(optimizer, image_size, output_path, epochs=500, batch_size=100, data_path='mnist'):
+    SECTION = 'VQvae'
+    RUN_FOLDER = output_path
+    RUN_FOLDER += SECTION + '/'
+    if not os.path.exists(RUN_FOLDER):
+        os.mkdir(RUN_FOLDER)
+
+
     model = VQ_VAE_Model.VQVAEModel(image_size)
-    train_metrics = None
     if data_path == 'mnist':
         train_data, test_data = DataHandler.mnist()
         train_data = tf.pad(train_data, [[0,0], [2,2], [2,2], [0,0]])
@@ -63,17 +67,18 @@ def train_vq_vae(optimizer, image_size, output_path, epochs=500, batch_size=100,
         num_images = data_generator.n
         train_metrics = train_loop(optimizer, num_images, batch_size, epochs, None, model, data_generator=data_generator)
 
-    loss_file = os.path.join(output_path, 'loss')
-    r_loss_file = os.path.join(output_path, 'r_loss')
-    vq_loss_file = os.path.join(output_path, 'vq_loss')
-    recons_file = os.path.join(output_path, 'recons')
+    loss_file = os.path.join(RUN_FOLDER, 'loss')
+    r_loss_file = os.path.join(RUN_FOLDER, 'r_loss')
+    vq_loss_file = os.path.join(RUN_FOLDER, 'vq_loss')
+    recons_file = os.path.join(RUN_FOLDER, 'recons')
 
+    print('Saving loss and model...')
     np.save(loss_file, train_metrics[0])
     np.save(r_loss_file, train_metrics[1])
     np.save(vq_loss_file, train_metrics[2])
     np.save(recons_file, train_metrics[3])
 
-    model_file = os.path.join(output_path, 'model.h5')
+    model_file = os.path.join(RUN_FOLDER, 'model.h5')
     model.save(model_file)
 
 
