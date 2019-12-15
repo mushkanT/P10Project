@@ -52,7 +52,8 @@ def cifar10(restrict=False):
     train_images = train_images / 255  # Normalize the images to [0, 1]
     return train_images
 
-def lsun(batch_size, restrict=False):
-    train_dataset = tfds.load(name="lsun/bedroom")
-    train_dataset.batch(batch_size).repeat()
+
+def lsun(restrict=False):
+    #train_dataset = tfds.load(name="lsun/bedroom")
+    train_dataset = tfds.load(name="mnist")['train']
     return train_dataset

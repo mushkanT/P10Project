@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import os.path
 
 
 def draw_2d_samples(generator, n_dim, seed=2019):
@@ -19,6 +20,12 @@ def generate_latent_vector_infogan(args):
     c = tf.keras.utils.to_categorical(c, num_classes=args.c_dim)
     latent_vector = np.hstack((noise, c))
     return latent_vector, c
+
+
+def write_config(args):
+    file = open(os.path.join(args.dir, 'config.txt'), 'w')
+    file.write(str(args))
+    file.close()
 
 
 '''

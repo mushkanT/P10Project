@@ -35,7 +35,7 @@ class GANTrainer(object):
                     alpha = tf.random.uniform(shape=[args.batch_size, 1, 1, 1], minval=0., maxval=1.)
 
                 if args.dataset == 'cifar10' and args.scale_data == 0:
-                    generated_images = tf.dtypes.cast(generated_images, dtype=tf.float64)
+                    batch = tf.dtypes.cast(batch, dtype=tf.float32)
 
                 with tf.GradientTape() as gTape:
                     differences = generated_images - batch
@@ -56,7 +56,6 @@ class GANTrainer(object):
                 real_loss = cross_entropy(tf.ones_like(real_output), real_output)
                 fake_loss = cross_entropy(tf.zeros_like(fake_output), fake_output)
                 disc_loss = real_loss + fake_loss
-
             else:
                 raise Exception('Cost function does not exists')
 
@@ -124,9 +123,9 @@ class GANTrainer(object):
         disc_loss = []
         images_while_training = []
         full_training_time = 0
-
+        it = iter(self.dataset)
         batches_pr_epoch = args.dataset_dim[0] // args.batch_size
-        n_steps = batches_pr_epoch // args.n_critic
+        n_steps = batches_pr_epoch // args.disc_iters  # Steps per epoch (Generator iterations)
 
         if self.auxiliary is None:
             train_d = self.train_discriminator
@@ -143,21 +142,19 @@ class GANTrainer(object):
                 images_while_training.append(u.draw_samples(self.generator, args.seed))
 
         for epoch in range(args.epochs):
-
-            # TODO: Should find a better way to do this
-            #self.dataset.shuffle(args.dataset_dim[0])
-            it = iter(self.dataset)
             start = time.time()
 
             for _ in range(n_steps):
-                disc_loss_n_critic = []
-                # take n steps with critic before training generator
-                for i in range(args.n_critic):
+                disc_iters_loss = []
+                # take x steps with critic before training generator
+                for i in range(args.disc_iters):
                     batch = next(it)
-                    disc_loss_n_critic.append(train_d(batch, args))
+                    if batch.shape[0] != args.batch_size:
+                        continue
+                    disc_iters_loss.append(train_d(batch, args))
 
                 gen_loss.append(tf.reduce_mean(train_g(args)).numpy())
-                disc_loss.append(tf.reduce_mean(disc_loss_n_critic).numpy())
+                disc_loss.append(tf.reduce_mean(disc_iters_loss).numpy())
 
             full_training_time += time.time()-start
 

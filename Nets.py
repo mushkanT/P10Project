@@ -4,6 +4,7 @@ layers = tf.keras.layers
 
 
 weight_init = tf.keras.initializers.RandomNormal(stddev=0.02)
+#dcgan without batchnorm in disc (wgan, wgan-gp)
 def tfgan_gen(args):
     g_dim = args.g_dim
     z_dim = args.noise_dim
@@ -27,6 +28,7 @@ def tfgan_gen(args):
     return model
 
 
+# Potentially use layer normalisation instead of dropout -> https://arxiv.org/pdf/1607.06450.pdf
 def tfgan_disc(args):
     input_dim = args.dataset_dim[1]
     d_dim = args.d_dim
@@ -117,7 +119,7 @@ def dcgan_gen(args):
     g_dim = args.g_dim
     z_dim = args.noise_dim
     img_dim = args.dataset_dim[1]
-    img_resize = img_dim//(2*2*2*2*3)
+    img_resize = img_dim // (2*2*2*2*3)
     channels = args.dataset_dim[3]
 
     model = keras.Sequential()
@@ -177,13 +179,13 @@ def toy_gen(n_dim):
     x = layers.Dense(128, activation='tanh', name='dense1')(inputs)
     x = layers.Dense(128, activation='tanh', name='dense2')(x)
     x = layers.Dense(128, activation='tanh', name='dense3')(x)
-    outputs = layers.Dense(2, activation='linear', name='preds')(x)
+    outputs = layers.Dense(2, activation='linear', name='preds')(x) #try tanh with successful configs
     model = keras.Model(inputs=inputs, outputs=outputs)
     return model
 
 
-def toy_disc():
-    inputs = keras.Input(shape=(256, 2), name='digits')
+def toy_disc(args):
+    inputs = keras.Input(shape=(args.batch_size, 2), name='digits')
     x = layers.Dense(128, activation='tanh', name='dense1')(inputs)
     x = layers.Dense(128, activation='tanh', name='dense2')(x)
     x = layers.Dense(128, activation='tanh', name='dense3')(x)

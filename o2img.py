@@ -87,8 +87,8 @@ def load_images(path):
             continue
         folder_path = path+'/'+str(folder)
         config_file = open(folder_path + '/config.txt', 'r').read()
-        dataset = config_file.split(',')[4].split('\'')[1]
-        epoch_interval = config_file.split(',')[10].split('=')[1]
+        dataset = config_file.split(',')[5].split('\'')[1]
+        epoch_interval = config_file.split(',')[11].split('=')[1]
         itw_data = np.load(folder_path + '/itw.npy')
         d_loss = np.load(folder_path + '/d_loss.npy')
         g_loss = np.load(folder_path + '/g_loss.npy')
