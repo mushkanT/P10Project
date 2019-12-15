@@ -54,6 +54,6 @@ def cifar10(restrict=False):
 
 
 def lsun(restrict=False):
-    #train_dataset = tfds.load(name="lsun/bedroom")
-    train_dataset = tfds.load(name="mnist")['train']
+    train_dataset = tfds.load(name="lsun/bedroom")
+    #train_dataset = tfds.load(name="mnist")['train']
     return train_dataset

@@ -40,12 +40,12 @@ parser.add_argument('--scale_data',     type=int,         default=0,        help
 args = parser.parse_args()
 
 # Debugging
-#args.dataset = 'lsun'
+#args.dataset = 'cifar10'
 #args.scale_data = 64
 #args.noise_dim = 100
 #args.epochs = 250
 #args.disc_iters = 5
-#args.gan_type='tfgan'
+#args.gan_type='dcgan'
 #args.loss='wgan-gp'
 #args.images_while_training = 5
 #args.limit_dataset = True
@@ -62,28 +62,28 @@ tf.random.set_seed(2019)
 if args.dataset == "toy":
     dat = dt.createToyDataRing()
     #o2i.plot_toy_distribution(dat)
-    dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+    train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
 elif args.dataset == "mnist":
     dat = dt.mnist(args.limit_dataset)
     if args.scale_data != 0:
         dat = tf.image.resize(dat, [args.scale_data, args.scale_data])
-    dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+    train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
 elif args.dataset == 'cifar10':
     dat = dt.cifar10(args.limit_dataset)
     if args.scale_data != 0:
         dat = tf.image.resize(dat, [args.scale_data, args.scale_data])
-    dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+    train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
 elif args.dataset == 'lsun':
     dat = dt.lsun(args.limit_dataset)
     dat = dat.shuffle(100000).batch(args.batch_size)
     if args.scale_data != 0:
         dat = dat.map(lambda x: tf.image.resize(x['image'], [args.scale_data, args.scale_data]))
-    dat = dat.repeat()
+    train_dat = dat.repeat()
 else:
     raise NotImplementedError()
 
 # Poor temporary fix
-args.dataset_dim = dat.element_spec.shape if not args.dataset == 'lsun' else [3000000, 64, 64, 3]
+args.dataset_dim = dat.shape if not args.dataset == 'lsun' else [3000000, 64, 64, 3]
 
 # Choose optimizers
 if args.optim_d == "adam":
@@ -119,11 +119,11 @@ u.write_config(args)
 if len(tf.config.experimental.list_physical_devices('GPU')) > 0:
     with tf.device('/GPU:0'):
         print('Using GPU')
-        ganTrainer = t.GANTrainer(generator, discriminator, auxiliary, dat)
+        ganTrainer = t.GANTrainer(generator, discriminator, auxiliary, train_dat)
         g_loss, d_loss, images_while_training, full_training_time = ganTrainer.train(args)
 else:
     print('Using CPU')
-    ganTrainer = t.GANTrainer(generator, discriminator, auxiliary, dat)
+    ganTrainer = t.GANTrainer(generator, discriminator, auxiliary, train_dat)
     g_loss, d_loss, images_while_training, full_training_time = ganTrainer.train(args)
 
 # Write losses, image values, full training time and save models
