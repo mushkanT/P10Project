@@ -1,7 +1,9 @@
 import tensorflow as tf
+import keras.backend as K
 import numpy as np
 import time
 import Utils as u
+#import matplotlib.pyplot as plt
 
 TINY = 1e-8
 
@@ -56,6 +58,9 @@ class GANTrainer(object):
                 real_loss = cross_entropy(tf.ones_like(real_output), real_output)
                 fake_loss = cross_entropy(tf.zeros_like(fake_output), fake_output)
                 disc_loss = real_loss + fake_loss
+
+                acc_real = K.mean(K.equal(tf.ones_like(real_output), K.round(tf.keras.activations.sigmoid(real_output))))
+                acc_fake = K.mean(K.equal(tf.zeros_like(real_output), K.round(tf.keras.activations.sigmoid(fake_output))))
             else:
                 raise Exception('Cost function does not exists')
 
@@ -66,7 +71,7 @@ class GANTrainer(object):
         if args.loss == "wgan":
             for var in self.discriminator.trainable_variables:
                 tf.clip_by_value(var, -args.clip, args.clip)
-        return disc_loss
+        return disc_loss, acc_fake, acc_real
 
     def train_generator(self, args):
         noise = tf.random.normal([args.batch_size, args.noise_dim])
@@ -122,6 +127,7 @@ class GANTrainer(object):
         gen_loss = []
         disc_loss = []
         images_while_training = []
+        acc_fakes, acc_reals = [],[]
         full_training_time = 0
         it = iter(self.dataset)
         batches_pr_epoch = args.dataset_dim[0] // args.batch_size
@@ -142,6 +148,7 @@ class GANTrainer(object):
                 images_while_training.append(u.draw_samples(self.generator, args.seed))
 
         for epoch in range(args.epochs):
+            print(epoch)
             start = time.time()
 
             for _ in range(n_steps):
@@ -151,7 +158,11 @@ class GANTrainer(object):
                     batch = next(it)
                     if batch.shape[0] != args.batch_size:
                         continue
-                    disc_iters_loss.append(train_d(batch, args))
+                    d_loss, acc_fake, acc_real = train_d(batch, args)
+                    disc_iters_loss.append(d_loss)
+                    acc_fakes.append(acc_fake)
+                    acc_reals.append(acc_real)
+                    #disc_iters_loss.append(train_d(batch, args))
 
                 gen_loss.append(tf.reduce_mean(train_g(args)).numpy())
                 disc_loss.append(tf.reduce_mean(disc_iters_loss).numpy())
@@ -166,4 +177,4 @@ class GANTrainer(object):
                     else:
                         images_while_training.append(u.draw_samples(self.generator, args.seed))
 
-        return gen_loss, disc_loss, images_while_training, full_training_time
+        return gen_loss, disc_loss, images_while_training, full_training_time, acc_fakes, acc_reals

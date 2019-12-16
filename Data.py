@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import tensorflow_datasets as tfds
 
+
 def createToyDataRing(n_mixtures=10, radius=3, Ntrain=5120, std=0.05): #50176
     delta_theta = 2 * np.pi / n_mixtures
     centers_x = []
@@ -44,12 +45,12 @@ def mnist(restrict=False):
 def cifar10(restrict=False):
     (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.cifar10.load_data()
     if restrict:
-        train_mask = [y[0] == 7 for y in train_labels]
-        test_mask = [y[0] == 7 for y in test_labels]
+        train_mask = [y[0] == 8 for y in train_labels]
+        test_mask = [y[0] == 8 for y in test_labels]
         train_images = train_images[train_mask]
         test_images = test_images[test_mask]
         train_images = np.concatenate([train_images, test_images])
-    train_images = train_images / 255  # Normalize the images to [0, 1]
+    train_images = (train_images - 127.5) / 127.5  # Normalize the images to [0, 1]
     return train_images
 
 

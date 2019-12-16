@@ -81,6 +81,39 @@ def plot_loss(gen_loss, disc_loss, path):
     plt.close()
 
 
+def plot_acc(fakes, reals, path):
+    save_path = path + '/graphs'
+    if not os.path.isdir(save_path):
+        os.mkdir(save_path)
+    fakes = tf.convert_to_tensor(fakes)
+    reals = tf.convert_to_tensor(reals)
+
+    # Plot both
+    plt.plot(fakes, label='Fakes')
+    plt.plot(reals, label='Reals')
+    plt.xlabel('Batches')
+    plt.ylabel('Accuracy')
+    plt.legend()
+    plt.savefig(save_path+'/acc_both.png')
+    plt.close()
+
+    # Plot gen
+    plt.plot(fakes, label='Fakes')
+    plt.xlabel('Batches')
+    plt.ylabel('Accuracy')
+    plt.legend()
+    plt.savefig(save_path+'/acc_fakes.png')
+    plt.close()
+
+    # Plot disc
+    plt.plot(reals, label='Reals', color='tab:orange')
+    plt.xlabel('Batches')
+    plt.ylabel('Accuracy')
+    plt.legend()
+    plt.savefig(save_path+'/acc_reals.png')
+    plt.close()
+
+
 def load_images(path):
     for folder in os.listdir(path):
         if folder == 'old':
@@ -88,12 +121,16 @@ def load_images(path):
         folder_path = path+'/'+str(folder)
         config_file = open(folder_path + '/config.txt', 'r').read()
         dataset = config_file.split(',')[5].split('\'')[1]
-        epoch_interval = config_file.split(',')[11].split('=')[1]
+        epoch_interval = config_file.split(',')[18].split('=')[1]
         itw_data = np.load(folder_path + '/itw.npy')
         d_loss = np.load(folder_path + '/d_loss.npy')
         g_loss = np.load(folder_path + '/g_loss.npy')
+        acc_fakes = np.load(folder_path + '/acc_fakes.npy')
+        acc_reals = np.load(folder_path + '/acc_reals.npy')
+
         produce_images_itw(dataset, folder_path, itw_data, int(epoch_interval))
-        produce_images_loss(folder_path, d_loss, g_loss)
+        produce_loss_graphs(folder_path, d_loss, g_loss)
+        plot_acc(acc_fakes, acc_reals, folder_path)
 
 
 def produce_images_itw(dataset, folder_path, data, epoch_interval):
@@ -102,11 +139,11 @@ def produce_images_itw(dataset, folder_path, data, epoch_interval):
         if not os.path.isdir(save_path):
             os.mkdir(save_path)
         plot_2d_data(save_path, data, epoch_interval)
-    elif dataset == 'mnist':
+    elif dataset in ['mnist', 'frey']:
         save_path = folder_path + '/images_itw'
         if not os.path.isdir(save_path):
             os.mkdir(save_path)
-        counter = 0
+        counter = 1
         for x in data:
             for i in range(x.shape[0]):
                 plt.subplot(4, 4, i + 1)
@@ -115,7 +152,6 @@ def produce_images_itw(dataset, folder_path, data, epoch_interval):
             plt.savefig(save_path + '/itw_' + str(counter) + '.png')
             counter = counter + epoch_interval
         plt.close()
-
     elif dataset == 'cifar10':
         save_path = folder_path + '/images_itw'
         if not os.path.isdir(save_path):
@@ -131,11 +167,12 @@ def produce_images_itw(dataset, folder_path, data, epoch_interval):
         plt.close()
 
 
-def produce_images_loss(folder_path, g_loss, d_loss):
-    save_path = folder_path + '/images_loss'
+def produce_loss_graphs(folder_path, d_loss, g_loss):
+    save_path = folder_path + '/graphs'
     if not os.path.isdir(save_path):
         os.mkdir(save_path)
     plot_loss(g_loss, d_loss, save_path)
+
 
 def test_trunc_trick(args):
     seed = tf.random.normal([args.num_samples_to_gen, args.noise_dim])

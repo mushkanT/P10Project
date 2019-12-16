@@ -8,12 +8,13 @@ import argparse
 import os.path
 #import o2img as o2i
 #import matplotlib.pyplot as plt
+from scipy.io import loadmat
 
 
 parser = argparse.ArgumentParser()
 
 # Settings
-parser.add_argument('--dataset',        type=str,         default='toy',    help=' toy | mnist | cifar10 | lsun')
+parser.add_argument('--dataset',        type=str,         default='toy',    help=' toy | mnist | cifar10 | lsun | frey')
 parser.add_argument('--loss',           type=str,         default='ce',     help='wgan-gp | wgan | ce')
 parser.add_argument('--batch_size',     type=int,         default=100)
 parser.add_argument('--epochs',         type=int,         default=500)
@@ -40,14 +41,14 @@ parser.add_argument('--scale_data',     type=int,         default=0,        help
 args = parser.parse_args()
 
 # Debugging
-#args.dataset = 'cifar10'
+#args.dataset = 'frey'
 #args.scale_data = 64
 #args.noise_dim = 100
-#args.epochs = 250
+#args.epochs = 20
 #args.disc_iters = 5
 #args.gan_type='dcgan'
 #args.loss='wgan-gp'
-#args.images_while_training = 5
+#args.images_while_training = 2
 #args.limit_dataset = True
 #args.dir = 'C:/Users/marku/Desktop'
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
@@ -79,6 +80,17 @@ elif args.dataset == 'lsun':
     if args.scale_data != 0:
         dat = dat.map(lambda x: tf.image.resize(x['image'], [args.scale_data, args.scale_data]))
     train_dat = dat.repeat()
+elif args.dataset == 'frey':
+    img_size = (28, 20, 1)
+    data = loadmat('/user/student.aau.dk/mjuuln15/frey_rawface.mat')
+    #data = loadmat(args.dir+'/frey_rawface.mat')
+    data = data['ff']
+    data = data.transpose()
+    data = data.reshape((-1, *img_size))
+    data = np.pad(data, [(0, 0), (2, 2), (6, 6), (0, 0)], 'constant')
+    #dat = data / 255.
+    dat = (data - 127.5) / 127.5
+    train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
 else:
     raise NotImplementedError()
 
@@ -87,7 +99,8 @@ args.dataset_dim = dat.shape if not args.dataset == 'lsun' else [3000000, 64, 64
 
 # Choose optimizers
 if args.optim_d == "adam":
-    args.gen_optimizer = tf.keras.optimizers.Adam(learning_rate=args.lr_d, beta_1=0.5)
+    args.gen_optimizer = tf.keras.optimizers.SGD(learning_rate=1e-3)
+    #args.gen_optimizer = tf.keras.optimizers.Adam(learning_rate=args.lr_d, beta_1=0.5)
 if args.optim_g == "adam":
     args.disc_optimizer = tf.keras.optimizers.Adam(learning_rate=args.lr_g, beta_1=0.5)
 else:
@@ -120,16 +133,18 @@ if len(tf.config.experimental.list_physical_devices('GPU')) > 0:
     with tf.device('/GPU:0'):
         print('Using GPU')
         ganTrainer = t.GANTrainer(generator, discriminator, auxiliary, train_dat)
-        g_loss, d_loss, images_while_training, full_training_time = ganTrainer.train(args)
+        g_loss, d_loss, images_while_training, full_training_time, acc_fakes, acc_reals = ganTrainer.train(args)
 else:
     print('Using CPU')
     ganTrainer = t.GANTrainer(generator, discriminator, auxiliary, train_dat)
-    g_loss, d_loss, images_while_training, full_training_time = ganTrainer.train(args)
+    g_loss, d_loss, images_while_training, full_training_time, acc_fakes, acc_reals = ganTrainer.train(args)
 
 # Write losses, image values, full training time and save models
 np.save(os.path.join(args.dir, 'g_loss'), g_loss)
 np.save(os.path.join(args.dir, 'd_loss'), d_loss)
 np.save(os.path.join(args.dir, 'itw'), images_while_training)
+np.save(os.path.join(args.dir, 'acc_fakes'), acc_fakes)
+np.save(os.path.join(args.dir, 'acc_reals'), acc_reals)
 
 file = open(os.path.join(args.dir, 'config.txt'), 'a')
 file.write(str(full_training_time))
