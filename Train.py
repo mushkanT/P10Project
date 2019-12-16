@@ -36,7 +36,7 @@ class GANTrainer(object):
                 else:
                     alpha = tf.random.uniform(shape=[args.batch_size, 1, 1, 1], minval=0., maxval=1.)
 
-                if args.dataset == 'cifar10' and args.scale_data == 0:
+                if args.dataset in ['cifar10', 'frey'] and args.scale_data == 0:
                     batch = tf.dtypes.cast(batch, dtype=tf.float32)
 
                 with tf.GradientTape() as gTape:
@@ -58,15 +58,15 @@ class GANTrainer(object):
                 real_loss = cross_entropy(tf.ones_like(real_output), real_output)
                 fake_loss = cross_entropy(tf.zeros_like(fake_output), fake_output)
                 disc_loss = real_loss + fake_loss
-
-                acc_real = K.mean(K.equal(tf.ones_like(real_output), K.round(tf.keras.activations.sigmoid(real_output))))
-                acc_fake = K.mean(K.equal(tf.zeros_like(real_output), K.round(tf.keras.activations.sigmoid(fake_output))))
             else:
                 raise Exception('Cost function does not exists')
 
         # Apply gradients
         gradients_of_discriminator = disc_tape.gradient(disc_loss, self.discriminator.trainable_variables)
         args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.discriminator.trainable_variables))
+        # Calc disc accuracy
+        acc_real = K.mean(K.equal(tf.ones_like(real_output), K.round(tf.keras.activations.sigmoid(real_output))))
+        acc_fake = K.mean(K.equal(tf.zeros_like(real_output), K.round(tf.keras.activations.sigmoid(fake_output))))
         # Clip weights if wgan loss function
         if args.loss == "wgan":
             for var in self.discriminator.trainable_variables:

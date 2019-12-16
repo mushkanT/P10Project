@@ -49,7 +49,8 @@ def cifar10(restrict=False):
         test_mask = [y[0] == 8 for y in test_labels]
         train_images = train_images[train_mask]
         test_images = test_images[test_mask]
-        train_images = np.concatenate([train_images, test_images])
+    train_images = np.concatenate([train_images, test_images])
+    train_images.astype('float32')
     train_images = (train_images - 127.5) / 127.5  # Normalize the images to [0, 1]
     return train_images
 

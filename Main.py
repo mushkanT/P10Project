@@ -23,7 +23,7 @@ parser.add_argument('--clip',           type=float,       default=0.01,     help
 parser.add_argument('--gp_lambda',      type=int,         default=10)
 parser.add_argument('--lr_d',           type=float,       default=1e-4)
 parser.add_argument('--lr_g',           type=float,       default=1e-4)
-parser.add_argument('--optim_d',        type=str,         default='adam',   help='adam')
+parser.add_argument('--optim_d',        type=str,         default='adam',   help='adam | sgd')
 parser.add_argument('--optim_g',        type=str,         default='adam',   help='adam')
 parser.add_argument('--num_samples_to_gen', type=int,     default=16)
 parser.add_argument('--images_while_training', type=int,  default=50,       help='Every x epoch to print images while training')
@@ -41,14 +41,14 @@ parser.add_argument('--scale_data',     type=int,         default=0,        help
 args = parser.parse_args()
 
 # Debugging
-#args.dataset = 'frey'
+#args.dataset = 'cifar10'
 #args.scale_data = 64
 #args.noise_dim = 100
-#args.epochs = 20
+#args.epochs = 5
 #args.disc_iters = 5
 #args.gan_type='dcgan'
 #args.loss='wgan-gp'
-#args.images_while_training = 2
+#args.images_while_training = 1
 #args.limit_dataset = True
 #args.dir = 'C:/Users/marku/Desktop'
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
@@ -82,8 +82,8 @@ elif args.dataset == 'lsun':
     train_dat = dat.repeat()
 elif args.dataset == 'frey':
     img_size = (28, 20, 1)
-    data = loadmat('/user/student.aau.dk/mjuuln15/frey_rawface.mat')
-    #data = loadmat(args.dir+'/frey_rawface.mat')
+    #data = loadmat('/user/student.aau.dk/mjuuln15/frey_rawface.mat')
+    data = loadmat(args.dir+'/frey_rawface.mat')
     data = data['ff']
     data = data.transpose()
     data = data.reshape((-1, *img_size))
@@ -99,8 +99,9 @@ args.dataset_dim = dat.shape if not args.dataset == 'lsun' else [3000000, 64, 64
 
 # Choose optimizers
 if args.optim_d == "adam":
+    args.gen_optimizer = tf.keras.optimizers.Adam(learning_rate=args.lr_d, beta_1=0.5)
+elif args.optim_d == "sgd":
     args.gen_optimizer = tf.keras.optimizers.SGD(learning_rate=1e-3)
-    #args.gen_optimizer = tf.keras.optimizers.Adam(learning_rate=args.lr_d, beta_1=0.5)
 if args.optim_g == "adam":
     args.disc_optimizer = tf.keras.optimizers.Adam(learning_rate=args.lr_g, beta_1=0.5)
 else:
@@ -122,8 +123,15 @@ elif args.gan_type == 'dcgan':
     generator = nets.dcgan_gen(args)
     discriminator = nets.dcgan_disc(args)
     auxiliary = None
+elif args.gan_type == 'cifargan':
+    generator = nets.cifargan_gen(args)
+    discriminator = nets.cifargan_disc(args)
+    auxiliary = None
 else:
     raise NotImplementedError()
+
+generator._name='gen'
+discriminator._name='disc'
 
 # Write config
 u.write_config(args)
@@ -146,9 +154,13 @@ np.save(os.path.join(args.dir, 'itw'), images_while_training)
 np.save(os.path.join(args.dir, 'acc_fakes'), acc_fakes)
 np.save(os.path.join(args.dir, 'acc_reals'), acc_reals)
 
-file = open(os.path.join(args.dir, 'config.txt'), 'a')
-file.write(str(full_training_time))
-file.close()
+generator._name='gen'
+discriminator._name='disc'
+
+with open(os.path.join(args.dir, 'config.txt'), 'a') as file:
+    file.write('\nFull training time: '+str(full_training_time)+'\n')
+    generator.summary(print_fn=lambda x: file.write(x + '\n'))
+    discriminator.summary(print_fn=lambda x: file.write(x + '\n'))
 
 generator.save(args.dir+'/generator')
 discriminator.save(args.dir+'/discriminator')

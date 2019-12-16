@@ -160,7 +160,7 @@ def produce_images_itw(dataset, folder_path, data, epoch_interval):
         for x in data:
             for i in range(x.shape[0]):
                 plt.subplot(4, 4, i + 1)
-                plt.imshow(x[i, :, :, :])
+                plt.imshow((x[i, :, :, :]+1)/2)
                 plt.axis('off')
             plt.savefig(save_path + '/itw_' + str(counter) + '.png')
             counter = counter + epoch_interval

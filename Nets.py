@@ -130,7 +130,6 @@ def dcgan_gen(args):
     model.add(layers.Dense(img_resize*img_resize*g_dim, use_bias=False, kernel_initializer=dcgan_weight_init, input_shape=(z_dim,)))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
-
     model.add(layers.Reshape((img_resize, img_resize, g_dim)))
 
     model.add(layers.Conv2DTranspose(g_dim*4, (4, 4), strides=(1, 1), kernel_initializer=dcgan_weight_init, padding='same', use_bias=False))
@@ -179,8 +178,9 @@ def dcgan_disc(args):
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU(0.2))
     '''
+
     model.add(layers.Flatten())
-    model.add(layers.Dense(channels, kernel_initializer=dcgan_weight_init))
+    model.add(layers.Dense(1, kernel_initializer=dcgan_weight_init))
     return model
 
 
@@ -204,3 +204,52 @@ def toy_disc(args):
     return model
 
 
+def cifargan_gen(args):
+    g_dim = args.g_dim
+    z_dim = args.noise_dim
+    img_dim = args.dataset_dim[1]
+
+    model = keras.Sequential()
+    # foundation for 4x4 image
+    n_nodes = 256 * 4 * 4
+    model.add(layers.Dense(n_nodes, input_dim=z_dim))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    model.add(layers.Reshape((4, 4, 256)))
+    # upsample to 8x8
+    model.add(layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same'))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # upsample to 16x16
+    model.add(layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same'))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # upsample to 32x32
+    model.add(layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same'))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # output layer
+    model.add(layers.Conv2D(3, (3, 3), activation='tanh', padding='same'))
+    return model
+
+
+def cifargan_disc(args):
+    d_dim = args.d_dim
+    input_dim = args.dataset_dim[1]
+    channels = args.dataset_dim[3]
+
+    model = keras.Sequential()
+    # normal
+    model.add(layers.Conv2D(64, (3, 3), padding='same', input_shape=input_dim))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # downsample
+    model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same'))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # downsample
+    model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same'))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # downsample
+    model.add(layers.Conv2D(256, (3, 3), strides=(2, 2), padding='same'))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # classifier
+    model.add(layers.Flatten())
+    model.add(layers.Dropout(0.4))
+    model.add(layers.Dense(1))
+    # compile model
+    return model
