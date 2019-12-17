@@ -80,7 +80,6 @@ class VAE:
             return mu + K.exp(log_var/2) * epsilon
 
         encoder_output = Lambda(sampling,name='encoder_output')([self.mu, self.log_var])
-
         self.encoder = Model(encoder_input, encoder_output)
 
 
