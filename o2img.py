@@ -120,8 +120,8 @@ def load_images(path):
             continue
         folder_path = path+'/'+str(folder)
         config_file = open(folder_path + '/config.txt', 'r').read()
-        dataset = config_file.split(',')[5].split('\'')[1]
-        epoch_interval = config_file.split(',')[18].split('=')[1]
+        dataset = config_file.split(',')[7].split('\'')[1]
+        epoch_interval = config_file.split(',')[20].split('=')[1]
         itw_data = np.load(folder_path + '/itw.npy')
         d_loss = np.load(folder_path + '/d_loss.npy')
         g_loss = np.load(folder_path + '/g_loss.npy')
@@ -152,7 +152,7 @@ def produce_images_itw(dataset, folder_path, data, epoch_interval):
             plt.savefig(save_path + '/itw_' + str(counter) + '.png')
             counter = counter + epoch_interval
         plt.close()
-    elif dataset == 'cifar10':
+    elif dataset in ['lsun', 'cifar10']:
         save_path = folder_path + '/images_itw'
         if not os.path.isdir(save_path):
             os.mkdir(save_path)
@@ -176,23 +176,24 @@ def produce_loss_graphs(folder_path, d_loss, g_loss):
 
 def test_trunc_trick(args):
     seed = tf.random.normal([args.num_samples_to_gen, args.noise_dim])
-    truncated_seed = tf.random.truncated_normal([args.num_samples_to_gen, args.noise_dim])
+    truncation = 0.5
+    truncated_seed = truncation * tf.random.truncated_normal([args.num_samples_to_gen, args.noise_dim])
 
-    gen = tf.keras.models.load_model('C:/Users/marku/Desktop/GAN_training_output/old/2224/generator')
-    noise = tf.random.normal([5000, 100])
-    mean_noise = tf.reduce_mean(noise, axis=0)
+    gen = tf.keras.models.load_model('C:/Users/marku/Desktop/GAN_training_output/old/cifar10/3187/generator')
+    # noise = tf.random.normal([10000, 100])
+    # mean_noise = tf.reduce_mean(noise, axis=0)
 
-    for z in range(2,10,2):
+    for z in range(2,10,5):
         z=z/10
         #z_hat=[]
         #for v in range(truncated_seed.shape[0]):
-        z_hat=(mean_noise + z * (seed - mean_noise))
-        truncated_images = gen(z_hat)
+        #z_hat=(mean_noise + z * (seed - mean_noise))
+        truncated_images = gen(truncated_seed)
         for i in range(truncated_images.shape[0]):
             plt.subplot(4, 4, i + 1)
-            plt.imshow(truncated_images[i, :, :, 0] * 127.5 + 127.5)
+            plt.imshow((truncated_images[i, :, :, :]+1)/2)
             plt.axis('off')
-        plt.savefig('C:/Users/marku/Desktop/GAN_training_output/old/trunc_images'+str(z)+'.png')
+        plt.savefig('C:/Users/marku/Desktop/GAN_training_output/old/truncTrickTest/trunc_images'+str(z)+'.png')
         plt.close()
 
     images = gen(seed)
@@ -200,7 +201,27 @@ def test_trunc_trick(args):
 
     for i in range(images.shape[0]):
         plt.subplot(4, 4, i + 1)
-        plt.imshow(images[i, :, :, 0] * 127.5 + 127.5)
+        plt.imshow((images[i, :, :, :] +1)/2)
         plt.axis('off')
     plt.savefig('C:/Users/marku/Desktop/GAN_training_output/old/truncTrickTest/reg_images.png')
     plt.close()
+
+
+def latent_walk(args, steps=16):
+    gen = tf.keras.models.load_model('C:/Users/marku/Desktop/GAN_training_output/old/cifar10/3187/generator')
+    # interpolate points
+    p0 = args.seed[0]
+    p1 = args.seed[6]
+    ratios = np.linspace(0, 1, num=steps)
+    vectors = []
+    # linear interpolate vectors
+    for ratio in ratios:
+        v = (1.0 - ratio) * p0 + ratio * p1
+        vectors.append(v)
+    vectors = np.asarray(vectors)
+    images = gen(vectors)
+    images = (images+1)/2.0
+    for i in range(images.shape[0]):
+        plt.subplot(4, 4, i + 1)
+        plt.imshow((images[i, :, :, :] + 1) / 2)
+        plt.axis('off')

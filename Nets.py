@@ -206,12 +206,13 @@ def cifargan_gen(args):
     g_dim = args.g_dim
     z_dim = args.noise_dim
     img_dim = args.dataset_dim[1]
+    img_resize = img_dim//(2*2*2)
 
     model = keras.Sequential()
     # foundation for 4x4 image
-    model.add(layers.Dense(g_dim * img_dim * img_dim, input_dim=z_dim))
+    model.add(layers.Dense(g_dim * img_resize * img_resize, input_dim=z_dim))
     model.add(layers.LeakyReLU(alpha=0.2))
-    model.add(layers.Reshape((img_dim, img_dim, g_dim)))
+    model.add(layers.Reshape((img_resize, img_resize, g_dim)))
     # upsample to 8x8
     model.add(layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same'))
     model.add(layers.LeakyReLU(alpha=0.2))

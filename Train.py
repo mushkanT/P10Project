@@ -20,13 +20,18 @@ class GANTrainer(object):
         self.auxiliary = auxiliary
         self.dataset = dataset
 
-    def train_discriminator(self, batch, args):
+    def train_discriminator(self, real_data, args):
         noise = tf.random.normal(shape=[args.batch_size, args.noise_dim])
+        disc_input_noise = tf.random.normal(shape=[args.batch_size, args.dataset_dim[1], args.dataset_dim[1], args.dataset_dim[3]], mean=0, stddev=0.1)
+
+        if real_data.dtype == tf.float64:
+            real_data = tf.dtypes.cast(real_data, dtype=tf.float32)
 
         with tf.GradientTape() as disc_tape:
             generated_images = self.generator(noise, training=False)
-            fake_output = self.discriminator(generated_images, training=True)
-            real_output = self.discriminator(batch, training=True)
+
+            fake_output = self.discriminator(generated_images+disc_input_noise, training=True)
+            real_output = self.discriminator(real_data+disc_input_noise, training=True)
 
             # Losses
             if args.loss == "wgan-gp":
@@ -36,12 +41,14 @@ class GANTrainer(object):
                 else:
                     alpha = tf.random.uniform(shape=[args.batch_size, 1, 1, 1], minval=0., maxval=1.)
 
-                if args.dataset in ['cifar10', 'frey'] and args.scale_data == 0:
-                    batch = tf.dtypes.cast(batch, dtype=tf.float32)
-
                 with tf.GradientTape() as gTape:
-                    differences = generated_images - batch
-                    interpolated_images = batch + (alpha * differences)
+
+                    interpolated_images = alpha * real_data + (1 - alpha) * generated_images
+
+                    # Used in their impl -> Flips signs (large alpha = towards fake)
+                    # differences = generated_images - real_data
+                    # interpolated_images = real_data + (alpha * differences)
+
                     gTape.watch(interpolated_images)
                     disc_interpolates = self.discriminator(interpolated_images)
 
@@ -63,6 +70,7 @@ class GANTrainer(object):
 
         # Apply gradients
         gradients_of_discriminator = disc_tape.gradient(disc_loss, self.discriminator.trainable_variables)
+        a = zip(gradients_of_discriminator, self.discriminator.trainable_variables)
         args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.discriminator.trainable_variables))
         # Calc disc accuracy
         acc_real = K.mean(K.equal(tf.ones_like(real_output), K.round(tf.keras.activations.sigmoid(real_output))))
@@ -94,7 +102,7 @@ class GANTrainer(object):
         args.gen_optimizer.apply_gradients(zip(gradients_of_generator, self.generator.trainable_variables))
         return gen_loss
 
-    def train_discriminator_infogan(self, batch, args):
+    def train_discriminator_infogan(self, real_data, args):
         noise = tf.random.normal([args.batch_size, args.noise_dim])
 
         # Select control variable distributions
@@ -110,7 +118,7 @@ class GANTrainer(object):
         with tf.GradientTape() as disc_tape:
             generated_images = self.generator(noise, training=False)
             fake_output = self.discriminator(generated_images, training=True)
-            real_output = self.discriminator(batch, training=True)
+            real_output = self.discriminator(real_data, training=True)
 
             # Original GAN loss
             cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)

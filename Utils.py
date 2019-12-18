@@ -51,8 +51,8 @@ def select_models(args):
         auxiliary = None
     else:
         raise NotImplementedError()
-    generator._name = 'gen'
-    discriminator._name = 'disc'
+    #generator._name = 'gen'
+    #discriminator._name = 'disc'
     return generator, discriminator, auxiliary
 
 
