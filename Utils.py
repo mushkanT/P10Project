@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import os.path
+import Nets as nets
 
 
 def draw_2d_samples(generator, n_dim, seed=2019):
@@ -26,6 +27,33 @@ def write_config(args):
     file = open(os.path.join(args.dir, 'config.txt'), 'w')
     file.write(str(args))
     file.close()
+
+
+def select_models(args):
+    if args.dataset == 'toy':
+        generator = nets.toy_gen(args.noise_dim)
+        discriminator = nets.toy_disc(args)
+        auxiliary = None
+    elif args.gan_type == 'infogan':
+        generator = nets.infogan_gen(args)
+        discriminator, auxiliary = nets.infogan_disc(args)
+    elif args.gan_type == 'tfgan':
+        generator = nets.tfgan_gen(args)
+        discriminator = nets.tfgan_disc(args)
+        auxiliary = None
+    elif args.gan_type == 'dcgan':
+        generator = nets.dcgan_gen(args)
+        discriminator = nets.dcgan_disc(args)
+        auxiliary = None
+    elif args.gan_type == 'cifargan':
+        generator = nets.cifargan_gen(args)
+        discriminator = nets.cifargan_disc(args)
+        auxiliary = None
+    else:
+        raise NotImplementedError()
+    generator._name = 'gen'
+    discriminator._name = 'disc'
+    return generator, discriminator, auxiliary
 
 
 '''

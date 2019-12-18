@@ -136,7 +136,6 @@ def dcgan_gen(args):
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
 
-    '''
     model.add(layers.Conv2DTranspose(g_dim*4, (4, 4), strides=(2, 2), padding='same', kernel_initializer=dcgan_weight_init, use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
@@ -144,7 +143,6 @@ def dcgan_gen(args):
     model.add(layers.Conv2DTranspose(g_dim*2, (4, 4), strides=(2, 2), padding='same', kernel_initializer=dcgan_weight_init, use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.ReLU())
-    '''
 
     model.add(layers.Conv2DTranspose(g_dim, (4, 4), strides=(2, 2), padding='same', kernel_initializer=dcgan_weight_init, use_bias=False))
     model.add(layers.BatchNormalization())
@@ -169,15 +167,15 @@ def dcgan_disc(args):
     model.add(layers.LeakyReLU(0.2))
     model.add(layers.Dropout(0.3))
 
-    '''
+
     model.add(layers.Conv2D(d_dim*4, (5, 5), strides=(2, 2), padding='same', kernel_initializer=dcgan_weight_init, use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU(0.2))
 
     model.add(layers.Conv2D(d_dim*8, (5, 5), strides=(2, 2), padding='same', kernel_initializer=dcgan_weight_init, use_bias=False))
-    model.add(layers.BatchNormalization())
+    #model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU(0.2))
-    '''
+
 
     model.add(layers.Flatten())
     model.add(layers.Dense(1, kernel_initializer=dcgan_weight_init))
@@ -211,10 +209,9 @@ def cifargan_gen(args):
 
     model = keras.Sequential()
     # foundation for 4x4 image
-    n_nodes = 256 * 4 * 4
-    model.add(layers.Dense(n_nodes, input_dim=z_dim))
+    model.add(layers.Dense(g_dim * img_dim * img_dim, input_dim=z_dim))
     model.add(layers.LeakyReLU(alpha=0.2))
-    model.add(layers.Reshape((4, 4, 256)))
+    model.add(layers.Reshape((img_dim, img_dim, g_dim)))
     # upsample to 8x8
     model.add(layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same'))
     model.add(layers.LeakyReLU(alpha=0.2))
@@ -236,7 +233,7 @@ def cifargan_disc(args):
 
     model = keras.Sequential()
     # normal
-    model.add(layers.Conv2D(64, (3, 3), padding='same', input_shape=input_dim))
+    model.add(layers.Conv2D(64, (3, 3), padding='same', input_shape=[input_dim, input_dim, channels]))
     model.add(layers.LeakyReLU(alpha=0.2))
     # downsample
     model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same'))

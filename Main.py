@@ -8,8 +8,6 @@ import argparse
 import os.path
 #import o2img as o2i
 #import matplotlib.pyplot as plt
-from scipy.io import loadmat
-
 
 parser = argparse.ArgumentParser()
 
@@ -28,7 +26,7 @@ parser.add_argument('--optim_g',        type=str,         default='adam',   help
 parser.add_argument('--num_samples_to_gen', type=int,     default=16)
 parser.add_argument('--images_while_training', type=int,  default=50,       help='Every x epoch to print images while training')
 parser.add_argument('--dir',            type=str,         default='/user/student.aau.dk/mjuuln15/output_data'            , help='Directory to save images, models, weights etc')
-parser.add_argument('--g_dim',          type=int,         default=64,       help='generator layer dimensions')
+parser.add_argument('--g_dim',          type=int,         default=256,       help='generator layer dimensions')
 parser.add_argument('--d_dim',          type=int,         default=64,       help='discriminator layer dimensions')
 parser.add_argument('--gan_type',       type=str,         default='dcgan',  help='dcgan | infogan | tfgan | presgan')
 parser.add_argument('--c_cat',          type=int,         default=10,       help='Amount of control variables for infogan')
@@ -41,12 +39,12 @@ parser.add_argument('--scale_data',     type=int,         default=0,        help
 args = parser.parse_args()
 
 # Debugging
-#args.dataset = 'cifar10'
-#args.scale_data = 64
+#args.dataset = 'lsun'
+#args.scale_data = 32
 #args.noise_dim = 100
-#args.epochs = 5
+#args.epochs = 10
 #args.disc_iters = 5
-#args.gan_type='dcgan'
+#args.gan_type='cifargan'
 #args.loss='wgan-gp'
 #args.images_while_training = 1
 #args.limit_dataset = True
@@ -56,46 +54,13 @@ args = parser.parse_args()
 
 # We will reuse this seed overtime for visualization
 args.seed = tf.random.normal([args.num_samples_to_gen, args.noise_dim])
+
 # Set random seed for reproducability
 tf.random.set_seed(2019)
 
 # Choose data
-if args.dataset == "toy":
-    dat = dt.createToyDataRing()
-    #o2i.plot_toy_distribution(dat)
-    train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
-elif args.dataset == "mnist":
-    dat = dt.mnist(args.limit_dataset)
-    if args.scale_data != 0:
-        dat = tf.image.resize(dat, [args.scale_data, args.scale_data])
-    train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
-elif args.dataset == 'cifar10':
-    dat = dt.cifar10(args.limit_dataset)
-    if args.scale_data != 0:
-        dat = tf.image.resize(dat, [args.scale_data, args.scale_data])
-    train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
-elif args.dataset == 'lsun':
-    dat = dt.lsun(args.limit_dataset)
-    dat = dat.shuffle(100000).batch(args.batch_size)
-    if args.scale_data != 0:
-        dat = dat.map(lambda x: tf.image.resize(x['image'], [args.scale_data, args.scale_data]))
-    train_dat = dat.repeat()
-elif args.dataset == 'frey':
-    img_size = (28, 20, 1)
-    #data = loadmat('/user/student.aau.dk/mjuuln15/frey_rawface.mat')
-    data = loadmat(args.dir+'/frey_rawface.mat')
-    data = data['ff']
-    data = data.transpose()
-    data = data.reshape((-1, *img_size))
-    data = np.pad(data, [(0, 0), (2, 2), (6, 6), (0, 0)], 'constant')
-    #dat = data / 255.
-    dat = (data - 127.5) / 127.5
-    train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
-else:
-    raise NotImplementedError()
-
-# Poor temporary fix
-args.dataset_dim = dat.shape if not args.dataset == 'lsun' else [3000000, 64, 64, 3]
+train_dat, shape = dt.select_dataset(args)
+args.dataset_dim = shape
 
 # Choose optimizers
 if args.optim_d == "adam":
@@ -108,30 +73,7 @@ else:
     raise NotImplementedError()
 
 # Choose model
-if args.dataset == 'toy':
-    generator = nets.toy_gen(args.noise_dim)
-    discriminator = nets.toy_disc(args)
-    auxiliary = None
-elif args.gan_type == 'infogan':
-    generator = nets.infogan_gen(args)
-    discriminator, auxiliary = nets.infogan_disc(args)
-elif args.gan_type == 'tfgan':
-    generator = nets.tfgan_gen(args)
-    discriminator = nets.tfgan_disc(args)
-    auxiliary = None
-elif args.gan_type == 'dcgan':
-    generator = nets.dcgan_gen(args)
-    discriminator = nets.dcgan_disc(args)
-    auxiliary = None
-elif args.gan_type == 'cifargan':
-    generator = nets.cifargan_gen(args)
-    discriminator = nets.cifargan_disc(args)
-    auxiliary = None
-else:
-    raise NotImplementedError()
-
-generator._name='gen'
-discriminator._name='disc'
+generator, discriminator, auxiliary = u.select_models(args)
 
 # Write config
 u.write_config(args)

@@ -129,7 +129,10 @@ class GANTrainer(object):
         images_while_training = []
         acc_fakes, acc_reals = [],[]
         full_training_time = 0
-        it = iter(self.dataset)
+        if args.dataset != 'lsun':
+            it = iter(self.dataset)
+        else:
+            it = self.dataset
         batches_pr_epoch = args.dataset_dim[0] // args.batch_size
         n_steps = batches_pr_epoch // args.disc_iters  # Steps per epoch (Generator iterations)
 

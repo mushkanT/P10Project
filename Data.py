@@ -1,6 +1,48 @@
 import tensorflow as tf
 import numpy as np
 import tensorflow_datasets as tfds
+from scipy.io import loadmat
+import os
+
+
+def select_dataset(args):
+    if args.dataset == "toy":
+        dat = createToyDataRing()
+        # o2i.plot_toy_distribution(dat)
+        train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+    elif args.dataset == "mnist":
+        dat = mnist(args.limit_dataset)
+        if args.scale_data != 0:
+            dat = tf.image.resize(dat, [args.scale_data, args.scale_data])
+        train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+    elif args.dataset == 'cifar10':
+        dat = cifar10(args.limit_dataset)
+        if args.scale_data != 0:
+            dat = tf.image.resize(dat, [args.scale_data, args.scale_data])
+        train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+    elif args.dataset == 'lsun':
+        ImgDataGen = tf.keras.preprocessing.image.ImageDataGenerator(preprocessing_function=preprocess, dtype=tf.dtypes.float32)
+        #train_dat = ImgDataGen.flow_from_directory('C:/Projects/lsun/fuck/', target_size=(args.scale_data, args.scale_data), batch_size=args.batch_size, seed=2019, class_mode=None, interpolation="nearest")
+        #amount = len(os.listdir('C:/Projects/lsun/fuck/data'))
+        train_dat = ImgDataGen.flow_from_directory('/user/student.aau.dk/mjuuln15/lsun_data/', target_size=(args.scale_data, args.scale_data), batch_size=args.batch_size, seed=2019, class_mode=None, interpolation="nearest")
+        amount = len(os.listdir('/user/student.aau.dk/mjuuln15/lsun_data/bedroom'))
+        shape = (amount, train_dat.image_shape[0], train_dat.image_shape[1], train_dat.image_shape[2])
+    elif args.dataset == 'frey':
+        img_size = (28, 20, 1)
+        # data = loadmat('/user/student.aau.dk/mjuuln15/frey_rawface.mat')
+        data = loadmat(args.dir + '/frey_rawface.mat')
+        data = data['ff']
+        data = data.transpose()
+        data = data.reshape((-1, *img_size))
+        data = np.pad(data, [(0, 0), (2, 2), (6, 6), (0, 0)], 'constant')
+        # dat = data / 255.
+        dat = (data - 127.5) / 127.5
+        train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+    else:
+        raise NotImplementedError()
+    if args.dataset != 'lsun':
+        shape = dat.shape
+    return train_dat, shape
 
 
 def createToyDataRing(n_mixtures=10, radius=3, Ntrain=5120, std=0.05): #50176
@@ -55,7 +97,6 @@ def cifar10(restrict=False):
     return train_images
 
 
-def lsun(restrict=False):
-    train_dataset = tfds.load(name="lsun/bedroom")
-    #train_dataset = tfds.load(name="mnist")['train']
-    return train_dataset
+def preprocess(img):
+    img = (img - 127.5) / 127.5
+    return img
