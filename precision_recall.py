@@ -45,7 +45,7 @@ class DistanceBlock:
 class ManifoldEstimator:
     """ Estimates the manifold of given feature vectors. """
 
-    def __init__(self, distance_block, features, row_batch_size=25000, col_batch_size=50000,
+    def __init__(self, distance_block, features, row_batch_size=6000, col_batch_size=50000,
                  nhood_sizes=[3], clamp_to_percentile=None, eps=1e-5):
         """ Estimate the manifold of given feature vectors.
 
@@ -88,50 +88,51 @@ class ManifoldEstimator:
                                                                                                        col_batch)
 
             # Find the k-nearest neighbor from the current batch.
-            self.D[begin1:end1, :] = np.partition(distance_batch[0:end1 - begin1, :], seq, axis=1)[:, self.nhood_sizes]
+            part = np.partition(distance_batch[0:end1 - begin1, :], seq, axis=1)
+            self.D[begin1:end1, :] = part[:, self.nhood_sizes]
 
         if clamp_to_percentile is not None:
             max_distances = np.percentile(self.D, clamp_to_percentile, axis=0)
             self.D[self.D > max_distances] = 0
 
-def evaluate(self, eval_features, return_realism=False, return_neighbors=False):
-    """Evaluate if new feature vectors are at the manifold."""
-    num_eval_images = eval_features.shape[0]
-    num_ref_images = self.D.shape[0]
-    distance_batch = np.zeros([self.row_batch_size, num_ref_images], dtype=np.float32)
-    batch_predictions = np.zeros([num_eval_images, self.num_nhoods], dtype=np.int32)
-    max_realism_score = np.zeros([num_eval_images, ], dtype=np.float32)
-    nearest_indices = np.zeros([num_eval_images, ], dtype=np.int32)
+    def evaluate(self, eval_features, return_realism=False, return_neighbors=False):
+        """Evaluate if new feature vectors are at the manifold."""
+        num_eval_images = eval_features.shape[0]
+        num_ref_images = self.D.shape[0]
+        distance_batch = np.zeros([self.row_batch_size, num_ref_images], dtype=np.float32)
+        batch_predictions = np.zeros([num_eval_images, self.num_nhoods], dtype=np.int32)
+        max_realism_score = np.zeros([num_eval_images, ], dtype=np.float32)
+        nearest_indices = np.zeros([num_eval_images, ], dtype=np.int32)
 
-    for begin1 in range(0, num_eval_images, self.row_batch_size):
-        end1 = min(begin1 + self.row_batch_size, num_eval_images)
-        feature_batch = eval_features[begin1:end1]
+        for begin1 in range(0, num_eval_images, self.row_batch_size):
+            end1 = min(begin1 + self.row_batch_size, num_eval_images)
+            feature_batch = eval_features[begin1:end1]
 
-        for begin2 in range(0, num_ref_images, self.col_batch_size):
-            end2 = min(begin2 + self.col_batch_size, num_ref_images)
-            ref_batch = self._ref_features[begin2:end2]
+            for begin2 in range(0, num_ref_images, self.col_batch_size):
+                end2 = min(begin2 + self.col_batch_size, num_ref_images)
+                ref_batch = self._ref_features[begin2:end2]
 
-            distance_batch[0:end1 - begin1, begin2:end2] = self._distance_block.pairwise_distances(feature_batch,
-                                                                                                   ref_batch)
+                distance_batch[0:end1 - begin1, begin2:end2] = self._distance_block.pairwise_distances(feature_batch,
+                                                                                                       ref_batch)
 
-        # From the minibatch of new feature vectors, determine if they are in the estimated manifold.
-        # If a feature vector is inside a hypersphere of some reference sample, then
-        # the new sample lies at the estimated manifold.
-        # The radii of the hyperspheres are determined from distances of neighborhood size k.
-        samples_in_manifold = distance_batch[0:end1 - begin1, :, None] <= self.D
-        batch_predictions[begin1:end1] = np.any(samples_in_manifold, axis=1).astype(np.int32)
+            # From the minibatch of new feature vectors, determine if they are in the estimated manifold.
+            # If a feature vector is inside a hypersphere of some reference sample, then
+            # the new sample lies at the estimated manifold.
+            # The radii of the hyperspheres are determined from distances of neighborhood size k.
+            samples_in_manifold = distance_batch[0:end1 - begin1, :, None] <= self.D
+            batch_predictions[begin1:end1] = np.any(samples_in_manifold, axis=1).astype(np.int32)
 
-        max_realism_score[begin1:end1] = np.max(self.D[:, 0] / (distance_batch[0:end1 - begin1, :] + self.eps), axis=1)
-        nearest_indices[begin1:end1] = np.argmin(distance_batch[0:end1 - begin1, :], axis=1)
+            max_realism_score[begin1:end1] = np.max(self.D[:, 0] / (distance_batch[0:end1 - begin1, :] + self.eps), axis=1)
+            nearest_indices[begin1:end1] = np.argmin(distance_batch[0:end1 - begin1, :], axis=1)
 
-    if return_realism and return_neighbors:
-        return batch_predictions, max_realism_score, nearest_indices
-    elif return_realism:
-        return batch_predictions, max_realism_score
-    elif return_neighbors:
-        return batch_predictions, nearest_indices
+        if return_realism and return_neighbors:
+            return batch_predictions, max_realism_score, nearest_indices
+        elif return_realism:
+            return batch_predictions, max_realism_score
+        elif return_neighbors:
+            return batch_predictions, nearest_indices
 
-    return batch_predictions
+        return batch_predictions
 
 
 def knn_precision_recall_features(ref_features, eval_features, nhood_sizes=[3],

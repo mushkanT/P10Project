@@ -26,7 +26,7 @@ def initialize_feature_extractor():
 
 def initialize_feature_extractor_incept():
     print('Initializing InceptionV3 model...')
-    with open('inception_v3_features.pkl','rb') as file:
+    with open('c:/users/palmi/desktop/inception_v3_features.pkl','rb') as file:
         net = pickle.load(file)
     return net
 
@@ -41,12 +41,11 @@ def evaluate(real_images, generated_images, batch_size=100, feature_model=0):
     :return: state: Dictionary containing precision and recall metrics
     """
     # Ensures that same amount of images in both samples
-    assert(real_images.shape[1] == generated_images.shape[1])
-    assert(len(real_images.shape) == len(generated_images.shape))
+    assert(real_images.shape[0] == generated_images.shape[0])
 
     init_tf()
 
-    num_images = real_images.shape(0)
+    num_images = real_images.shape[0]
 
     if feature_model == 0:
         feature_net = initialize_feature_extractor()
@@ -55,14 +54,14 @@ def evaluate(real_images, generated_images, batch_size=100, feature_model=0):
 
     # Calculate features vectors for real image samples
     print('Calculating feature vectors for real images...')
-    ref_features = np.zeros([num_images, feature_net.output.shape[1]], dtype=np.float32)
+    ref_features = np.zeros([num_images, feature_net.output_shape[1]], dtype=np.float32)
     for begin in range(0, num_images, batch_size):
         end = min(begin + batch_size, num_images)
         ref_features[begin:end] = feature_net.run(real_images[begin:end], num_gpus=1, assume_frozen=True)
 
     # Calculate feature vectors for generated image samples
     print('Calculating feature vector for generated images...')
-    eval_features = np.zeros([num_images, feature_net.output.shape[1]], dtype=np.float32)
+    eval_features = np.zeros([num_images, feature_net.output_shape[1]], dtype=np.float32)
     for begin in range(0, num_images, batch_size):
         end = min(begin+batch_size, num_images)
         eval_features[begin:end] = feature_net.run(generated_images[begin:end], num_gpus=1, assume_froze=True)
