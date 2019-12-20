@@ -4,6 +4,8 @@ import dnnlib
 from dnnlib.tflib import tfutil
 import numpy as np
 from precision_recall import knn_precision_recall_features
+import argparse
+import tensorflow as tf
 
 
 
@@ -69,3 +71,69 @@ def evaluate(real_images, generated_images, batch_size=100, feature_model=0):
     print('Estimating manifold of feature vectors and calculating precision/recall...')
     state = knn_precision_recall_features(ref_features, eval_features)
     return state
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--img_size', type=int)
+    parser.add_argument('--norm_setting', type=int, help='0 for 0-1 normalising, 1 for -1,1 normalising')
+    parser.add_argument('--sample_size', type=int, default=50000, help='Number of sample used for manifold estimation')
+    parser.add_argument('--dataset', type=str, help='mnist|cifar10|freyface|lsun')
+    parser.add_argument('--datapath', type=str, help='path to real datasets in case of dataset=freyface|lsun')
+    parser.add_argument('--output_path', type=str, help='outputs a csv file containing results and arguments')
+    parser.add_argument('--feature_net', type=str, default='vgg', help='feature extractor - options: vgg|incepv3')
+    parser.add_argument('--mask', type=int, default=None, help='Optional mask for cifar dataset option')
+
+    args = parser.parse_args()
+
+    if args.dataset == 'mnist':
+        (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
+
+    elif args.data == 'cifar10':
+        (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.cifar10.load_data()
+
+
+    #Mask images by labels -> Create a single class
+    if args.mask is not None:
+        train_mask = [y[0] == args.mask for y in train_labels]
+        test_mask = [y[0] == args.mask for y in test_labels]
+        train_images = train_images[train_mask]
+        test_images = test_images[test_mask]
+
+    #Get sample size images or atleast all train+test images
+    if train_images.shape[0] >= args.sample_size:
+        train_images = train_images[:args.sample_size]
+    else:
+        train_images = np.concatenate([train_images, test_images])
+        end = min(train_images.shape[0], args.sample_size)
+        train_images = train_images[:end]
+
+
+
+    (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.cifar10.load_data()
+
+
+
+    sess = tf.Session()
+
+    real_images = np.concatenate([train_images, test_images])
+    # real_images = real_images / 255.
+
+    with sess.as_default():
+        real_images = tf.transpose(real_images, perm=[0, 3, 1, 2]).eval()
+
+    generated_images = np.load('c:/users/palmi/desktop/gen_images.npy')
+
+    generated_images = (generated_images + 1) / 2
+
+    generated_images = (generated_images * 255).astype(int)
+
+
+    with sess.as_default():
+        generated_images = tf.transpose(generated_images, perm=[0, 3, 1, 2]).eval()
+
+    # generated_images = np.concatenate([real_images[:3000],generated_images[:3000]])
+
+    result = evaluate(real_images, generated_images, batch_size=50, feature_model=1)
+
+    print('Recall (Variance): ' + str(result['recall'][0]))
+    print('Precision (quality): ' + str(result['precision'][0]))
