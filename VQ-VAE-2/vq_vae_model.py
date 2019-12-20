@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 import tensorflow as tf
 from tensorflow.keras import layers
-import sonnet as snt
+# import sonnet as snt
 
 
 class VQVAEModel:
@@ -18,6 +18,7 @@ class VQVAEModel:
         :param commitment_cost: Controls the level on influence from the encoder output
         :param decay: Controls the speed of the EMA for vector quantizer
         """
+
         self.num_hiddens = num_hiddens
         self.num_residual_hiddens = num_residual_hiddens
         self.num_residual_layers = num_residual_layers
@@ -27,7 +28,9 @@ class VQVAEModel:
         self.num_channels = num_channels
         self.decay = decay
         self.image_size = image_size
-        self.build_models()
+
+    def load_model(self, model_path):
+        self.model = tf.keras.models.load_model(model_path)
 
     def residual_stack_builder(self, in_shape, num_residual_layers, num_residual_hiddens, name):
         res_input = layers.Input(shape=in_shape)
@@ -37,7 +40,9 @@ class VQVAEModel:
                              kernel_size=3,
                              strides=1,
                              padding='same',
-                             name="residual_3x3")
+                             name="residual_3x3",
+                             activation='relu'
+                             )
 
         res1 = layers.Conv2D(filters=self.num_hiddens,
                              kernel_size=3,
@@ -46,7 +51,6 @@ class VQVAEModel:
                              name='residual_1x1')
 
         res3_out = res3(encoded)
-        res3_out = layers.Activation('relu')(res3_out)
         res1_out = res1(res3_out)
 
         res_encoding = layers.add([res_input, res1_out])
@@ -54,21 +58,18 @@ class VQVAEModel:
         if num_residual_layers == 2:
             res_encoding = layers.Activation('relu')(res_encoding)
             res3_out2 = res3(res_encoding)
-            res3_out2 = layers.Activation('relu')(res3_out2)
             res1_out2 = res1(res3_out2)
             res_encoding = layers.add([res_encoding, res1_out2])
         else:
             raise Exception('Only support 1 or 2 residual layers')
         return tf.keras.Model(inputs=res_input, outputs=res_encoding, name=name)
 
-    def build_models(self):
+    def build_model(self):
         input_img = layers.Input(shape=(self.image_size, self.image_size, self.num_channels))
         encode = layers.Conv2D(filters=self.num_hiddens // 2, kernel_size=4, strides=2, padding='same',
-                               name='encoder_conv_1')(input_img)
-        encode = layers.Activation('relu')(encode)
-        encode = layers.Conv2D(filters=self.num_hiddens, kernel_size=4, strides=2, padding='same', name='encoder_conv_2')(
+                               name='encoder_conv_1', activation='relu')(input_img)
+        encode = layers.Conv2D(filters=self.num_hiddens, kernel_size=4, strides=2, padding='same', name='encoder_conv_2', activation='relu')(
             encode)
-        encode = layers.Activation('relu')(encode)
         bottom_encodeOut = layers.Conv2D(filters=self.num_hiddens,
                                          kernel_size=3,
                                          strides=1,
@@ -87,10 +88,9 @@ class VQVAEModel:
             filters=self.num_hiddens // 2,
             kernel_size=4,
             strides=2,
-            padding='same'
+            padding='same',
+            activation='relu'
         )(bottom_encode_out)
-
-        top_encoding = layers.Activation('relu')(top_encoding)
 
         top_encoding = layers.Conv2D(
             filters=self.num_hiddens,
@@ -115,10 +115,10 @@ class VQVAEModel:
             name='top_to_vq_conv'
         )(top_encoding)
 
-        quanter = snt.nets.VectorQuantizerEMA(self.embedding_dim, self.num_embeddings, self.commitment_cost, self.decay)
-        quant_layer = layers.Lambda(lambda x: quanter(x, is_training=True))
+        #quanter = snt.nets.VectorQuantizerEMA(self.embedding_dim, self.num_embeddings, self.commitment_cost, self.decay)
+        #quant_layer = layers.Lambda(lambda x: quanter(x, is_training=True))
 
-        quant_top = quant_layer(embed_top)
+        quant_top = VQ(self.embedding_dim,self.num_embeddings,self.commitment_cost, name='vq_top')(embed_top)
         decode_top = layers.Conv2D(filters=self.num_hiddens,
                                    kernel_size=3,
                                    strides=1,
@@ -147,9 +147,10 @@ class VQVAEModel:
             name='bottom_to_vq_conv'
         )(encoded_bottom)
 
-        bottom_quanter = snt.nets.VectorQuantizerEMA(self.embedding_dim, self.num_embeddings, self.commitment_cost, self.decay)
-        quant_bottom = layers.Lambda(lambda x: bottom_quanter(x,is_training=True))(embed_bottom)
+        #bottom_quanter = snt.nets.VectorQuantizerEMA(self.embedding_dim, self.num_embeddings, self.commitment_cost, self.decay)
+        #quant_bottom = layers.Lambda(lambda x: bottom_quanter(x,is_training=True))(embed_bottom)
 
+        quant_bottom = VQ(self.embedding_dim, self.num_embeddings, self.commitment_cost, name='vq_bottom')(embed_bottom)
         self.encoder = tf.keras.Model(inputs=input_img, outputs=[quant_top, quant_bottom], name='encoder')
 
         top_dec_input = layers.Input(shape=quant_top['quantize'][0].shape)
@@ -174,9 +175,9 @@ class VQVAEModel:
             filters=self.num_hiddens // 2,
             kernel_size=4,
             strides=2,
-            padding='same'
+            padding='same',
+            activation='relu'
         )(decoding)
-        decoding = layers.Activation('relu')(decoding)
         decode_out = layers.Conv2DTranspose(
             filters=self.num_channels,
             kernel_size=4,
@@ -186,56 +187,77 @@ class VQVAEModel:
 
         self.decoder=tf.keras.Model(inputs=[top_dec_input,bottom_dec_input], outputs=decode_out, name='decoder')
 
-        self.model = tf.keras.Model(inputs=input_img, outputs=self.decoder([quant_top['quantize'],quant_bottom['quantize']]),name='vqvae')
+        self.model = tf.keras.Model(inputs=input_img, outputs=[self.decoder([quant_top['quantize'],quant_bottom['quantize']]), quant_top, quant_bottom],name='vqvae')
 
 
+class VQ(layers.Layer):
+    def __init__(self, embedding_dim, num_embeddings, commitment_cost,
+                 initializer='uniform', epsilon=1e-10, **kwargs):
+        self.embedding_dim = embedding_dim
+        self.num_embeddings = num_embeddings
+        self.commitment_cost = commitment_cost
+        self.initializer = initializer
+        self.epsilon = epsilon
 
+        super(VQ, self).__init__(**kwargs)
 
-class Quantize(tf.keras.Layer):
-    def __init__(self, dim, n_embed, decay=0.99, eps=1e-5):
-        super().__init__()
+    def build(self, input_shape):
+        # Add embedding weights.
+        self.w = self.add_weight(name='embedding',
+                                 shape=(self.embedding_dim, self.num_embeddings),
+                                 initializer=self.initializer,
+                                 trainable=True)
 
-        self.dim = dim
-        self.n_embed = n_embed
-        self.decay = decay
-        self.eps = eps
-        embed = tf.random.normal((dim,n_embed))
-        #embed = torch.randn(dim, n_embed)
-        self.register_buffer('embed', embed)
-        self.register_buffer('cluster_size', tf.zeros(n_embed))
-        self.register_buffer('embed_avg', embed.clone())
+        # Finalize building.
+        super(VQ, self).build(input_shape)
 
-    def call(self, input):
-        flatten = input.reshape(-1, self.dim)
-        dist = (
-            flatten.pow(2).sum(1, keepdim=True)
-            - 2 * flatten @ self.embed
-            + self.embed.pow(2).sum(0, keepdim=True)
-        )
-        _, embed_ind = (-dist).max(1)
-        embed_onehot = tf.one_hot(embed_ind, self.n_embed).type(flatten.dtype)
-        embed_ind = embed_ind.view(*input.shape[:-1])
-        quantize = self.embed_code(embed_ind)
+    def get_config(self):
+        config = super().get_config().copy()
+        config.update({
+            'embedding_dim': self.embedding_dim,
+            'num_embeddings': self.num_embeddings,
+            'commitment_cost': self.commitment_cost,
+            'initializer': self.initializer,
+            'epsilon': self.epsilon,
+        })
+        return config
 
-        if self.training:
-            self.cluster_size.data.mul_(self.decay).add_(
-                1 - self.decay, embed_onehot.sum(0)
-            )
-            embed_sum = flatten.transpose(0, 1) @ embed_onehot
-            self.embed_avg.data.mul_(self.decay).add_(1 - self.decay, embed_sum)
-            n = self.cluster_size.sum()
-            cluster_size = (
-                (self.cluster_size + self.eps) / (n + self.n_embed * self.eps) * n
-            )
-            embed_normalized = self.embed_avg / cluster_size.unsqueeze(0)
-            self.embed.data.copy_(embed_normalized)
+    def call(self, x):
+        # Flatten input except for last dimension.
+        flat_inputs = tf.keras.backend.reshape(x, (-1, self.embedding_dim))
 
-        diff = (quantize.detach() - input).pow(2).mean()
-        quantize = input + (quantize - input).detach()
+        # Calculate distances of input to embedding vectors.
+        distances = (tf.keras.backend.sum(flat_inputs ** 2, axis=1, keepdims=True)
+                     - 2 * tf.keras.backend.dot(flat_inputs, self.w)
+                     + tf.keras.backend.sum(self.w ** 2, axis=0, keepdims=True))
 
-        return quantize, diff, embed_ind
+        # Retrieve encoding indices.
+        encoding_indices = tf.keras.backend.argmax(-distances, axis=1)
+        encodings = tf.keras.backend.one_hot(encoding_indices, self.num_embeddings)
+        encoding_indices = tf.keras.backend.reshape(encoding_indices, tf.keras.backend.shape(x)[:-1])
+        quantized = self.quantize(encoding_indices)
 
-    def embed_code(self, embed_id):
-        return layers.Embedding(embed_id, self.embed.transpose(0,1))(embed_id)
+        e_latent_loss = tf.reduce_mean((tf.stop_gradient(quantized) - x) ** 2)
+        q_latent_loss = tf.reduce_mean((quantized - tf.stop_gradient(x)) ** 2)
+        loss = q_latent_loss + self.commitment_cost * e_latent_loss
 
+        quantized = x + tf.stop_gradient(quantized - x)
+        avg_probs = tf.reduce_mean(encodings, axis=0)
+        perplexity = tf.exp(- tf.reduce_sum(avg_probs * tf.math.log(avg_probs + self.epsilon)))
 
+        return {
+            'quantize': quantized,
+            'loss': loss,
+            'perplexity': perplexity,
+            'encodings': encodings,
+            'encoding_indices': encoding_indices,
+            'distances': distances
+        }
+
+    @property
+    def embeddings(self):
+        return self.w
+
+    def quantize(self, encoding_indices):
+        w = tf.keras.backend.transpose(self.embeddings.read_value())
+        return tf.nn.embedding_lookup(w, encoding_indices)

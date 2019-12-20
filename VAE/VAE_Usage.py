@@ -45,10 +45,9 @@ def VAE_grey(RUN_ID, RUN_FOLDER, lr, r_loss, batch_size, epochs, print_n_batches
 
     VAE.encoder.summary()
     VAE.decoder.summary()
-
     VAE.compile(learning_rate=lr, r_loss_factor=r_loss)
     if data_name == 'MNIST':
-        (x_train, x_test) = datahandler.mnist(norm_setting=0)
+        (x_train, x_test) = datahandler.mnist()
     else:
         img_size = (28,20,1)
         data = loadmat(data_name)
@@ -57,7 +56,6 @@ def VAE_grey(RUN_ID, RUN_FOLDER, lr, r_loss, batch_size, epochs, print_n_batches
         data = data.reshape((-1, *img_size))
         data = pad(data,[(0,0),(0,0),(4,4),(0,0)])
         x_train = data/255.
-
     VAE.train(
         x_train,
         batch_size=batch_size,
@@ -87,12 +85,12 @@ def VAE_CIFAR(RUN_ID, RUN_FOLDER, lr, r_loss, batch_size, epochs, print_n_batche
 
     VAE = VAE_model(
         input_dim=(32, 32, 3),
-        encoder_conv_filters=[32, 64, 64, 64],
+        encoder_conv_filters=[64, 128, 128, 256],
         encoder_conv_kernel_size=[3, 3, 3, 3],
-        encoder_conv_strides=[2, 2, 2, 2],
-        decoder_conv_t_filters=[64, 64, 32, 3],
-        decoder_conv_t_kernel_size=[3, 3, 3, 3],
-        decoder_conv_t_strides=[2, 2, 2, 2],
+        encoder_conv_strides=[1, 2, 2, 2],
+        decoder_conv_t_filters=[128, 128, 128, 3],
+        decoder_conv_t_kernel_size=[4, 4, 4, 4],
+        decoder_conv_t_strides=[2, 2, 2, 1],
         z_dim=z_dim
     )
 
@@ -110,7 +108,6 @@ def VAE_CIFAR(RUN_ID, RUN_FOLDER, lr, r_loss, batch_size, epochs, print_n_batche
 
     VAE.train(
         x_train,
-        batch_size=batch_size,
         epochs=epochs,
         run_folder=RUN_FOLDER,
         print_n_batches=print_n_batches,
@@ -131,7 +128,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int, default=32, help='Batch size')
     parser.add_argument('--run_id', type=str, help='ID of current run')
     parser.add_argument('--run_folder', type=str, help='folder that contains run generated items (images, weights etc.)')
-    parser.add_argument('--z_dim', type=int, default=50, help='Size of latent dimensions for encoding')
+    parser.add_argument('--z_dim', type=int, default=100, help='Size of latent dimensions for encoding')
     parser.add_argument('--data_folder', type=str, default='MNIST')
 
     args = parser.parse_args()

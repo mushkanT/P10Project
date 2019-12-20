@@ -1,4 +1,4 @@
-import vq_vae_model2 as vq_vae
+import vq_vae_model as vq_vae
 import tensorflow as tf
 
 

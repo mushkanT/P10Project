@@ -5,7 +5,7 @@ import tensorflow as tf
 import lmdb
 from Data_Utils import CodeRow
 import Utils.DataHandler as dh
-from VQ_VAE_Model import VQVAEModel
+from OLD_vq_vae_model import VQVAEModel
 
 
 def extract(lmdb_env, loader, model):

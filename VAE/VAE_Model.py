@@ -162,7 +162,7 @@ class VAE:
     def load_weights(self, filepath):
         self.model.load_weights(filepath)
 
-    def train(self, x_train, batch_size, epochs, run_folder, print_n_batches = 100, init_epoch = 0, lr_decay = 1):
+    def train(self, x_train, epochs, run_folder, print_n_batches = 100, init_epoch = 0, lr_decay = 1):
 
         custom_callback = CustomCallback(run_folder, print_n_batches, init_epoch, self)
         lr_sched = step_decay_schedule(initial_lr=self.learning_rate, decay_factor=lr_decay, step_size=1)
@@ -172,8 +172,6 @@ class VAE:
         self.model.fit(
             x_train,
             x_train,
-            batch_size=batch_size,
-            shuffle=True,
             epochs=epochs,
             initial_epoch=init_epoch,
             callbacks=callbacks_list,
@@ -197,11 +195,8 @@ class VAE:
         custom_callback = CustomCallback(run_folder, print_every_n_batches, initial_epoch, self)
         lr_sched = step_decay_schedule(initial_lr=self.learning_rate, decay_factor=lr_decay, step_size=1)
 
-        checkpoint_filepath = os.path.join(run_folder, "weights/weights-{epoch:03d}-{loss:.2f}.h5")
-        checkpoint1 = ModelCheckpoint(checkpoint_filepath, save_weights_only=True, verbose=1)
-        checkpoint2 = ModelCheckpoint(os.path.join(run_folder, 'weights/weights.h5'), save_weights_only=True, verbose=1)
 
-        callbacks_list = [checkpoint1, checkpoint2, custom_callback, lr_sched]
+        callbacks_list = [custom_callback, lr_sched]
 
         self.model.fit_generator(
             data_flow
@@ -212,6 +207,17 @@ class VAE:
             , steps_per_epoch=steps_per_epoch,
             verbose=0
         )
+
+        loss_file = os.path.join(run_folder, 'loss')
+        r_loss_file = os.path.join(run_folder, 'r_loss')
+        kl_loss_file = os.path.join(run_folder, 'kl_loss')
+
+        np.save(loss_file, custom_callback.loss)
+        np.save(r_loss_file, custom_callback.r_loss)
+        np.save(kl_loss_file, custom_callback.kl_loss)
+
+        model_file = os.path.join(run_folder, 'model')
+        self.model.save(model_file)
 
     def plot_model(self, run_folder):
         plot_model(self.model, to_file=os.path.join(run_folder, 'viz/model.png'), show_shapes=True,

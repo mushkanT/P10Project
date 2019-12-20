@@ -11,7 +11,7 @@ except ImportError:
 
 import Utils.DataHandler
 from PixelSNAIL import PixelSNAIL
-from scheduler import CycleScheduler
+
 
 
 def train(args, epoch, loader, model, optimizer, scheduler):
@@ -148,10 +148,6 @@ if __name__ == '__main__':
     #model = model.to(device)
 
     scheduler = None
-    if args.sched == 'cycle':
-        scheduler = CycleScheduler(
-            optimizer, args.lr, n_iter=len(loader) * args.epoch, momentum=None
-        )
 
     for i in range(args.epoch):
         train(args, i, loader, model, optimizer, scheduler, device)
