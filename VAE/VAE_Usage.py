@@ -37,7 +37,6 @@ def VAE_grey(RUN_ID, RUN_FOLDER, lr, r_loss, batch_size, epochs, print_n_batches
         z_dim=z_dim
     )
 
-
     if mode == 'build':
         VAE.save(RUN_FOLDER)
     else:

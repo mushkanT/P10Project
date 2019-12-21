@@ -35,8 +35,8 @@ def train_loop(optimizer, print_n_batches, epochs, dataset, model):
             train_vqvae_loss.append(train_results['mean_latent_loss'])
 
             if iteration % print_n_batches == 0:
-                train_recons.append(train_results['x_recon'])
-                print('%d. train loss: %f ' % (0 + 1, np.mean(train_losses)) +
+                train_recons.append([train_results['x_recon'][:16], batch[:16]])
+                print('%d. train loss: %f ' % (0 + iteration, np.mean(train_losses)) +
                         ('recon_error: %.6f ' % np.mean(train_recon_errors)) +
                         ('vqvae loss: %.6f' % np.mean(train_vqvae_loss)))
 
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', type=str, default='mnist', help='Can be mnist|cifar10')
     parser.add_argument('--lr', type=float, default='2e-4', help='Learning rate')
     parser.add_argument('--epochs', type=int, default=50, help='number of epochs')
-    parser.add_argument('--print_n_batches', type=int, default=500, help='Prints status every n\'th batch.')
+    parser.add_argument('--print_n_batches', type=int, default=1200, help='Prints status every n\'th batch.')
     parser.add_argument('--img_size', type=int, default=32, help='Size of images in the given dataset. NxN')
     parser.add_argument('--batch_size', type=int, default=100, help='Batch size')
     parser.add_argument('--run_id', type=str, help='ID of current run')
