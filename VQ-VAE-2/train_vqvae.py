@@ -39,12 +39,11 @@ def train_loop(optimizer, print_n_batches, epochs, dataset, model):
                 print('%d. train loss: %f ' % (0 + 1, np.mean(train_losses)) +
                         ('recon_error: %.6f ' % np.mean(train_recon_errors)) +
                         ('vqvae loss: %.6f' % np.mean(train_vqvae_loss)))
-                break
 
     return [train_losses, train_recon_errors, train_vqvae_loss, train_recons]
 
 
-def train_vq_vae(optimizer, image_size, output_path, print_n_batches, epochs=500, batch_size=100, data_path='mnist'):
+def train_vq_vae(optimizer, image_size, output_path, print_n_batches, epochs, batch_size, data_path):
     SECTION = 'VQvae'
     RUN_FOLDER = output_path
     RUN_FOLDER += SECTION + '/'
