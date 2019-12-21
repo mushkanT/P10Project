@@ -67,7 +67,8 @@ def cifar10(restrict=-1, norm_setting=0):
         test_mask = [y[0] == restrict for y in test_labels]
         train_images = train_images[train_mask]
         test_images = test_images[test_mask]
-        train_images = np.concatenate([train_images, test_images])
+    train_images = np.concatenate([train_images, test_images])
+    train_images = train_images.astype('float32')
     if norm_setting == 0:
         train_images /= 255.0  # Normalize to [0,1]
     elif norm_setting == 1:
