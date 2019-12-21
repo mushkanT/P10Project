@@ -9,7 +9,7 @@ try:
 except ImportError:
     amp = None
 
-import Utils.DataHandler
+import DataHandler
 from PixelSNAIL import PixelSNAIL
 
 
@@ -85,10 +85,7 @@ if __name__ == '__main__':
 
     print(args)
 
-    dataset = LMDBDataset(args.path)
-    loader = DataLoader(
-        dataset, batch_size=args.batch, shuffle=True, num_workers=4, drop_last=True
-    )
+    dataset = DataHandler.get_encodings(args.batch_size, shuffle=True, drop_remainder=True, path=args.path)
 
     ckpt = {}
 
@@ -144,8 +141,7 @@ if __name__ == '__main__':
     if amp is not None:
         model, optimizer = amp.initialize(model, optimizer, opt_level=args.amp)
 
-    #model = nn.DataParallel(model)
-    #model = model.to(device)
+
 
     scheduler = None
 

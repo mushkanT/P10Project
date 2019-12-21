@@ -95,7 +95,6 @@ if __name__ == '__main__':
 
     print(args)
 
-
     train_vq_vae(
         tf.keras.optimizers.Adam(learning_rate=args.lr),
         image_size=args.img_size,
