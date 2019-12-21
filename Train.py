@@ -5,7 +5,9 @@ import time
 import Utils as u
 #import matplotlib.pyplot as plt
 
+
 TINY = 1e-8
+
 
 class GANTrainer(object):
 
@@ -22,10 +24,11 @@ class GANTrainer(object):
 
     def train_discriminator(self, real_data, args):
         noise = tf.random.normal(shape=[args.batch_size, args.noise_dim])
-        disc_input_noise = tf.random.normal(shape=[args.batch_size, args.dataset_dim[1], args.dataset_dim[1], args.dataset_dim[3]], mean=0, stddev=0.1)
 
-        if real_data.dtype == tf.float64:
-            real_data = tf.dtypes.cast(real_data, dtype=tf.float32)
+        if args.input_noise:
+            disc_input_noise = tf.random.normal(shape=[args.batch_size, args.dataset_dim[1], args.dataset_dim[1], args.dataset_dim[3]], mean=0, stddev=0.1)
+        else:
+            disc_input_noise = 0
 
         with tf.GradientTape() as disc_tape:
             generated_images = self.generator(noise, training=False)
@@ -62,8 +65,25 @@ class GANTrainer(object):
 
             elif args.loss == "ce":
                 cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
-                real_loss = cross_entropy(tf.ones_like(real_output), real_output)
-                fake_loss = cross_entropy(tf.zeros_like(fake_output), fake_output)
+                real_labels = np.ones_like(real_output)
+                fake_labels = np.zeros_like(fake_output)
+
+                if args.label_flipping:
+                    real_indices = np.random.randint(size=[args.batch_size, 1], low=1, high=100)
+                    fake_indices = np.random.randint(size=[args.batch_size, 1], low=1, high=100)
+
+                    flip_mask_real = np.array([y <= 5 for y in real_indices])
+                    flip_mask_fake = np.array([y <= 5 for y in fake_indices])
+
+                    real_labels = real_labels - flip_mask_real
+                    fake_labels = fake_labels + flip_mask_fake
+
+                if args.label_smooth:
+                    label_smoothing = np.random.uniform(low=0.9, high=1., size=[1])
+                    real_labels = real_labels * label_smoothing
+
+                real_loss = cross_entropy(real_labels, real_output)
+                fake_loss = cross_entropy(fake_labels, fake_output)
                 disc_loss = real_loss + fake_loss
             else:
                 raise Exception('Cost function does not exists')
@@ -159,7 +179,6 @@ class GANTrainer(object):
                 images_while_training.append(u.draw_samples(self.generator, args.seed))
 
         for epoch in range(args.epochs):
-            print(epoch)
             start = time.time()
 
             for _ in range(n_steps):
@@ -167,6 +186,10 @@ class GANTrainer(object):
                 # take x steps with critic before training generator
                 for i in range(args.disc_iters):
                     batch = next(it)
+                    if isinstance(batch, np.ndarray):
+                        batch = tf.convert_to_tensor(batch)
+                    if batch.dtype == tf.float64:
+                        batch = tf.dtypes.cast(batch, dtype=tf.float32)
                     if batch.shape[0] != args.batch_size:
                         continue
                     d_loss, acc_fake, acc_real = train_d(batch, args)

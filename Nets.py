@@ -120,8 +120,8 @@ def dcgan_gen(args):
     g_dim = args.g_dim
     z_dim = args.noise_dim
     img_dim = args.dataset_dim[1]
-    if args.dataset in ['frey', 'mnist', 'cifar10']:
-        img_resize = 8
+    if args.dataset in ['frey', 'mnist', 'cifar10'] and args.scale_data == 0:
+        img_resize = 2
     else:
         img_resize = img_dim // (2*2*2*2)
     channels = args.dataset_dim[3]
@@ -202,10 +202,39 @@ def toy_disc(args):
     return model
 
 
+def cifargan_ups_gen(args):
+    g_dim = args.g_dim
+    z_dim = args.noise_dim
+    img_dim = args.dataset_dim[1]
+    channels = args.dataset_dim[3]
+    img_resize = img_dim//(2*2*2)
+
+    model = keras.Sequential()
+    # foundation for 4x4 image
+    model.add(layers.Dense(g_dim * img_resize * img_resize, input_dim=z_dim))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    model.add(layers.Reshape((img_resize, img_resize, g_dim)))
+    # upsample to 8x8
+    model.add(layers.UpSampling2D(size=(2,2), interpolation='nearest'))
+    model.add(layers.Conv2D(128, (4, 4), strides=(1, 1), padding='same'))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # upsample to 16x16
+    model.add(layers.UpSampling2D(size=(2,2), interpolation='nearest'))
+    model.add(layers.Conv2D(128, (4, 4), strides=(1, 1), padding='same'))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # upsample to 32x32
+    model.add(layers.UpSampling2D(size=(2,2), interpolation='nearest'))
+    model.add(layers.Conv2D(128, (4, 4), strides=(1, 1), padding='same'))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # output layer
+    model.add(layers.Conv2D(channels, (4, 4), activation='tanh', padding='same'))
+    return model
+
 def cifargan_gen(args):
     g_dim = args.g_dim
     z_dim = args.noise_dim
     img_dim = args.dataset_dim[1]
+    channels = args.dataset_dim[3]
     img_resize = img_dim//(2*2*2)
 
     model = keras.Sequential()
@@ -223,7 +252,7 @@ def cifargan_gen(args):
     model.add(layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same'))
     model.add(layers.LeakyReLU(alpha=0.2))
     # output layer
-    model.add(layers.Conv2D(3, (3, 3), activation='tanh', padding='same'))
+    model.add(layers.Conv2DTranspose(channels, (4, 4), activation='tanh', padding='same'))
     return model
 
 
@@ -237,13 +266,13 @@ def cifargan_disc(args):
     model.add(layers.Conv2D(64, (3, 3), padding='same', input_shape=[input_dim, input_dim, channels]))
     model.add(layers.LeakyReLU(alpha=0.2))
     # downsample
-    model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same'))
+    model.add(layers.Conv2D(64, (3, 3), strides=(2, 2), padding='same'))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # downsample
+    model.add(layers.Conv2D(64, (3, 3), strides=(2, 2), padding='same'))
     model.add(layers.LeakyReLU(alpha=0.2))
     # downsample
     model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same'))
-    model.add(layers.LeakyReLU(alpha=0.2))
-    # downsample
-    model.add(layers.Conv2D(256, (3, 3), strides=(2, 2), padding='same'))
     model.add(layers.LeakyReLU(alpha=0.2))
     # classifier
     model.add(layers.Flatten())

@@ -25,7 +25,8 @@ def select_dataset(args):
         #train_dat = ImgDataGen.flow_from_directory('C:/Projects/lsun/fuck/', target_size=(args.scale_data, args.scale_data), batch_size=args.batch_size, seed=2019, class_mode=None, interpolation="nearest")
         #amount = len(os.listdir('C:/Projects/lsun/fuck/data'))
         train_dat = ImgDataGen.flow_from_directory('/user/student.aau.dk/mjuuln15/lsun_data/', target_size=(args.scale_data, args.scale_data), batch_size=args.batch_size, seed=2019, class_mode=None, interpolation="nearest")
-        amount = len(os.listdir('/user/student.aau.dk/mjuuln15/lsun_data/bedroom'))
+        #amount = len(os.listdir('/user/student.aau.dk/mjuuln15/lsun_data/bedroom'))
+        amount = 2554932
         shape = (amount, train_dat.image_shape[0], train_dat.image_shape[1], train_dat.image_shape[2])
     elif args.dataset == 'frey':
         img_size = (28, 20, 1)

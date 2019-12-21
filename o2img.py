@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os
 import numpy as np
-
+import math
 
 def generate_and_save_images(model, epoch, test_input):
     # Notice `training` is set to False.
@@ -216,7 +216,10 @@ def latent_walk(args, steps=16):
     vectors = []
     # linear interpolate vectors
     for ratio in ratios:
-        v = (1.0 - ratio) * p0 + ratio * p1
+        #Spherical interpolation
+        v = slerp(ratio, p0, p1)
+        #Lin interpolaiton between points
+        #v = (1.0 - ratio) * p0 + ratio * p1
         vectors.append(v)
     vectors = np.asarray(vectors)
     images = gen(vectors)
@@ -225,3 +228,12 @@ def latent_walk(args, steps=16):
         plt.subplot(4, 4, i + 1)
         plt.imshow((images[i, :, :, :] + 1) / 2)
         plt.axis('off')
+
+
+def slerp(val, low, high):
+    omega = np.arccos(np.clip(np.dot(low/np.linalg.norm(low), high/np.norm(high)), -1, 1))
+    so = np.sin(omega)
+    if so == 0:
+        # L'Hopital's rule/LERP
+        return (1.0-val) * low + val * high
+    return np.sin((1.0-val)*omega) / so * low + np.sin(val*omega) / so * high
