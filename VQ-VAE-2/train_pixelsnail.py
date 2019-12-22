@@ -15,10 +15,7 @@ from PixelSNAIL import PixelSNAIL
 
 
 def train(args, epoch, loader, model, optimizer, scheduler):
-
-    criterion = nn.CrossEntropyLoss()
-
-    for i, (top, bottom, label) in enumerate(loader):
+    for i, batch in enumerate(loader):
         model.zero_grad()
 
         top = top.to(device)

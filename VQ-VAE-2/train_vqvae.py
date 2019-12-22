@@ -49,7 +49,7 @@ def train_vq_vae(optimizer, image_size, output_path, print_n_batches, epochs, ba
     RUN_FOLDER += SECTION + '/'
     if not os.path.exists(RUN_FOLDER):
         os.mkdir(RUN_FOLDER)
-    channels = 1 if data_path == 'mnist' else 3
+    channels = 1 if data_path == 'mnist' or data_path == 'mnist_fashion' else 3
 
     #Build or load model
     model = vq_vae_model.VQVAEModel(image_size, channels)

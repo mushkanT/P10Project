@@ -37,6 +37,8 @@ def get_dataset(batch_size, data_name='mnist', restrict=-1, pad_to_32=False, nor
         dat = cifar10(restrict,norm_setting)
     elif os.path.exists(data_name):
         return custom_data(data_name, batch_size,target_size,shuffle,norm_setting=norm_setting)
+    else:
+        raise NotImplementedError('Unsupported dataset provided or dataset not found')
 
 
 
@@ -50,14 +52,12 @@ def get_dataset(batch_size, data_name='mnist', restrict=-1, pad_to_32=False, nor
 
 
 def get_encodings(batch_size, shuffle, drop_remainder, path):
-    data = np.load(path)
+    data = np.load(path,allow_pickle=True)
+
     dataset = tf.data.Dataset.from_tensor_slices(data)
     if shuffle:
         dataset = dataset.shuffle(data.shape[0])
     return dataset.batch(batch_size, drop_remainder=drop_remainder)
-
-
-
 
 
 def cifar10(restrict=-1, norm_setting=0):
@@ -94,3 +94,9 @@ def custom_data(path, batch_size, target_size, shuffle=True, norm_setting=0):
                                                          target_size=target_size,
                                                          shuffle=shuffle)
     return train_data_gen
+
+
+if __name__ == '__main__':
+    dataset = get_encodings(1, True, True, 'c:/users/user/desktop/newencodings.npy')
+    one_batch = next(dataset)
+    print(one_batch.shape)

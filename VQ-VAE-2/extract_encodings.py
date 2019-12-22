@@ -3,6 +3,7 @@ import tensorflow as tf
 from vq_vae_model import VQVAEModel
 import DataHandler
 import numpy as np
+import pickle
 
 
 def extract(dataset, model, output_path):
@@ -10,9 +11,9 @@ def extract(dataset, model, output_path):
     for i,batch in enumerate(dataset):
         print('Getting encodings from batch:' + str(i))
         out = model.model(batch)
-        encodings.append([out[1]['quantize'], out[2]['quantize']])
+        encodings.append({'top':out[1]['quantize'].numpy(), 'bottom':out[2]['quantize'].numpy()})
     print('saving encodings')
-    np.save(output_path + 'encodings', encodings)
+    np.save(output_path + 'newencodings', encodings)
 
 
 
