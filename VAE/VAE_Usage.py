@@ -46,7 +46,7 @@ def VAE_grey(RUN_ID, RUN_FOLDER, lr, r_loss, batch_size, epochs, print_n_batches
     VAE.decoder.summary()
     VAE.compile(learning_rate=lr, r_loss_factor=r_loss)
     if data_name == 'MNIST':
-        (x_train, x_test) = datahandler.mnist()
+        x_train = datahandler.mnist()
     else:
         img_size = (28,20,1)
         data = loadmat(data_name)
@@ -103,7 +103,7 @@ def VAE_CIFAR(RUN_ID, RUN_FOLDER, lr, r_loss, batch_size, epochs, print_n_batche
 
     VAE.compile(learning_rate=lr, r_loss_factor=r_loss)
 
-    (x_train, x_test) = datahandler.cifar10(norm_setting=0)
+    x_train = datahandler.cifar10(norm_setting=0)
 
     VAE.train(
         x_train,
