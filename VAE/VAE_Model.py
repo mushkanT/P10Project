@@ -162,7 +162,7 @@ class VAE:
     def load_weights(self, filepath):
         self.model.load_weights(filepath)
 
-    def train(self, x_train, epochs, run_folder, print_n_batches = 100, init_epoch = 0, lr_decay = 1):
+    def train(self, x_train, batch_size, epochs, run_folder, print_n_batches = 100, init_epoch = 0, lr_decay = 1):
 
         custom_callback = CustomCallback(run_folder, print_n_batches, init_epoch, self)
         lr_sched = step_decay_schedule(initial_lr=self.learning_rate, decay_factor=lr_decay, step_size=1)
@@ -173,6 +173,7 @@ class VAE:
             x_train,
             x_train,
             epochs=epochs,
+            batch_size=batch_size,
             initial_epoch=init_epoch,
             callbacks=callbacks_list,
             verbose=0
