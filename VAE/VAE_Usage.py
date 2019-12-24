@@ -148,6 +148,6 @@ if __name__ == '__main__':
             args.print_n_batches = 50000 // args.batch_size
         VAE_CIFAR(args.run_id, args.run_folder, args.lr, args.r_loss_factor, args.batch_size, args.epochs, args.print_n_batches, args.init_epoch, args.z_dim)
     else:
-        raise('Dataset not supported')
+        raise Exception('Dataset not supported')
 
 

@@ -133,7 +133,7 @@ class VAE:
             kl_loss = vae_kl_loss(y_true, y_pred)
             return r_loss + kl_loss
 
-        optimizer = Adam(lr=learning_rate)
+        optimizer = Adam(lr=learning_rate, beta_1= 0.9)
         self.model.compile(optimizer=optimizer, loss = vae_loss, metrics = [vae_r_loss, vae_kl_loss])
 
     def save(self, folder):
