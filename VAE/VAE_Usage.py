@@ -108,6 +108,7 @@ def VAE_CIFAR(RUN_ID, RUN_FOLDER, lr, r_loss, batch_size, epochs, print_n_batche
     VAE.train(
         x_train,
         epochs=epochs,
+        batch_size=batch_size,
         run_folder=RUN_FOLDER,
         print_n_batches=print_n_batches,
         init_epoch=init_epoch
