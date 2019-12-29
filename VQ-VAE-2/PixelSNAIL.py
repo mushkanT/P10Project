@@ -71,7 +71,7 @@ class WNConv2d(tf.keras.layers.Layer):
                 kernel_size=kernel_size,
                 strides=stride,
                 padding=padding,
-                bias=bias,
+                use_bias=bias,
             )
         )
 
