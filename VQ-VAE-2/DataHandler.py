@@ -53,11 +53,7 @@ def get_dataset(batch_size, data_name='mnist', restrict=-1, pad_to_32=False, nor
 
 def get_encodings(batch_size, shuffle, drop_remainder, path):
     data = np.load(path,allow_pickle=True)
-
-    dataset = tf.data.Dataset.from_tensor_slices(data)
-    if shuffle:
-        dataset = dataset.shuffle(data.shape[0])
-    return dataset.batch(batch_size, drop_remainder=drop_remainder)
+    return data
 
 
 def cifar10(restrict=-1, norm_setting=0):

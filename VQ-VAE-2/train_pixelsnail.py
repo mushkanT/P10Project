@@ -1,8 +1,6 @@
 import argparse
 import numpy as np
 import tensorflow as tf
-
-
 try:
     from apex import amp
 
@@ -14,50 +12,28 @@ from PixelSNAIL import PixelSNAIL
 
 
 
-def train(args, epoch, loader, model, optimizer, scheduler):
-    for i, batch in enumerate(loader):
-        model.zero_grad()
+def train(args, dataset, model, optimizer):
+    losses = []
+    for i, batch in enumerate(dataset):
+        with tf.GradientTape() as tape:
 
-        top = top.to(device)
+            if args.hier == 'top':
+                top = batch['top']
+                target = top
+                out, _ = model(top)
 
-        if args.hier == 'top':
-            target = top
-            out, _ = model(top)
+            elif args.hier == 'bottom':
+                bottom = batch['bottom']
+                target = bottom
+                out, _ = model(bottom, condition=top)
 
-        elif args.hier == 'bottom':
-            bottom = bottom.to(device)
-            target = bottom
-            out, _ = model(bottom, condition=top)
-
-        loss = criterion(out, target)
-        loss.backward()
-
-        if scheduler is not None:
-            scheduler.step()
-        optimizer.step()
-
-        _, pred = out.max(1)
-        correct = (pred == target).float()
-        accuracy = correct.sum() / target.numel()
-
-        lr = optimizer.param_groups[0]['lr']
-
-        loader.set_description(
-            (
-                f'epoch: {epoch + 1}; loss: {loss.item():.5f}; '
-                f'acc: {accuracy:.5f}; lr: {lr:.5f}'
-            )
-        )
-
-
-class PixelTransform:
-    def __init__(self):
-        pass
-
-    def __call__(self, input):
-        ar = np.array(input)
-
-        return torch.from_numpy(ar).long()
+            cross_entropy = tf.losses.CategoricalCrossentropy()
+            loss = cross_entropy(target, out)
+            losses.append(loss)
+        trainable_varibles = model.trainable_variables
+        grads = tape.gradient(loss, trainable_varibles)
+        optimizer.apply_gradients(zip(grads, trainable_varibles))
+    return losses
 
 
 if __name__ == '__main__':
@@ -143,8 +119,4 @@ if __name__ == '__main__':
     scheduler = None
 
     for i in range(args.epoch):
-        train(args, i, loader, model, optimizer, scheduler, device)
-        torch.save(
-            {'model': model.module.state_dict(), 'args': args},
-            f'checkpoint/pixelsnail_{args.hier}_{str(i + 1).zfill(3)}.pt',
-        )
+        train(args, dataset, model, optimizer)
