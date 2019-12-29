@@ -49,10 +49,10 @@ if __name__ == '__main__':
     parser.add_argument('--n_cond_res_block', type=int, default=3)
     parser.add_argument('--dropout', type=float, default=0.1)
     parser.add_argument('--amp', type=str, default='O0')
-    parser.add_argument('--sched', type=str)
-    parser.add_argument('--ckpt', type=str)
     parser.add_agument('--img_size', type=int, help='Image size as int')
-    parser.add_argument('path', type=str)
+    parser.add_argument('--path', type=str)
+    parser.add_argument('--run_id', type=str)
+    parser.add_argument('--run_folder', type=str)
 
     args = parser.parse_args()
 
@@ -60,11 +60,6 @@ if __name__ == '__main__':
 
     dataset = DataHandler.get_encodings(args.batch_size, shuffle=True, drop_remainder=True, path=args.path)
 
-    ckpt = {}
-
-    if args.ckpt is not None:
-        ckpt = tf.saved_model.load(args.ckpt)
-        args = ckpt['args']
 
     top_input = 0
     bottom_input = 0
@@ -105,18 +100,12 @@ if __name__ == '__main__':
             cond_res_channel=args.n_res_channel,
         )
 
-    if 'model' in ckpt:
-        model.load_state_dict(ckpt['model'])
 
-
-    optimizer = tf.keras.optimizers.Adam(model.parameters(), lr=args.lr)
+    optimizer = tf.keras.optimizers.Adam(lr=args.lr)
 
     if amp is not None:
         model, optimizer = amp.initialize(model, optimizer, opt_level=args.amp)
 
-
-
-    scheduler = None
 
     for i in range(args.epoch):
         train(args, dataset, model, optimizer)
