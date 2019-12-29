@@ -392,9 +392,9 @@ class PixelSNAIL(tf.keras.Model):
             n_class, channel, [(kernel + 1) // 2, kernel // 2], padding='downright'
         )
 
-        coord_x = (tf.range(height).float() - height / 2) / height
+        coord_x = (tf.range(height) - height / 2) / height
         coord_x = coord_x.view(1, 1, height, 1).expand(1, 1, height, width)
-        coord_y = (tf.range(width).float() - width / 2) / width
+        coord_y = (tf.range(width) - width / 2) / width
         coord_y = coord_y.view(1, 1, 1, width).expand(1, 1, height, width)
         self.register_buffer('background', tf.concat([coord_x, coord_y], 3))
 
