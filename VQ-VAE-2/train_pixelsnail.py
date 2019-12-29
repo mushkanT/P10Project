@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
     print(args)
 
-    dataset = DataHandler.get_encodings(args.batch_size, shuffle=True, drop_remainder=True, path=args.path)
+    dataset = DataHandler.get_encodings(args.batch, shuffle=True, drop_remainder=True, path=args.path)
 
 
     top_input = 0
