@@ -1,10 +1,10 @@
 import tensorflow as tf
 import numpy as np
 from functools import partial, lru_cache
-from tensorflow_addons import layers.WeightNormalization
+import tensorflow_addons as tfa
 
 def wn_linear(in_dim, out_dim):
-    return tfa.layers.WeightNormalization(tf.keras.layers.Dense(out_dim, in_dim))
+    return tfa.layers.wrappers.WeightNormalization(tf.keras.layers.Dense(out_dim, in_dim))
 
 def glu(kernel_shape, layer_input, layer_name, residual=None):
     """ Gated Linear Unit """
@@ -66,7 +66,7 @@ class WNConv2d(tf.keras.Layer):
     ):
         super().__init__()
 
-        self.conv = tfa.layers.WeightNormalization(
+        self.conv = tfa.layers.wrappers.WeightNormalization(
             tf.keras.layers.Conv2D(
                 filters=out_channel,
                 kernel_size=kernel_size,
