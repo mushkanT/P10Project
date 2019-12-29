@@ -49,7 +49,7 @@ if __name__ == '__main__':
     parser.add_argument('--n_cond_res_block', type=int, default=3)
     parser.add_argument('--dropout', type=float, default=0.1)
     parser.add_argument('--amp', type=str, default='O0')
-    parser.add_agument('--img_size', type=int, help='Image size as int')
+    parser.add_argument('--img_size', type=int, help='Image size as int')
     parser.add_argument('--path', type=str)
     parser.add_argument('--run_id', type=str)
     parser.add_argument('--run_folder', type=str)
