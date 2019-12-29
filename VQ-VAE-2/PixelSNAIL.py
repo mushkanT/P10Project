@@ -49,11 +49,10 @@ def glu(kernel_shape, layer_input, layer_name, residual=None):
         conv2 = tf.add(conv2, residual)
 
     h = tf.multiply(conv1, tf.sigmoid(conv2, name="sig"))
-
     return h
 
 
-class WNConv2d(tf.keras.Layer):
+class WNConv2d(tf.keras.layers.Layer):
     def __init__(
         self,
         in_channel,
@@ -102,7 +101,7 @@ def shift_right(input, size=1):
     return tf.pad(input, [size, 0, 0, 0])[:, :, :, : input.shape[3]]
 
 
-class CausalConv2d(tf.keras.Layer):
+class CausalConv2d(tf.keras.layers.Layer):
     def __init__(
         self,
         in_channel,
@@ -154,7 +153,7 @@ class CausalConv2d(tf.keras.Layer):
         return out
 
 
-class GatedResBlock(tf.keras.Layer):
+class GatedResBlock(tf.keras.layers.Layer):
     def __init__(
         self,
         in_channel,
@@ -226,7 +225,7 @@ def causal_mask(size):
     )
 
 
-class CausalAttention(tf.keras.Layer):
+class CausalAttention(tf.keras.layers.Layer):
     def __init__(self, query_channel, key_channel, channel, n_head=8, dropout=0.1):
         super().__init__()
 
@@ -268,7 +267,7 @@ class CausalAttention(tf.keras.Layer):
         return out
 
 
-class PixelBlock(tf.keras.Layer):
+class PixelBlock(tf.keras.layers.Layer):
     def __init__(
         self,
         in_channel,
@@ -342,7 +341,7 @@ class PixelBlock(tf.keras.Layer):
         return out
 
 
-class CondResNet(tf.keras.Layer):
+class CondResNet(tf.keras.layers.Layer):
     def __init__(self, in_channel, channel, kernel_size, n_res_block):
         super().__init__()
 
