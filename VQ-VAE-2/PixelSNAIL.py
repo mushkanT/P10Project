@@ -59,7 +59,7 @@ class WNConv2d(tf.keras.layers.Layer):
         out_channel,
         kernel_size,
         stride=1,
-        padding=0,
+        padding='same',
         bias=True,
         activation=None,
     ):
@@ -138,7 +138,7 @@ class CausalConv2d(tf.keras.layers.Layer):
             out_channel,
             kernel_size,
             stride=stride,
-            padding=0,
+            padding='same',
             activation=activation,
         )
 
