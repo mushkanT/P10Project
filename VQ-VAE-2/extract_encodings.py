@@ -11,7 +11,7 @@ def extract(dataset, model, output_path):
     for i,batch in enumerate(dataset):
         print('Getting encodings from batch:' + str(i))
         out = model.model(batch)
-        encodings.append({'top':out[1]['quantize'].numpy(), 'bottom':out[2]['quantize'].numpy()})
+        encodings.append({'top':out[1]['encoding_indices'].numpy(), 'bottom':out[2]['encoding_indices'].numpy()})
     print('saving encodings')
     np.save(output_path + 'newencodings', encodings)
 
