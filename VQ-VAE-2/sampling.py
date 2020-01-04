@@ -1,0 +1,93 @@
+import argparse
+import tensorflow as tf
+import vq_vae_model as vq
+import PixelSNAIL
+
+
+def get_top_bottom_models(args, top_input, bottom_input):
+
+    top_model = PixelSNAIL.PixelSNAIL(
+        [top_input, top_input],
+        512,
+        args.channel,
+        5,
+        4,
+        4,
+        256,
+        dropout=0.1,
+        n_out_res_block=0,
+    )
+
+    bottom_model = PixelSNAIL.PixelSNAIL(
+        [bottom_input, bottom_input],
+        512,
+        args.channel,
+        5,
+        4,
+        4,
+        256,
+        attention=False,
+        dropout=0.1,
+        n_cond_res_block=3,
+        cond_res_channel=256,
+    )
+
+    return top_model, bottom_model
+
+
+def sample_pixelsnail(model, batch, size, temp, condition=None):
+    row = tf.zeros([batch,size[0],size[1]], dtype=tf.int64)
+    cache = {}
+
+    for i in range(size[0]):
+        for j in range(size[1]):
+            out, cache = model(row[:, : i + 1, :], condition=condition, cache=cache)
+            prob = tf.nn.softmax(out[: i, j, :] / temp, 3)
+            sample = tf.random.categorical(prob, 1)
+            row[:, i, j] = sample
+
+    return row
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--batch', type=int, default=8, help='number of samples to generate')
+    parser.add_argument('--img_size', type=int, help='size of images to sample')
+    parser.add_argument('--channels', type=int, help='image channels')
+    parser.add_argument('--vqvae_model', type=str, help='path to saved vqvae_model to decode image')
+    parser.add_argument('--top_pixelCNN', type=str, help='path to saved weight of top pixelsnail model')
+    parser.add_argument('--bottom_pixelCNN', type=str, help='path to saved weight of bottom pixelsnail model')
+    parser.add_argument('--temp', type=float, default=1.0, help='unknown')
+    parser.add_argument('output_path', type=str, help='where to save sample')
+
+    args = parser.parse_args()
+
+    vqvae_model = vq.VQVAEModel(args.img_size, args.channels)
+    vqvae_model.load_model(args.vqvae_model)
+
+
+    if args.img_size == 32:
+        top_input = 4
+        bottom_input = 8
+    elif args.img_size == 256:
+        top_input = 32
+        bottom_input = 64
+    else:
+        raise ('Unsupported image size')
+
+    top_model, bottom_model = get_top_bottom_models(args, top_input, bottom_input)
+    top_model.load_weights(args.top_pixelCNN)
+    bottom_model.load_weights(args.bottom_pixelCNN)
+
+    top_sample = sample_pixelsnail(top_model, args.batch, [top_input, top_input], args.temp)
+    bottom_sample = sample_pixelsnail(bottom_model, args.batch, [bottom_input, bottom_input], args.temp, condition=top_sample)
+
+    decode_top = vqvae_model.vq_top.quantize(top_sample)
+    decode_bottom = vqvae_model.vq_bot.quantize(bottom_sample)
+
+    decoded_sample = vqvae_model.decoder([decode_top,decode_bottom])
+
+    print('Noice')
+
+
+

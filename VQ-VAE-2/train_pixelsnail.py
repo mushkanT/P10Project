@@ -8,11 +8,14 @@ except ImportError:
 
 import DataHandler
 from PixelSNAIL import PixelSNAIL
+import os
+import numpy as np
 
 
 
 def train(args, dataset, model, optimizer):
     losses = []
+    cross_entropy = tf.losses.SparseCategoricalCrossentropy()
     for i, batch in enumerate(dataset):
         with tf.GradientTape() as tape:
 
@@ -27,14 +30,14 @@ def train(args, dataset, model, optimizer):
                 target = bottom
                 out, _ = model(bottom, condition=top)
 
-            cross_entropy = tf.losses.SparseCategoricalCrossentropy()
+
             loss = cross_entropy(target,out)
             print(loss)
             losses.append(loss)
         trainable_varibles = model.trainable_variables
         grads = tape.gradient(loss, trainable_varibles)
         optimizer.apply_gradients(zip(grads, trainable_varibles))
-        model.load_weights('/home/palminde/Documents/model')
+
     return losses
 
 
@@ -52,7 +55,7 @@ if __name__ == '__main__':
     parser.add_argument('--dropout', type=float, default=0.1)
     parser.add_argument('--amp', type=str, default='O0')
     parser.add_argument('--img_size', type=int, help='Image size as int')
-    parser.add_argument('--path', type=str)
+    parser.add_argument('--in_path', type=str)
     parser.add_argument('--run_id', type=str)
     parser.add_argument('--run_folder', type=str)
 
@@ -60,11 +63,8 @@ if __name__ == '__main__':
 
     print(args)
 
-    dataset = DataHandler.get_encodings(args.batch, shuffle=True, drop_remainder=True, path=args.path)
+    dataset = DataHandler.get_encodings(args.batch, shuffle=True, drop_remainder=True, path=args.in_path)
 
-
-    top_input = 0
-    bottom_input = 0
     if args.img_size == 32:
         top_input = 4
         bottom_input = 8
@@ -108,6 +108,16 @@ if __name__ == '__main__':
     if amp is not None:
         model, optimizer = amp.initialize(model, optimizer, opt_level=args.amp)
 
+    SECTION = 'PixelSnail'
+    RUN_FOLDER = args.run_folder
+    RUN_FOLDER += SECTION + '/'
+    if not os.path.exists(RUN_FOLDER):
+        os.mkdir(RUN_FOLDER)
 
+    losses = []
     for i in range(args.epoch):
-        train(args, dataset, model, optimizer)
+        epoch_losses = train(args, dataset, model, optimizer)
+        losses.extend(epoch_losses)
+
+    np.save(RUN_FOLDER + 'loss', losses)
+    model.save_weights(RUN_FOLDER, save_format='tf')
