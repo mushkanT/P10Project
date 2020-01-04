@@ -1,56 +1,19 @@
+import random
 import tensorflow as tf
 import numpy as np
 from functools import partial, lru_cache
 import tensorflow_addons as tfa
+import math
+
+
+tf.random.set_seed(0)
+
+random.seed(0)
+
+np.random.seed(0)
 
 def wn_linear(in_dim, out_dim):
-    return tfa.layers.wrappers.WeightNormalization(tf.keras.layers.Dense(out_dim, in_dim))
-
-def glu(kernel_shape, layer_input, layer_name, residual=None):
-    """ Gated Linear Unit """
-    # Pad the left side to prevent kernels from viewing future context
-    kernel_width = kernel_shape[1]
-    left_pad = kernel_width - 1
-    paddings = [[0,0],[0,0],[left_pad,0],[0,0]]
-    padded_input = tf.pad(layer_input, paddings, "CONSTANT")
-
-    # Kaiming intialization
-    stddev = np.sqrt(2.0 / (kernel_shape[1] * kernel_shape[2]))
-
-    # First conv layer
-    W_g = tf.Variable(stddev, dtype=tf.float32)
-    W_v = tf.Variable(tf.random_normal(kernel_shape, stddev=stddev), name="W%s" % layer_name)
-    W =  (W_g / tf.nn.l2_normalize(W_v, 0)) * W_v
-    b = tf.Variable(tf.zeros([kernel_shape[2] * kernel_shape[3]]), name="b%s" % layer_name)
-    conv1 = tf.nn.depthwise_conv2d(
-        padded_input,
-        W,
-        strides=[1, 1, 1, 1],
-        padding="VALID",
-        name="conv1")
-    conv1 = tf.nn.bias_add(conv1, b)
-
-    # Second gating sigmoid layer
-    V_g = tf.Variable(stddev, dtype=tf.float32)
-    V_v = tf.Variable(tf.random_normal(kernel_shape, stddev=stddev), name="V%s" % layer_name)
-    V = (V_g / tf.nn.l2_normalize(V_v, 0)) * V_v
-    c = tf.Variable(tf.zeros([kernel_shape[2] * kernel_shape[3]]), name="c%s" % layer_name)
-    conv2 = tf.nn.depthwise_conv2d(
-        padded_input,
-        V,
-        strides=[1, 1, 1, 1],
-        padding="VALID",
-        name="conv2")
-    conv2 = tf.nn.bias_add(conv2, c)
-
-    # Preactivation residual
-    if residual is not None:
-        conv1 = tf.add(conv1, residual)
-        conv2 = tf.add(conv2, residual)
-
-    h = tf.multiply(conv1, tf.sigmoid(conv2, name="sig"))
-    return h
-
+    return tfa.layers.wrappers.WeightNormalization(tf.keras.layers.Dense(out_dim))
 
 class WNConv2d(tf.keras.layers.Layer):
     def __init__(
@@ -59,11 +22,14 @@ class WNConv2d(tf.keras.layers.Layer):
         out_channel,
         kernel_size,
         stride=1,
-        padding='same',
+        padding='valid',
         bias=True,
         activation=None,
     ):
         super().__init__()
+
+        if isinstance(padding,(int, float)):
+            padding = 'valid'
 
         self.conv = tfa.layers.wrappers.WeightNormalization(
             tf.keras.layers.Conv2D(
@@ -94,11 +60,11 @@ class WNConv2d(tf.keras.layers.Layer):
 
 
 def shift_down(input, size=1):
-    return tf.pad(input, [0, 0, size, 0])[:, :, : input.shape[2], :]
+    return tf.pad(input, [[0,0], [size,0], [0, 0], [0,0]])[:, :input.shape[1], :, :]
 
 
 def shift_right(input, size=1):
-    return tf.pad(input, [size, 0, 0, 0])[:, :, :, : input.shape[3]]
+    return tf.pad(input, [[0,0], [0,0], [size, 0], [0, 0]])[:, :, :input.shape[2], :]
 
 
 class CausalConv2d(tf.keras.layers.Layer):
@@ -121,16 +87,16 @@ class CausalConv2d(tf.keras.layers.Layer):
         kernel_width = kernel_size[1]
 
         if padding == 'downright':
-            pad =[[0,0],[kernel_width-1,0],[kernel_height -1 , 0], [0,0]]
+            pad =[[0,0], [kernel_height -1, 0],[kernel_width-1, 0], [0, 0]]
 
         elif padding == 'down' or padding == 'causal':
             kw_floor = kernel_width // 2
 
-            pad =[[0,0], [kw_floor, kw_floor], [kernel_height - 1, 0], [0,0]]
+            pad =[[0,0], [kernel_height - 1, 0], [kw_floor, kw_floor], [0,0]]
 
         self.causal = 0
         if padding == 'causal':
-            self.causal = kernel_size[1] // 2
+            self.causal = kernel_width // 2
         self.pad = pad
 
         self.conv = WNConv2d(
@@ -138,7 +104,7 @@ class CausalConv2d(tf.keras.layers.Layer):
             out_channel,
             kernel_size,
             stride=stride,
-            padding='same',
+            padding='valid',
             activation=activation,
         )
 
@@ -146,7 +112,10 @@ class CausalConv2d(tf.keras.layers.Layer):
         out = tf.pad(input,self.pad)
 
         if self.causal > 0:
-            self.conv.conv.weight_v.data[:, :, -1, self.causal :].zero_()
+            if not self.conv.conv.built:
+                self.conv.conv.build(out.shape)
+            self.conv.conv.v[-1, self.causal:, :, :].assign(tf.zeros_like(self.conv.conv.v[-1, self.causal:, :, :]))
+
 
         out = self.conv(out)
 
@@ -205,12 +174,15 @@ class GatedResBlock(tf.keras.layers.Layer):
             condition = self.condition(condition)
             out += condition
             # out = out + condition.view(condition.shape[0], 1, 1, condition.shape[1])
-
-        out = glu([1,1,1,1],out)
+        out = new_glu(out, dim=3)
+        #out = glu([4,4,512,1], out, 'glu')
         out += input
 
         return out
-
+def new_glu(input, dim=3):
+    a,b = tf.split(input, num_or_size_splits=2, axis=dim)
+    sig_b = tf.sigmoid(b)
+    return a * sig_b
 
 @lru_cache(maxsize=64)
 def causal_mask(size):
@@ -220,8 +192,8 @@ def causal_mask(size):
     start_mask[0] = 0
 
     return (
-        tf.convert_to_tensor(mask).unsqueeze(0),
-        tf.convert_to_tensor(start_mask).unsqueeze(1),
+        tf.reshape(tf.convert_to_tensor(mask), [1, mask.shape[0], mask.shape[1]]),
+        tf.reshape(tf.convert_to_tensor(start_mask),[start_mask.shape[0], 1]),
     )
 
 
@@ -239,30 +211,28 @@ class CausalAttention(tf.keras.layers.Layer):
         self.dropout = tf.keras.layers.Dropout(dropout)
 
     def __call__(self, query, key):
-        batch, _, height, width = key.shape
+        batch, height, width, _ = key.shape
 
         def reshape(input):
-            return input.view(batch, -1, self.n_head, self.dim_head).transpose(1, 2)
+            return tf.transpose(tf.reshape(input,[batch, -1, self.n_head, self.dim_head]),perm=[0,2,1,3])
 
-        query_flat = query.view(batch, query.shape[1], -1).transpose(1, 2)
-        key_flat = key.view(batch, key.shape[1], -1).transpose(1, 2)
+        query_flat = tf.reshape(query, [batch,-1,query.shape[3]])
+        key_flat = tf.reshape(key, [batch, -1, key.shape[3]])
         query = reshape(self.query(query_flat))
-        key = reshape(self.key(key_flat)).transpose(2, 3)
+        key = tf.transpose(reshape(self.key(key_flat)),perm=[0,1,3,2])
         value = reshape(self.value(key_flat))
 
-        attn = tf.matmul(query, key) / tf.sqrt(self.dim_head)
+        attn = tf.matmul(query, key) / math.sqrt(self.dim_head)
         mask, start_mask = causal_mask(height * width)
-        mask = mask.type_as(query)
-        start_mask = start_mask.type_as(query)
-        attn = attn.masked_fill(mask == 0, -1e4)
-        attn = tf.keras.layers.Softmax(attn, 3) * start_mask
+        mask = tf.cast(mask, query.dtype)
+        start_mask = tf.cast(start_mask, query.dtype)
+        attn = tf.where(mask == 0., -1e4, tf.cast(attn,tf.float32))
+        attn = (tf.keras.layers.Softmax(3)(attn)) * start_mask
         attn = self.dropout(attn)
 
         out = attn @ value
-        out = out.transpose(1, 2).reshape(
-            batch, height, width, self.dim_head * self.n_head
-        )
-        out = out.permute(0, 3, 1, 2)
+        out = tf.transpose(out, [0,2,1,3])
+        out = tf.reshape(out,[batch, height, width, self.dim_head * self.n_head])
 
         return out
 
@@ -392,11 +362,14 @@ class PixelSNAIL(tf.keras.Model):
             n_class, channel, [(kernel + 1) // 2, kernel // 2], padding='downright'
         )
 
-        coord_x = (tf.range(height) - height / 2) / height
-        coord_x = coord_x.view(1, 1, height, 1).expand(1, 1, height, width)
-        coord_y = (tf.range(width) - width / 2) / width
-        coord_y = coord_y.view(1, 1, 1, width).expand(1, 1, height, width)
-        self.register_buffer('background', tf.concat([coord_x, coord_y], 3))
+        coord_x = (tf.cast(tf.range(height), dtype=tf.float32) - height / 2) / height
+        coord_x = tf.reshape(coord_x, [1,height,1,1])
+        coord_x = tf.broadcast_to(coord_x, [1,height,width,1])
+        coord_y = (tf.cast(tf.range(width), dtype=tf.float32) - width / 2) / width
+        coord_y = tf.reshape(coord_y, [1,1,width,1])
+        coord_y = tf.broadcast_to(coord_y, [1,height,width,1])
+        self.register_bufffer = tf.concat([coord_x,coord_y],3)
+        #self.register_buffer('background', tf.concat([coord_x, coord_y], 3))
 
         self.blocks = []
 
@@ -423,38 +396,37 @@ class PixelSNAIL(tf.keras.Model):
         for i in range(n_out_res_block):
             out.append(GatedResBlock(channel, res_channel, 1))
 
-        out.extend([tf.keras.layers.ELU, WNConv2d(channel, n_class, 1)])
+        out.extend([tf.keras.layers.ELU(), WNConv2d(channel, n_class, 1)])
 
-        self.out = tf.keras.Sequential(*out)
+        self.out = tf.keras.Sequential()
+        for layer in out:
+            self.out.add(layer)
 
     def __call__(self, input, condition=None, cache=None):
         if cache is None:
             cache = {}
         batch, height, width = input.shape
-        input = (
-            tf.one_hot(input, self.n_class).permute(0, 3, 1, 2).type_as(self.background)
-        )
-        horizontal = shift_down(self.horizontal(input))
-        vertical = shift_right(self.vertical(input))
-        out = horizontal + vertical
+        input = tf.one_hot(input, self.n_class)
+        input = tf.cast(input, dtype=tf.float32)
+        pre_horizontal = self.horizontal(input)
+        horizontal = shift_down(pre_horizontal)
+        pre_vertical = self.vertical(input)
+        vertical = shift_right(pre_vertical)
+        out = tf.keras.layers.add([horizontal, vertical])
 
-        background = self.background[:, :, :height, :].expand(batch, 2, height, width)
+        background = tf.broadcast_to(self.register_bufffer[:, :height, : , :],[batch, height, width, 2])
 
         if condition is not None:
             if 'condition' in cache:
                 condition = cache['condition']
-                condition = condition[:, :, :height, :]
-
+                condition = condition[:, :height, :, :]
             else:
-                condition = (
-                    tf.one_hot(condition, self.n_class)
-                    .permute(0, 3, 1, 2)
-                    .type_as(self.background)
-                )
+                condition = tf.one_hot(condition, self.n_class)
+                condition = tf.cast(condition, dtype=tf.float32)
                 condition = self.cond_resnet(condition)
                 condition = tf.keras.layers.UpSampling2D.interpolate(condition, size=2)
                 cache['condition'] = tf.identity(tf.stop_gradient(condition))
-                condition = condition[:, :, :height, :]
+                condition = condition[:, :height, :, :]
 
         for block in self.blocks:
             out = block(out, background, condition=condition)

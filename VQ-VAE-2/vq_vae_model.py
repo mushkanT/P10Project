@@ -117,8 +117,8 @@ class VQVAEModel:
 
         #quanter = snt.nets.VectorQuantizerEMA(self.embedding_dim, self.num_embeddings, self.commitment_cost, self.decay)
         #quant_layer = layers.Lambda(lambda x: quanter(x, is_training=True))
-
-        quant_top = VQ(self.embedding_dim,self.num_embeddings,self.commitment_cost, name='vq_top')(embed_top)
+        self.vq_top = VQ(self.embedding_dim, self.num_embeddings, self.commitment_cost, name='vq_top')
+        quant_top = self.vq_top(embed_top)
         decode_top = layers.Conv2D(filters=self.num_hiddens,
                                    kernel_size=3,
                                    strides=1,
@@ -150,7 +150,8 @@ class VQVAEModel:
         #bottom_quanter = snt.nets.VectorQuantizerEMA(self.embedding_dim, self.num_embeddings, self.commitment_cost, self.decay)
         #quant_bottom = layers.Lambda(lambda x: bottom_quanter(x,is_training=True))(embed_bottom)
 
-        quant_bottom = VQ(self.embedding_dim, self.num_embeddings, self.commitment_cost, name='vq_bottom')(embed_bottom)
+        self.vq_bot = VQ(self.embedding_dim, self.num_embeddings, self.commitment_cost, name='vq_bottom')
+        quant_bottom = self.vq_bot(embed_bottom)
         self.encoder = tf.keras.Model(inputs=input_img, outputs=[quant_top, quant_bottom], name='encoder')
 
         top_dec_input = layers.Input(shape=quant_top['quantize'][0].shape)

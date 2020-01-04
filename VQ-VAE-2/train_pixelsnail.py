@@ -1,5 +1,4 @@
 import argparse
-import numpy as np
 import tensorflow as tf
 try:
     from apex import amp
@@ -22,17 +21,20 @@ def train(args, dataset, model, optimizer):
                 target = top
                 out, _ = model(top)
 
+
             elif args.hier == 'bottom':
                 bottom = batch['bottom']
                 target = bottom
                 out, _ = model(bottom, condition=top)
 
-            cross_entropy = tf.losses.CategoricalCrossentropy()
-            loss = cross_entropy(target, out)
+            cross_entropy = tf.losses.SparseCategoricalCrossentropy()
+            loss = cross_entropy(target,out)
+            print(loss)
             losses.append(loss)
         trainable_varibles = model.trainable_variables
         grads = tape.gradient(loss, trainable_varibles)
         optimizer.apply_gradients(zip(grads, trainable_varibles))
+        model.load_weights('/home/palminde/Documents/model')
     return losses
 
 
