@@ -1,15 +1,11 @@
 import random
 import tensorflow as tf
 import numpy as np
-from functools import partial, lru_cache
+from functools import lru_cache
 import tensorflow_addons as tfa
 import math
-
-
 tf.random.set_seed(0)
-
 random.seed(0)
-
 np.random.seed(0)
 
 def wn_linear(in_dim, out_dim):
@@ -29,7 +25,7 @@ class WNConv2d(tf.keras.layers.Layer):
         super().__init__()
 
         if isinstance(padding,(int, float)):
-            padding = 'valid'
+            padding = 'same'
 
         self.conv = tfa.layers.wrappers.WeightNormalization(
             tf.keras.layers.Conv2D(
@@ -137,28 +133,26 @@ class GatedResBlock(tf.keras.layers.Layer):
         super().__init__()
 
         if conv == 'wnconv2d':
-            conv_module = partial(WNConv2d, padding=kernel_size // 2)
+            self.conv1 = WNConv2d(in_channel,channel,kernel_size, padding=kernel_size//2)
+            self.conv2 = WNConv2d(channel, in_channel * 2, kernel_size, padding=kernel_size//2)
 
         elif conv == 'causal_downright':
-            conv_module = partial(CausalConv2d, padding='downright')
+            self.conv1 = CausalConv2d(in_channel, channel, kernel_size, padding='downright')
+            self.conv2 = CausalConv2d(channel, in_channel*2, kernel_size, padding='downright')
 
         elif conv == 'causal':
-            conv_module = partial(CausalConv2d, padding='causal')
+            self.conv1 = CausalConv2d(in_channel, channel, kernel_size, padding='causal')
+            self.conv2 = CausalConv2d(channel, in_channel * 2, kernel_size, padding='causal')
 
         self.activation = activation
-        self.conv1 = conv_module(in_channel, channel, kernel_size)
 
         if auxiliary_channel > 0:
             self.aux_conv = WNConv2d(auxiliary_channel, channel, 1)
 
         self.dropout = tf.keras.layers.Dropout(dropout)
 
-        self.conv2 = conv_module(channel, in_channel * 2, kernel_size)
-
         if condition_dim > 0:
-            # self.condition = nn.Linear(condition_dim, in_channel * 2, bias=False)
-            self.condition = WNConv2d(condition_dim, in_channel * 2, 1, bias=False)
-
+            self.condition = WNConv2d(condition_dim, in_channel * 2, 1, bias=True)
 
     def __call__(self, input, aux_input=None, condition=None):
         out = self.conv1(self.activation(input))
@@ -173,9 +167,7 @@ class GatedResBlock(tf.keras.layers.Layer):
         if condition is not None:
             condition = self.condition(condition)
             out += condition
-            # out = out + condition.view(condition.shape[0], 1, 1, condition.shape[1])
         out = new_glu(out, dim=3)
-        #out = glu([4,4,512,1], out, 'glu')
         out += input
 
         return out
@@ -315,16 +307,17 @@ class CondResNet(tf.keras.layers.Layer):
     def __init__(self, in_channel, channel, kernel_size, n_res_block):
         super().__init__()
 
-        blocks = [WNConv2d(in_channel, channel, kernel_size, padding=kernel_size // 2)]
+        self.blocks = [WNConv2d(in_channel, channel, kernel_size, padding=kernel_size // 2)]
 
         for i in range(n_res_block):
-            blocks.append(GatedResBlock(channel, channel, kernel_size))
+            self.blocks.append(GatedResBlock(channel, channel, kernel_size))
 
-        self.blocks = tf.keras.Sequential(*blocks)
+        #self.blocks = tf.keras.Sequential(blocks)
 
     def __call__(self, input):
-        return self.blocks(input)
-
+        for block in self.blocks:
+            input = block(input)
+        return input
 
 class PixelSNAIL(tf.keras.Model):
     def __init__(
@@ -369,7 +362,6 @@ class PixelSNAIL(tf.keras.Model):
         coord_y = tf.reshape(coord_y, [1,1,width,1])
         coord_y = tf.broadcast_to(coord_y, [1,height,width,1])
         self.register_bufffer = tf.concat([coord_x,coord_y],3)
-        #self.register_buffer('background', tf.concat([coord_x, coord_y], 3))
 
         self.blocks = []
 
@@ -398,9 +390,8 @@ class PixelSNAIL(tf.keras.Model):
 
         out.extend([tf.keras.layers.ELU(), WNConv2d(channel, n_class, 1)])
 
-        self.out = tf.keras.Sequential()
-        for layer in out:
-            self.out.add(layer)
+        self.out = tf.keras.Sequential(out)
+
 
     def __call__(self, input, condition=None, cache=None):
         if cache is None:
@@ -408,6 +399,7 @@ class PixelSNAIL(tf.keras.Model):
         batch, height, width = input.shape
         input = tf.one_hot(input, self.n_class)
         input = tf.cast(input, dtype=tf.float32)
+
         pre_horizontal = self.horizontal(input)
         horizontal = shift_down(pre_horizontal)
         pre_vertical = self.vertical(input)
@@ -424,7 +416,7 @@ class PixelSNAIL(tf.keras.Model):
                 condition = tf.one_hot(condition, self.n_class)
                 condition = tf.cast(condition, dtype=tf.float32)
                 condition = self.cond_resnet(condition)
-                condition = tf.keras.layers.UpSampling2D.interpolate(condition, size=2)
+                condition = tf.keras.layers.UpSampling2D(size=2)(condition)
                 cache['condition'] = tf.identity(tf.stop_gradient(condition))
                 condition = condition[:, :height, :, :]
 

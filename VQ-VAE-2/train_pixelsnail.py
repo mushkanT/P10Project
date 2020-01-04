@@ -15,7 +15,7 @@ import numpy as np
 
 def train(args, dataset, model, optimizer):
     losses = []
-    cross_entropy = tf.losses.SparseCategoricalCrossentropy()
+    cross_entropy = tf.losses.SparseCategoricalCrossentropy(from_logits=True)
     for i, batch in enumerate(dataset):
         with tf.GradientTape() as tape:
 
@@ -28,7 +28,7 @@ def train(args, dataset, model, optimizer):
             elif args.hier == 'bottom':
                 bottom = batch['bottom']
                 target = bottom
-                out, _ = model(bottom, condition=top)
+                out, _ = model(bottom, condition=batch['top'])
 
 
             loss = cross_entropy(target,out)
