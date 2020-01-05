@@ -11,7 +11,7 @@ def train(model, dataset, optimizer):
     for i, batch in enumerate(dataset):
         batch = tf.cast(tf.squeeze(batch, axis=3), tf.int64)
         with tf.GradientTape() as tape:
-            out = model(batch)
+            out, _ = model(batch)
             loss = cross_entropy(batch, out)
             print(loss)
             losses.append(loss)
