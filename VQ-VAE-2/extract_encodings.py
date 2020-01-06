@@ -13,7 +13,7 @@ def extract(dataset, model, output_path):
         out = model.model(batch)
         encodings.append({'top':out[1]['encoding_indices'].numpy(), 'bottom':out[2]['encoding_indices'].numpy()})
     print('saving encodings')
-    np.save(output_path + 'newencodings', encodings)
+    np.save(output_path + 'encodings', encodings)
 
 
 

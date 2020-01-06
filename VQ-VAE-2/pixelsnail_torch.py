@@ -1,37 +1,43 @@
-import tensorflow as tf
+# Copyright (c) Xi Chen
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Borrowed from https://github.com/neocxi/pixelsnail-public and ported it to PyTorch
+
+from math import sqrt
+from functools import partial, lru_cache
 import numpy as np
-from functools import lru_cache
-import tensorflow_addons as tfa
-import math
+import torch
+from torch import nn
+from torch.nn import functional as F
+
 
 def wn_linear(in_dim, out_dim):
-    return tfa.layers.wrappers.WeightNormalization(tf.keras.layers.Dense(out_dim))
+    return nn.utils.weight_norm(nn.Linear(in_dim, out_dim))
 
-class WNConv2d(tf.keras.layers.Layer):
+
+class WNConv2d(nn.Module):
     def __init__(
         self,
         in_channel,
         out_channel,
         kernel_size,
         stride=1,
-        padding='valid',
+        padding=0,
         bias=True,
         activation=None,
     ):
         super().__init__()
 
-        if isinstance(padding,(int, float)):
-            padding = 'same'
-
-        self.conv = tfa.layers.wrappers.WeightNormalization(
-            tf.keras.layers.Conv2D(
-                filters=out_channel,
-                kernel_size=kernel_size,
-                strides=stride,
+        self.conv = nn.utils.weight_norm(nn.Conv2d(
+                in_channel,
+                out_channel,
+                kernel_size,
+                stride=stride,
                 padding=padding,
-                use_bias=bias,
-            )
-        )
+                bias=bias,
+        ))
 
         self.out_channel = out_channel
 
@@ -42,7 +48,7 @@ class WNConv2d(tf.keras.layers.Layer):
 
         self.activation = activation
 
-    def __call__(self, input):
+    def forward(self, input):
         out = self.conv(input)
 
         if self.activation is not None:
@@ -52,14 +58,14 @@ class WNConv2d(tf.keras.layers.Layer):
 
 
 def shift_down(input, size=1):
-    return tf.pad(input, [[0,0], [size,0], [0, 0], [0,0]])[:, :input.shape[1], :, :]
+    return F.pad(input, [0, 0, size, 0])[:, :, : input.shape[2], :]
 
 
 def shift_right(input, size=1):
-    return tf.pad(input, [[0,0], [0,0], [size, 0], [0, 0]])[:, :, :input.shape[2], :]
+    return F.pad(input, [size, 0, 0, 0])[:, :, :, : input.shape[3]]
 
 
-class CausalConv2d(tf.keras.layers.Layer):
+class CausalConv2d(nn.Module):
     def __init__(
         self,
         in_channel,
@@ -75,53 +81,49 @@ class CausalConv2d(tf.keras.layers.Layer):
             kernel_size = [kernel_size] * 2
 
         self.kernel_size = kernel_size
-        kernel_height = kernel_size[0]
-        kernel_width = kernel_size[1]
 
         if padding == 'downright':
-            pad =[[0,0], [kernel_height -1, 0],[kernel_width-1, 0], [0, 0]]
+            pad = [kernel_size[1] - 1, 0, kernel_size[0] - 1, 0]
 
         elif padding == 'down' or padding == 'causal':
-            kw_floor = kernel_width // 2
+            pad = kernel_size[1] // 2
 
-            pad =[[0,0], [kernel_height - 1, 0], [kw_floor, kw_floor], [0,0]]
+            pad = [pad, pad, kernel_size[0] - 1, 0]
 
         self.causal = 0
         if padding == 'causal':
-            self.causal = kernel_width // 2
-        self.pad = pad
+            self.causal = kernel_size[1] // 2
+
+        self.pad = nn.ZeroPad2d(pad)
 
         self.conv = WNConv2d(
             in_channel,
             out_channel,
             kernel_size,
             stride=stride,
-            padding='valid',
+            padding=0,
             activation=activation,
         )
 
-    def __call__(self, input):
-        out = tf.pad(input,self.pad)
+    def forward(self, input):
+        out = self.pad(input)
 
         if self.causal > 0:
-            if not self.conv.conv.built:
-                self.conv.conv.build(out.shape)
-            self.conv.conv.v[-1, self.causal:, :, :].assign(tf.zeros_like(self.conv.conv.v[-1, self.causal:, :, :]))
-
+            self.conv.conv.weight.data[:, :, -1, self.causal:].zero_()
 
         out = self.conv(out)
 
         return out
 
 
-class GatedResBlock(tf.keras.layers.Layer):
+class GatedResBlock(nn.Module):
     def __init__(
         self,
         in_channel,
         channel,
         kernel_size,
         conv='wnconv2d',
-        activation=tf.keras.activations.elu,
+        activation=nn.ELU,
         dropout=0.1,
         auxiliary_channel=0,
         condition_dim=0,
@@ -129,29 +131,33 @@ class GatedResBlock(tf.keras.layers.Layer):
         super().__init__()
 
         if conv == 'wnconv2d':
-            self.conv1 = WNConv2d(in_channel,channel,kernel_size, padding=kernel_size//2)
-            self.conv2 = WNConv2d(channel, in_channel * 2, kernel_size, padding=kernel_size//2)
+            conv_module = partial(WNConv2d, padding=kernel_size // 2)
 
         elif conv == 'causal_downright':
-            self.conv1 = CausalConv2d(in_channel, channel, kernel_size, padding='downright')
-            self.conv2 = CausalConv2d(channel, in_channel*2, kernel_size, padding='downright')
+            conv_module = partial(CausalConv2d, padding='downright')
 
         elif conv == 'causal':
-            self.conv1 = CausalConv2d(in_channel, channel, kernel_size, padding='causal')
-            self.conv2 = CausalConv2d(channel, in_channel * 2, kernel_size, padding='causal')
+            conv_module = partial(CausalConv2d, padding='causal')
 
-        self.activation = activation
+        self.activation = activation(inplace=True)
+        self.conv1 = conv_module(in_channel, channel, kernel_size)
 
         if auxiliary_channel > 0:
             self.aux_conv = WNConv2d(auxiliary_channel, channel, 1)
 
-        self.dropout = tf.keras.layers.Dropout(dropout)
+        self.dropout = nn.Dropout(dropout)
+
+        self.conv2 = conv_module(channel, in_channel * 2, kernel_size)
 
         if condition_dim > 0:
-            self.condition = WNConv2d(condition_dim, in_channel * 2, 1, bias=True)
+            # self.condition = nn.Linear(condition_dim, in_channel * 2, bias=False)
+            self.condition = WNConv2d(condition_dim, in_channel * 2, 1, bias=False)
 
-    def __call__(self, input, aux_input=None, condition=None):
-        out = self.conv1(self.activation(input))
+        self.gate = nn.GLU(1)
+
+    def forward(self, input, aux_input=None, condition=None):
+        out = self.activation(input)
+        out = self.conv1(out)
 
         if aux_input is not None:
             out = out + self.aux_conv(self.activation(aux_input))
@@ -163,14 +169,13 @@ class GatedResBlock(tf.keras.layers.Layer):
         if condition is not None:
             condition = self.condition(condition)
             out += condition
-        out = new_glu(out, dim=3)
+            # out = out + condition.view(condition.shape[0], 1, 1, condition.shape[1])
+
+        out = self.gate(out)
         out += input
 
         return out
-def new_glu(input, dim=3):
-    a,b = tf.split(input, num_or_size_splits=2, axis=dim)
-    sig_b = tf.sigmoid(b)
-    return a * sig_b
+
 
 @lru_cache(maxsize=64)
 def causal_mask(size):
@@ -180,12 +185,12 @@ def causal_mask(size):
     start_mask[0] = 0
 
     return (
-        tf.reshape(tf.convert_to_tensor(mask), [1, mask.shape[0], mask.shape[1]]),
-        tf.reshape(tf.convert_to_tensor(start_mask),[start_mask.shape[0], 1]),
+        torch.from_numpy(mask).unsqueeze(0),
+        torch.from_numpy(start_mask).unsqueeze(1),
     )
 
 
-class CausalAttention(tf.keras.layers.Layer):
+class CausalAttention(nn.Module):
     def __init__(self, query_channel, key_channel, channel, n_head=8, dropout=0.1):
         super().__init__()
 
@@ -196,36 +201,38 @@ class CausalAttention(tf.keras.layers.Layer):
         self.dim_head = channel // n_head
         self.n_head = n_head
 
-        self.dropout = tf.keras.layers.Dropout(dropout)
+        self.dropout = nn.Dropout(dropout)
 
-    def __call__(self, query, key):
-        batch, height, width, _ = key.shape
+    def forward(self, query, key):
+        batch, _, height, width = key.shape
 
         def reshape(input):
-            return tf.transpose(tf.reshape(input,[batch, -1, self.n_head, self.dim_head]),perm=[0,2,1,3])
+            return input.view(batch, -1, self.n_head, self.dim_head).transpose(1, 2)
 
-        query_flat = tf.reshape(query, [batch,-1,query.shape[3]])
-        key_flat = tf.reshape(key, [batch, -1, key.shape[3]])
+        query_flat = query.view(batch, query.shape[1], -1).transpose(1, 2)
+        key_flat = key.view(batch, key.shape[1], -1).transpose(1, 2)
         query = reshape(self.query(query_flat))
-        key = tf.transpose(reshape(self.key(key_flat)),perm=[0,1,3,2])
+        key = reshape(self.key(key_flat)).transpose(2, 3)
         value = reshape(self.value(key_flat))
 
-        attn = tf.matmul(query, key) / math.sqrt(self.dim_head)
+        attn = torch.matmul(query, key) / sqrt(self.dim_head)
         mask, start_mask = causal_mask(height * width)
-        mask = tf.cast(mask, query.dtype)
-        start_mask = tf.cast(start_mask, query.dtype)
-        attn = tf.where(mask == 0., -1e4, tf.cast(attn,tf.float32))
-        attn = (tf.keras.layers.Softmax(3)(attn)) * start_mask
+        mask = mask.type_as(query)
+        start_mask = start_mask.type_as(query)
+        attn = attn.masked_fill(mask == 0, -1e4)
+        attn = torch.softmax(attn, 3) * start_mask
         attn = self.dropout(attn)
 
         out = attn @ value
-        out = tf.transpose(out, [0,2,1,3])
-        out = tf.reshape(out,[batch, height, width, self.dim_head * self.n_head])
+        out = out.transpose(1, 2).reshape(
+            batch, height, width, self.dim_head * self.n_head
+        )
+        out = out.permute(0, 3, 1, 2)
 
         return out
 
 
-class PixelBlock(tf.keras.layers.Layer):
+class PixelBlock(nn.Module):
     def __init__(
         self,
         in_channel,
@@ -251,7 +258,7 @@ class PixelBlock(tf.keras.layers.Layer):
                 )
             )
 
-        self.resblocks = resblocks
+        self.resblocks = nn.ModuleList(resblocks)
 
         self.attention = attention
 
@@ -278,44 +285,43 @@ class PixelBlock(tf.keras.layers.Layer):
         else:
             self.out = WNConv2d(in_channel + 2, in_channel, 1)
 
-    def __call__(self, input, background, condition=None):
+    def forward(self, input, background, condition=None):
         out = input
 
         for resblock in self.resblocks:
             out = resblock(out, condition=condition)
 
         if self.attention:
-            key_cat = tf.concat([input, out, background], 3)
+            key_cat = torch.cat([input, out, background], 1)
             key = self.key_resblock(key_cat)
-            query_cat = tf.concat([out, background], 3)
+            query_cat = torch.cat([out, background], 1)
             query = self.query_resblock(query_cat)
             attn_out = self.causal_attention(query, key)
             out = self.out_resblock(out, attn_out)
 
         else:
-            bg_cat = tf.concat([out, background], 3)
+            bg_cat = torch.cat([out, background], 1)
             out = self.out(bg_cat)
 
         return out
 
 
-class CondResNet(tf.keras.layers.Layer):
+class CondResNet(nn.Module):
     def __init__(self, in_channel, channel, kernel_size, n_res_block):
         super().__init__()
 
-        self.blocks = [WNConv2d(in_channel, channel, kernel_size, padding=kernel_size // 2)]
+        blocks = [WNConv2d(in_channel, channel, kernel_size, padding=kernel_size // 2)]
 
         for i in range(n_res_block):
-            self.blocks.append(GatedResBlock(channel, channel, kernel_size))
+            blocks.append(GatedResBlock(channel, channel, kernel_size))
 
-        #self.blocks = tf.keras.Sequential(blocks)
+        self.blocks = nn.Sequential(*blocks)
 
-    def __call__(self, input):
-        for block in self.blocks:
-            input = block(input)
-        return input
+    def forward(self, input):
+        return self.blocks(input)
 
-class PixelSNAIL(tf.keras.Model):
+
+class PixelSNAIL(nn.Module):
     def __init__(
         self,
         shape,
@@ -351,15 +357,13 @@ class PixelSNAIL(tf.keras.Model):
             n_class, channel, [(kernel + 1) // 2, kernel // 2], padding='downright'
         )
 
-        coord_x = (tf.cast(tf.range(height), dtype=tf.float32) - height / 2) / height
-        coord_x = tf.reshape(coord_x, [1,height,1,1])
-        coord_x = tf.broadcast_to(coord_x, [1,height,width,1])
-        coord_y = (tf.cast(tf.range(width), dtype=tf.float32) - width / 2) / width
-        coord_y = tf.reshape(coord_y, [1,1,width,1])
-        coord_y = tf.broadcast_to(coord_y, [1,height,width,1])
-        self.register_bufffer = tf.stop_gradient(tf.concat([coord_x,coord_y],3))
+        coord_x = (torch.arange(height).float() - height / 2) / height
+        coord_x = coord_x.view(1, 1, height, 1).expand(1, 1, height, width)
+        coord_y = (torch.arange(width).float() - width / 2) / width
+        coord_y = coord_y.view(1, 1, 1, width).expand(1, 1, height, width)
+        self.register_buffer('background', torch.cat([coord_x, coord_y], 1))
 
-        self.blocks = []
+        self.blocks = nn.ModuleList()
 
         for i in range(n_block):
             self.blocks.append(
@@ -384,37 +388,38 @@ class PixelSNAIL(tf.keras.Model):
         for i in range(n_out_res_block):
             out.append(GatedResBlock(channel, res_channel, 1))
 
-        out.extend([tf.keras.layers.ELU(), WNConv2d(channel, n_class, 1)])
+        out.extend([nn.ELU(inplace=True), WNConv2d(channel, n_class, 1)])
 
-        self.out = tf.keras.Sequential(out)
+        self.out = nn.Sequential(*out)
 
-
-    def __call__(self, input, condition=None, cache=None):
+    def forward(self, input, condition=None, cache=None):
         if cache is None:
             cache = {}
         batch, height, width = input.shape
-        input = tf.one_hot(input, self.n_class)
-        input = tf.cast(input, dtype=tf.float32)
+        input = (
+            F.one_hot(input, self.n_class).permute(0, 3, 1, 2).type_as(self.background)
+        )
+        horizontal = shift_down(self.horizontal(input))
+        vertical = shift_right(self.vertical(input))
+        out = horizontal + vertical
 
-        pre_horizontal = self.horizontal(input)
-        horizontal = shift_down(pre_horizontal)
-        pre_vertical = self.vertical(input)
-        vertical = shift_right(pre_vertical)
-        out = tf.keras.layers.add([horizontal, vertical])
-
-        background = tf.broadcast_to(self.register_bufffer[:, :height, : , :],[batch, height, width, 2])
+        background = self.background[:, :, :height, :].expand(batch, 2, height, width)
 
         if condition is not None:
             if 'condition' in cache:
                 condition = cache['condition']
-                condition = condition[:, :height, :, :]
+                condition = condition[:, :, :height, :]
+
             else:
-                condition = tf.one_hot(condition, self.n_class)
-                condition = tf.cast(condition, dtype=tf.float32)
+                condition = (
+                    F.one_hot(condition, self.n_class)
+                    .permute(0, 3, 1, 2)
+                    .type_as(self.background)
+                )
                 condition = self.cond_resnet(condition)
-                condition = tf.keras.layers.UpSampling2D(size=2)(condition)
-                cache['condition'] = tf.identity(tf.stop_gradient(condition))
-                condition = condition[:, :height, :, :]
+                condition = F.interpolate(condition, scale_factor=2)
+                cache['condition'] = condition.detach().clone()
+                condition = condition[:, :, :height, :]
 
         for block in self.blocks:
             out = block(out, background, condition=condition)
