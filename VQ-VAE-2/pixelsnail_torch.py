@@ -30,14 +30,14 @@ class WNConv2d(nn.Module):
     ):
         super().__init__()
 
-        self.conv = nn.Conv2d(
+        self.conv = nn.utils.weight_norm(nn.Conv2d(
                 in_channel,
                 out_channel,
                 kernel_size,
                 stride=stride,
                 padding=padding,
                 bias=bias,
-        )
+        ))
 
         self.out_channel = out_channel
 
