@@ -94,7 +94,10 @@ if __name__ == '__main__':
     else:
         raise ('Unsupported image size')
 
+
+
     top_model, bottom_model = get_top_bottom_models(args, top_input, bottom_input)
+
     top_model.load_weights(args.top_pixelCNN)
     bottom_model.load_weights(args.bottom_pixelCNN)
 
