@@ -117,6 +117,7 @@ class VAE:
 
         self.model = Model(model_input, model_output)
 
+
     def compile(self, learning_rate, r_loss_factor):
         self.learning_rate = learning_rate
 
@@ -227,3 +228,7 @@ class VAE:
                    show_layer_names=True)
         plot_model(self.decoder, to_file=os.path.join(run_folder, 'viz/decoder.png'), show_shapes=True,
                    show_layer_names=True)
+
+
+
+
