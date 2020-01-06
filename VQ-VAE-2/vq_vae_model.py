@@ -45,7 +45,7 @@ class VQVAEModel:
                              )
 
         res1 = layers.Conv2D(filters=self.num_hiddens,
-                             kernel_size=3,
+                             kernel_size=1,
                              strides=1,
                              padding='same',
                              name='residual_1x1')
