@@ -77,7 +77,7 @@ if __name__ == '__main__':
     parser.add_argument('--img_size', type=int)
     parser.add_argument('--norm_setting', type=int, help='0 for 0-1 normalising, 1 for -1,1 normalising')
     parser.add_argument('--sample_size', type=int, default=50000, help='Number of sample used for manifold estimation')
-    parser.add_argument('--dataset', type=str, help='mnist|cifar10|freyface|lsun')
+    parser.add_argument('--dataset', type=str, help='mnist|cifar10|mnist_f|lsun')
     parser.add_argument('--datapath', type=str, help='path to real datasets in case of dataset=freyface|lsun')
     parser.add_argument('--gen_data', type=str, help='')
     parser.add_argument('--feature_net', type=str, default='vgg', help='feature extractor - options: vgg|incepv3')
@@ -87,9 +87,10 @@ if __name__ == '__main__':
 
     if args.dataset == 'mnist':
         (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
-
     elif args.dataset == 'cifar10':
         (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.cifar10.load_data()
+    elif args.dataset == 'mnist_f':
+        (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.fashion_mnist.load_data()
 
 
     #Mask images by labels -> Create a single class
@@ -110,10 +111,10 @@ if __name__ == '__main__':
 
 
     #(train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.cifar10.load_data()
-
-    real_images = np.expand_dims(train_images,-1)
-    # real_images = real_images / 255.
-
+    if args.dataset == 'mnist' or args.dataset == 'mnist_f':
+        real_images = np.expand_dims(train_images,-1)
+    else:
+        real_images = train_images
 
     sess = tf.Session()
     with sess.as_default():

@@ -9,7 +9,7 @@ import tensorflow as tf
 def VAE_grey(RUN_ID, RUN_FOLDER, lr, r_loss, batch_size, epochs, print_n_batches, init_epoch, z_dim, data_name):
     # run params
     SECTION = 'vae'
-    DATA_NAME = data_name if data_name == 'MNIST' else 'FREY_FACE'
+    DATA_NAME = data_name if data_name == 'MNIST' else 'MNIST_F'
     RUN_FOLDER += SECTION + '/'
     if not os.path.exists(RUN_FOLDER):
         os.mkdir(RUN_FOLDER)
@@ -48,13 +48,7 @@ def VAE_grey(RUN_ID, RUN_FOLDER, lr, r_loss, batch_size, epochs, print_n_batches
     if data_name == 'MNIST':
         x_train = datahandler.mnist()
     else:
-        img_size = (28,20,1)
-        data = loadmat(data_name)
-        data = data['ff']
-        data = data.transpose()
-        data = data.reshape((-1, *img_size))
-        data = pad(data,[(0,0),(0,0),(4,4),(0,0)])
-        x_train = data/255.
+        x_train = datahandler.mnist(fashion=True)
     VAE.train(
         x_train,
         batch_size=batch_size,
@@ -139,6 +133,10 @@ if __name__ == '__main__':
         if args.print_n_batches is None:
             args.print_n_batches = 60000 // args.batch_size
         VAE_grey(args.run_id, args.run_folder, args.lr, args.r_loss_factor, args.batch_size, args.epochs, args.print_n_batches, args.init_epoch, args.z_dim, 'MNIST')
+    elif args.dataset == 'mnist_f':
+        if args.print_n_batches is None:
+            args.print_n_batches = 60000 // args.batch_size
+        VAE_grey(args.run_id, args.run_folder, args.lr, args.r_loss_factor, args.batch_size, args.epochs, args.print_n_batches, args.init_epoch, args.z_dim, 'MNIST_F')
     elif args.dataset == 'freyface':
         if args.print_n_batches is None:
             args.print_n_batches = 1965 // args.batch_size
