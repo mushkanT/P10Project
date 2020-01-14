@@ -88,7 +88,7 @@ if __name__ == '__main__':
     if args.dataset == 'mnist':
         (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
 
-    elif args.data == 'cifar10':
+    elif args.dataset == 'cifar10':
         (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.cifar10.load_data()
 
 
