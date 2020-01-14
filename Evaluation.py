@@ -79,7 +79,7 @@ if __name__ == '__main__':
     parser.add_argument('--sample_size', type=int, default=50000, help='Number of sample used for manifold estimation')
     parser.add_argument('--dataset', type=str, help='mnist|cifar10|freyface|lsun')
     parser.add_argument('--datapath', type=str, help='path to real datasets in case of dataset=freyface|lsun')
-    parser.add_argument('--output_path', type=str, help='outputs a csv file containing results and arguments')
+    parser.add_argument('--gen_data', type=str, help='')
     parser.add_argument('--feature_net', type=str, default='vgg', help='feature extractor - options: vgg|incepv3')
     parser.add_argument('--mask', type=int, default=None, help='Optional mask for cifar dataset option')
 
@@ -121,19 +121,15 @@ if __name__ == '__main__':
     with sess.as_default():
         real_images = tf.transpose(real_images, perm=[0, 3, 1, 2]).eval()
 
-    generated_images = np.load('c:/users/palmi/desktop/gen_images.npy')
-
-    generated_images = (generated_images + 1) / 2
-
+    generated_images = np.load(args.gen_data)
+    if args.norm_setting == 1:
+        generated_images = (generated_images + 1) / 2
     generated_images = (generated_images * 255).astype(int)
-
 
     with sess.as_default():
         generated_images = tf.transpose(generated_images, perm=[0, 3, 1, 2]).eval()
 
-    # generated_images = np.concatenate([real_images[:3000],generated_images[:3000]])
-
-    result = evaluate(real_images, generated_images, batch_size=50, feature_model=1)
+    result = evaluate(real_images, generated_images, batch_size=50, feature_model=0)
 
     print('Recall (Variance): ' + str(result['recall'][0]))
     print('Precision (quality): ' + str(result['precision'][0]))
