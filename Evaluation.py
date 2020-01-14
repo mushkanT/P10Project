@@ -109,15 +109,13 @@ if __name__ == '__main__':
 
 
 
-    (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.cifar10.load_data()
+    #(train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.cifar10.load_data()
 
+    real_images = np.expand_dims(train_images,-1)
+    # real_images = real_images / 255.
 
 
     sess = tf.Session()
-
-    real_images = np.concatenate([train_images, test_images])
-    # real_images = real_images / 255.
-
     with sess.as_default():
         real_images = tf.transpose(real_images, perm=[0, 3, 1, 2]).eval()
 
