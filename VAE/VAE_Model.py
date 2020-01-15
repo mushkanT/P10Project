@@ -106,7 +106,7 @@ class VAE:
                 if self.use_dropout:
                     x = Dropout(rate = 0.25)(x)
             else:
-                x = Activation('sigmoid')(x)
+                x = Activation('tanh')(x)
 
         decoder_output = x
 

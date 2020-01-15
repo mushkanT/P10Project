@@ -124,9 +124,9 @@ if __name__ == '__main__':
     if args.norm_setting == 1:
         generated_images = (generated_images + 1) / 2
     generated_images = (generated_images * 255).astype(int)
-
-    with sess.as_default():
-        generated_images = tf.transpose(generated_images, perm=[0, 3, 1, 2]).eval()
+    if generated_images.shape[1] == 32:
+        with sess.as_default():
+            generated_images = tf.transpose(generated_images, perm=[0, 3, 1, 2]).eval()
 
     result = evaluate(real_images, generated_images, batch_size=50, feature_model=0)
 
