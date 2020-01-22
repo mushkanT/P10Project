@@ -53,6 +53,14 @@ def select_models(args):
         generator = nets.cifargan_ups_gen(args)
         discriminator = nets.cifargan_disc(args)
         auxiliary = None
+    elif args.gan_type == 'cifargan_bn':
+        generator = nets.cifargan_bn_gen(args)
+        discriminator = nets.cifargan_bn_disc(args)
+        auxiliary = None
+    elif args.gan_type == 'cifargan_bn_g':
+        generator = nets.cifargan_bn_gen(args)
+        discriminator = nets.cifargan_disc(args)
+        auxiliary = None
     else:
         raise NotImplementedError()
     #generator._name = 'gen'

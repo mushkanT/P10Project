@@ -3,6 +3,8 @@ import numpy as np
 import tensorflow_datasets as tfds
 from scipy.io import loadmat
 import os
+import matplotlib.pyplot as plt
+
 
 
 def select_dataset(args):
@@ -11,21 +13,27 @@ def select_dataset(args):
         # o2i.plot_toy_distribution(dat)
         train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
     elif args.dataset == "mnist":
-        dat = mnist(args.limit_dataset)
+        dat = mnist(args.input_scale, args.limit_dataset)
+        if args.scale_data != 0:
+            dat = tf.image.resize(dat, [args.scale_data, args.scale_data])
+        train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+    elif args.dataset == "mnist-f":
+        dat = mnist_f(args.input_scale, args.limit_dataset)
         if args.scale_data != 0:
             dat = tf.image.resize(dat, [args.scale_data, args.scale_data])
         train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
     elif args.dataset == 'cifar10':
-        dat = cifar10(args.limit_dataset)
+        dat = cifar10(args.input_scale, args.limit_dataset)
         if args.scale_data != 0:
             dat = tf.image.resize(dat, [args.scale_data, args.scale_data])
+        if args.grayscale:
+            dat = tf.image.rgb_to_grayscale(dat)
         train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
     elif args.dataset == 'lsun':
         ImgDataGen = tf.keras.preprocessing.image.ImageDataGenerator(preprocessing_function=preprocess, dtype=tf.dtypes.float32)
-        #train_dat = ImgDataGen.flow_from_directory('C:/Projects/lsun/fuck/', target_size=(args.scale_data, args.scale_data), batch_size=args.batch_size, seed=2019, class_mode=None, interpolation="nearest")
-        #amount = len(os.listdir('C:/Projects/lsun/fuck/data'))
+                
         train_dat = ImgDataGen.flow_from_directory('/user/student.aau.dk/mjuuln15/lsun_data/', target_size=(args.scale_data, args.scale_data), batch_size=args.batch_size, seed=2019, class_mode=None, interpolation="nearest")
-        #amount = len(os.listdir('/user/student.aau.dk/mjuuln15/lsun_data/bedroom'))
+               
         amount = 2554932
         shape = (amount, train_dat.image_shape[0], train_dat.image_shape[1], train_dat.image_shape[2])
     elif args.dataset == 'frey':
@@ -69,7 +77,7 @@ def createToyDataRing(n_mixtures=10, radius=3, Ntrain=5120, std=0.05): #50176
     return dat
 
 
-def mnist(restrict=False):
+def mnist(input_scale, restrict=False):
     (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
     if restrict:
         selected_ix = train_labels == 7
@@ -81,11 +89,33 @@ def mnist(restrict=False):
     # Transform from 28x28 to 32x32
     padding = tf.constant([[0,0], [2,2], [2,2], [0,0]])
     train_images = tf.pad(train_images, padding, "CONSTANT")
-    train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
+    if input_scale:
+        train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
+    else:
+        train_images = train_images / 255 # Normalize the images to [0, 1]    
     return train_images
 
 
-def cifar10(restrict=False):
+def mnist_f(input_scale, restrict=False):
+    (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.fashion_mnist.load_data()
+    if restrict:
+        selected_ix = train_labels == 7
+        selected_ix_test = test_labels == 7
+        train_images = train_images[selected_ix]
+        test_images = test_images[selected_ix_test]
+        train_images = np.concatenate([train_images, test_images])
+    train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
+    # Transform from 28x28 to 32x32
+    padding = tf.constant([[0,0], [2,2], [2,2], [0,0]])
+    train_images = tf.pad(train_images, padding, "CONSTANT")
+    if input_scale:
+        train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
+    else:
+        train_images = train_images / 255 # Normalize the images to [0, 1]
+    return train_images
+
+
+def cifar10(input_scale, restrict=False):
     (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.cifar10.load_data()
     if restrict:
         train_mask = [y[0] == 8 for y in train_labels]
@@ -94,7 +124,10 @@ def cifar10(restrict=False):
         test_images = test_images[test_mask]
     train_images = np.concatenate([train_images, test_images])
     train_images.astype('float32')
-    train_images = (train_images - 127.5) / 127.5  # Normalize the images to [0, 1]
+    if input_scale:
+        train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
+    else:
+        train_images = train_images / 255 # Normalize the images to [0, 1]
     return train_images
 
 

@@ -3,10 +3,11 @@ import numpy as np
 import Nets as nets
 import Data as dt
 import Train as t
+import time
 import Utils as u
 import argparse
 import os.path
-#import o2img as o2i
+import o2img as o2i
 #import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser()
@@ -37,24 +38,27 @@ parser.add_argument('--img_dim',        type=int,           default=32,         
 parser.add_argument('--noise_dim',      type=int,           default=10,         help='size of the latent vector')
 parser.add_argument('--limit_dataset',  type=bool,          default=False,      help='True to limit mnist/cifar dataset to one class')
 parser.add_argument('--scale_data',     type=int,           default=0,          help='Scale images in dataset to MxM')
-parser.add_argument('--label_flipping', type=bool,          default=True,       help='Flip 5% of labels during training of disc')
-parser.add_argument('--label_smooth',   type=bool,          default=True,       help='Smooth the labels of the disc from 1 to 0 occasionally')
-parser.add_argument('--input_noise',    type=bool,          default=True,       help='Add gaussian noise to the discriminator inputs')
+parser.add_argument('--label_flipping', type=bool,          default=False,      help='Flip 5% of labels during training of disc')
+parser.add_argument('--label_smooth',   type=bool,          default=False,      help='Smooth the labels of the disc from 1 to 0 occasionally')
+parser.add_argument('--input_noise',    type=bool,          default=False,      help='Add gaussian noise to the discriminator inputs')
+parser.add_argument('--input_scale',    type=bool,          default=False,      help='True=-1,1 False=0,1')
+parser.add_argument('--purpose',        type=str,		    default='',		    help='purpose of this experiment')
+parser.add_argument('--grayscale',      type=bool,		    default=True)
 
 args = parser.parse_args()
 
 # Debugging
-#args.dataset = 'cifar10'
+args.dataset = 'cifar10'
 #args.scale_data = 64
 #args.batch_size = 2
 #args.noise_dim = 100
 #args.epochs = 10
 #args.disc_iters = 5
 #args.gan_type='dcgan'
-#args.loss='ce'
+args.loss='wgan-gp'
 #args.images_while_training = 1
 #args.limit_dataset = True
-#args.dir = 'C:/Users/marku/Desktop'
+args.dir = 'C:/Users/marku/Desktop'
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
 #o2i.test_trunc_trick(args)
 
@@ -66,8 +70,12 @@ tf.random.set_seed(2019)
 np.random.seed(2019)
 
 # Choose data
+start = time.time()
 train_dat, shape = dt.select_dataset(args)
 args.dataset_dim = shape
+data_load_time = time.time() - start
+if args.input_noise:
+    args.variance = 0.1
 
 # GEN optimiser
 if args.optim_g == "adam":
@@ -90,11 +98,6 @@ else:
 # Choose model
 generator, discriminator, auxiliary = u.select_models(args)
 
-discriminator.summary()
-generator.summary()
-
-
-
 # Write config
 u.write_config(args)
 
@@ -116,11 +119,14 @@ np.save(os.path.join(args.dir, 'itw'), images_while_training)
 np.save(os.path.join(args.dir, 'acc_fakes'), acc_fakes)
 np.save(os.path.join(args.dir, 'acc_reals'), acc_reals)
 
+
+
+
 generator._name='gen'
 discriminator._name='disc'
 
 with open(os.path.join(args.dir, 'config.txt'), 'a') as file:
-    file.write('\nFull training time: '+str(full_training_time)+'\n')
+    file.write('\nFull training time: '+str(full_training_time)+'\nData load time: '+str(data_load_time))
     generator.summary(print_fn=lambda x: file.write(x + '\n'))
     discriminator.summary(print_fn=lambda x: file.write(x + '\n'))
 
