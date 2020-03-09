@@ -2,7 +2,8 @@ import tensorflow as tf
 import numpy as np
 import Nets as nets
 import Data as dt
-import Train as t
+import GAN_trainer as gan_t
+import CoGAN_trainer as cogan_t
 import time
 import Utils as u
 import argparse
@@ -15,7 +16,8 @@ parser = argparse.ArgumentParser()
 # Settings
 parser.add_argument('--dataset',        type=str,           default='toy',      help=' toy | mnist | cifar10 | lsun | frey')
 parser.add_argument('--loss',           type=str,           default='ce',       help='wgan-gp | wgan | ce')
-parser.add_argument('--batch_size',     type=int,           default=100)
+parser.add_argument('--penalty',        type=str,           default='none',       help='none | wgan-gp')
+parser.add_argument('--batch_size',     type=int,           default=128)
 parser.add_argument('--epochs',         type=int,           default=500)
 parser.add_argument('--disc_iters',     type=int,           default=1)
 parser.add_argument('--clip',           type=float,         default=0.01,       help='upper bound for clipping')
@@ -26,16 +28,13 @@ parser.add_argument('--b1',             type=float,         default=0.9)
 parser.add_argument('--b2',             type=float,         default=0.999)
 parser.add_argument('--optim_d',        type=str,           default='adam',     help='adam | sgd | rms')
 parser.add_argument('--optim_g',        type=str,           default='adam',     help='adam | rms')
-parser.add_argument('--num_samples_to_gen', type=int,       default=64)
+parser.add_argument('--num_samples_to_gen', type=int,       default=16)
 parser.add_argument('--images_while_training', type=int,    default=50,         help='Every x epoch to print images while training')
-parser.add_argument('--dir',            type=str,           default='/user/student.aau.dk/mjuuln15/output_data'            , help='Directory to save images, models, weights etc')
+parser.add_argument('--dir',            type=str,           default='/user/student.aau.dk/mjuuln15/output_data',     help='Directory to save images, models, weights etc')
 parser.add_argument('--g_dim',          type=int,           default=256,        help='generator layer dimensions')
 parser.add_argument('--d_dim',          type=int,           default=64,         help='discriminator layer dimensions')
-parser.add_argument('--gan_type',       type=str,           default='dcgan',    help='dcgan | infogan | tfgan | cifargan_u')
-parser.add_argument('--c_cat',          type=int,           default=10,         help='Amount of control variables for infogan')
-parser.add_argument('--c_cont',         type=int,           default=2,          help = 'Amount of continuous control variables for infogan')
-parser.add_argument('--img_dim',        type=int,           default=32,         help='Dataset image dimension')
-parser.add_argument('--noise_dim',      type=int,           default=10,         help='size of the latent vector')
+parser.add_argument('--gan_type',       type=str,           default='cogan',    help='dcgan | infogan | tfgan | cifargan_u | cogan')
+parser.add_argument('--noise_dim',      type=int,           default=100,         help='size of the latent vector')
 parser.add_argument('--limit_dataset',  type=bool,          default=False,      help='True to limit mnist/cifar dataset to one class')
 parser.add_argument('--scale_data',     type=int,           default=0,          help='Scale images in dataset to MxM')
 parser.add_argument('--label_flipping', type=bool,          default=False,      help='Flip 5% of labels during training of disc')
@@ -43,27 +42,28 @@ parser.add_argument('--label_smooth',   type=bool,          default=False,      
 parser.add_argument('--input_noise',    type=bool,          default=False,      help='Add gaussian noise to the discriminator inputs')
 parser.add_argument('--input_scale',    type=bool,          default=False,      help='True=-1,1 False=0,1')
 parser.add_argument('--purpose',        type=str,		    default='',		    help='purpose of this experiment')
-parser.add_argument('--grayscale',      type=bool,		    default=True)
+parser.add_argument('--grayscale',      type=bool,		    default=False)
 
 args = parser.parse_args()
 
 # Debugging
-args.dataset = 'cifar10'
+#args.dataset = 'mnist'
+#args.gan_type = 'cogan'
 #args.scale_data = 64
 #args.batch_size = 2
 #args.noise_dim = 100
-#args.epochs = 10
+#args.epochs = 2
 #args.disc_iters = 5
 #args.gan_type='dcgan'
-args.loss='wgan-gp'
 #args.images_while_training = 1
 #args.limit_dataset = True
-args.dir = 'C:/Users/marku/Desktop'
+#args.dir = 'C:/Users/marku/Desktop/backup'
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
 #o2i.test_trunc_trick(args)
 
 # We will reuse this seed overtime for visualization
 args.seed = tf.random.normal([args.num_samples_to_gen, args.noise_dim])
+#args.seed = np.random.normal(0, 1, args.num_samples_to_gen, 100)
 
 # Set random seeds for reproducability
 tf.random.set_seed(2019)
@@ -71,8 +71,8 @@ np.random.seed(2019)
 
 # Choose data
 start = time.time()
-train_dat, shape = dt.select_dataset(args)
-args.dataset_dim = shape
+train_dat = dt.select_dataset(args)
+args.dataset_dim = train_dat.shape
 data_load_time = time.time() - start
 if args.input_noise:
     args.variance = 0.1
@@ -96,42 +96,77 @@ else:
     raise NotImplementedError()
 
 # Choose model
-generator, discriminator, auxiliary = u.select_models(args)
+if args.gan_type == 'cogan':
+    generator1, generator2, discriminator1, discriminator2 = u.select_cogan_architecture(args)
 
-# Write config
-u.write_config(args)
+    # Write config
+    u.write_config(args)
 
-# Start training
-if len(tf.config.experimental.list_physical_devices('GPU')) > 0:
-    with tf.device('/GPU:0'):
-        print('Using GPU')
-        ganTrainer = t.GANTrainer(generator, discriminator, auxiliary, train_dat)
-        g_loss, d_loss, images_while_training, full_training_time, acc_fakes, acc_reals = ganTrainer.train(args)
+    # Start training
+    if len(tf.config.experimental.list_physical_devices('GPU')) > 0:
+        with tf.device('/GPU:0'):
+            print('Using GPU')
+            ganTrainer = cogan_t.GANTrainer(generator1, generator2, discriminator1, discriminator2, train_dat)
+            g_loss, d_loss, images_while_training, full_training_time, acc_fakes, acc_reals = ganTrainer.train(args)
+    else:
+        print('Using CPU')
+        ganTrainer = cogan_t.GANTrainer(generator1, generator2, discriminator1, discriminator2, train_dat)
+        full_training_time = ganTrainer.train(args)
+
+    #np.save(os.path.join(args.dir, 'acc_fakes'), acc_fakes)
+    #np.save(os.path.join(args.dir, 'acc_reals'), acc_reals)
+
+    generator1._name = 'gen1'
+    discriminator1._name = 'disc1'
+    generator2._name = 'gen2'
+    discriminator2._name = 'disc2'
+
+    with open(os.path.join(args.dir, 'config.txt'), 'a') as file:
+        file.write('\nFull training time: ' + str(full_training_time) + '\nData load time: ' + str(data_load_time))
+        generator1.summary(print_fn=lambda x: file.write(x + '\n'))
+        discriminator1.summary(print_fn=lambda x: file.write(x + '\n'))
+        generator2.summary(print_fn=lambda x: file.write(x + '\n'))
+        discriminator2.summary(print_fn=lambda x: file.write(x + '\n'))
+
+    generator1.save(args.dir + '/generator1')
+    discriminator1.save(args.dir + '/discriminator1')
+    generator2.save(args.dir + '/generator2')
+    discriminator2.save(args.dir + '/discriminator2')
+
 else:
-    print('Using CPU')
-    ganTrainer = t.GANTrainer(generator, discriminator, auxiliary, train_dat)
-    g_loss, d_loss, images_while_training, full_training_time, acc_fakes, acc_reals = ganTrainer.train(args)
+    generator, discriminator = u.select_gan_architecture(args)
+    train_dat = tf.data.Dataset.from_tensor_slices(train_dat).shuffle(train_dat.shape[0]).batch(args.batch_size).repeat()
+    # Write config
+    u.write_config(args)
 
-# Write losses, image values, full training time and save models
-np.save(os.path.join(args.dir, 'g_loss'), g_loss)
-np.save(os.path.join(args.dir, 'd_loss'), d_loss)
-np.save(os.path.join(args.dir, 'itw'), images_while_training)
-np.save(os.path.join(args.dir, 'acc_fakes'), acc_fakes)
-np.save(os.path.join(args.dir, 'acc_reals'), acc_reals)
+    # Start training
+    if len(tf.config.experimental.list_physical_devices('GPU')) > 0:
+        with tf.device('/GPU:0'):
+            print('Using GPU')
+            ganTrainer = gan_t.GANTrainer(generator, discriminator, train_dat)
+            g_loss, d_loss, images_while_training, full_training_time, acc_fakes, acc_reals = ganTrainer.train(args)
+    else:
+        print('Using CPU')
+        ganTrainer = gan_t.GANTrainer(generator, discriminator, train_dat)
+        g_loss, d_loss, images_while_training, full_training_time, acc_fakes, acc_reals = ganTrainer.train(args)
 
+    # Write losses, image values, full training time and save models
+    np.save(os.path.join(args.dir, 'g_loss'), g_loss)
+    np.save(os.path.join(args.dir, 'd_loss'), d_loss)
+    np.save(os.path.join(args.dir, 'itw'), images_while_training)
+    np.save(os.path.join(args.dir, 'acc_fakes'), acc_fakes)
+    np.save(os.path.join(args.dir, 'acc_reals'), acc_reals)
 
+    generator._name='gen'
+    discriminator._name='disc'
 
+    with open(os.path.join(args.dir, 'config.txt'), 'a') as file:
+        file.write('\nFull training time: '+str(full_training_time)+'\nData load time: '+str(data_load_time))
+        generator.summary(print_fn=lambda x: file.write(x + '\n'))
+        discriminator.summary(print_fn=lambda x: file.write(x + '\n'))
 
-generator._name='gen'
-discriminator._name='disc'
-
-with open(os.path.join(args.dir, 'config.txt'), 'a') as file:
-    file.write('\nFull training time: '+str(full_training_time)+'\nData load time: '+str(data_load_time))
-    generator.summary(print_fn=lambda x: file.write(x + '\n'))
-    discriminator.summary(print_fn=lambda x: file.write(x + '\n'))
-
-generator.save(args.dir+'/generator')
-discriminator.save(args.dir+'/discriminator')
+    generator.save(args.dir+'/generator')
+    discriminator.save(args.dir+'/discriminator')
 
 
 

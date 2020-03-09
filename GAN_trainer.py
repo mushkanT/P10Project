@@ -15,12 +15,10 @@ class GANTrainer(object):
     def __init__(self,
                  generator,
                  discriminator,
-                 auxiliary,
                  dataset
                  ):
         self.generator = generator
         self.discriminator = discriminator
-        self.auxiliary = auxiliary
         self.dataset = dataset
 
     def train_discriminator(self, real_data, args):
@@ -137,7 +135,6 @@ class GANTrainer(object):
         args.gen_optimizer.apply_gradients(zip(gradients_of_generator, self.generator.trainable_variables))
         return gen_loss
 
-
     def train(self, args):
         gen_loss = []
         disc_loss = []
@@ -152,13 +149,6 @@ class GANTrainer(object):
             it = self.dataset
         batches_pr_epoch = args.dataset_dim[0] // args.batch_size
         n_steps = batches_pr_epoch // args.disc_iters  # Steps per epoch (Generator iterations)
-
-        if self.auxiliary is None:
-            train_d = self.train_discriminator
-            train_g = self.train_generator
-        else:
-            train_d = self.train_discriminator_infogan
-            train_g = self.train_generator_infogan
 
         # Image before training
         if args.images_while_training != 0:
@@ -182,7 +172,7 @@ class GANTrainer(object):
                         batch = tf.dtypes.cast(batch, dtype=tf.float32)
                     if batch.shape[0] != args.batch_size:
                         continue
-                    d_loss, acc_fake, acc_real = train_d(batch, args)
+                    d_loss, acc_fake, acc_real = self.train_discriminator(batch, args)
                     disc_iters_loss.append(d_loss)
                     acc_fakes.append(acc_fake)
                     acc_reals.append(acc_real)
@@ -190,7 +180,7 @@ class GANTrainer(object):
    
                     #disc_iters_loss.append(train_d(batch, args))
 
-                gen_loss.append(tf.reduce_mean(train_g(args)).numpy())
+                gen_loss.append(tf.reduce_mean(self.train_generator(args)).numpy())
                 disc_loss.append(tf.reduce_mean(disc_iters_loss).numpy())
 
             full_training_time += time.time()-start
