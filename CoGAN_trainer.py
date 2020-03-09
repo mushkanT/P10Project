@@ -15,7 +15,6 @@ class GANTrainer(object):
 
     def __init__(self, g1, g2, d1, d2, data):
         self.domain2 = 1
-        self.cross_entropy = tf.keras.losses.BinaryCrossentropy()
         self.hist_g1 = []
         self.hist_g2 = []
         self.hist_d1 = []
@@ -62,7 +61,7 @@ class GANTrainer(object):
             batch2 = next(it2)
 
             # Sample noise as generator input
-            noise = np.random.normal(0, 1, (args.batch_size, 100))
+            noise = tf.random.normal([args.batch_size, 100])
 
             # ----------------------
             #  Train Discriminators
@@ -97,7 +96,7 @@ class GANTrainer(object):
 
                 # Calc loss and penalty
                 d2_loss = d_loss_fn(disc_fake2, disc_real2)
-                gp2 = p.calc_penalty(gen_batch1, batch1, self.d1, args)  # if loss is not wgan-gp then gp=0
+                gp2 = p.calc_penalty(gen_batch2, batch2, self.d2, args)  # if loss is not wgan-gp then gp=0
                 d2_loss = d2_loss + gp2 * args.gp_lambda
             gradients_of_discriminator = tape.gradient(d2_loss, self.d2.trainable_variables)
             args.gen_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d2.trainable_variables))
@@ -157,7 +156,7 @@ class GANTrainer(object):
             self.hist_g1.append(g1_loss)
             self.hist_g2.append(g2_loss)
 
-            #print("%d [D1 loss: %f] [D2 loss: %f] [G1 loss: %f] [G2 loss: %f]" % (epoch, d1_loss, d2_loss, g1_loss, g2_loss))
+            print("%d [D1 loss: %f] [D2 loss: %f] [G1 loss: %f] [G2 loss: %f]" % (epoch, d1_loss, d2_loss, g1_loss, g2_loss))
 
             # If at save interval => save generated image samples
             if epoch % args.images_while_training == 0:
@@ -167,7 +166,6 @@ class GANTrainer(object):
 
     def sample_images(self, epoch, seed, dir):
         r, c = 4, 4
-        # noise = np.random.normal(0, 1, (r * int(c/2), 100))
         gen_batch1 = self.g1.predict(seed)
         gen_batch2 = self.g2.predict(seed)
 

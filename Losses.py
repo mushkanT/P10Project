@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-k_cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+k_cross_entropy = tf.keras.losses.BinaryCrossentropy()
 
 
 def cross_entropy_gen(fake_output):

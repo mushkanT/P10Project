@@ -24,8 +24,16 @@ def write_config(args):
 
 
 def select_cogan_architecture(args):
-    generator1, generator2 = nets.cogan_generators_conv(args)
-    discriminator1, discriminator2 = nets.cogan_discriminators_conv(args)
+    if args.g_arch == 'conv':
+        generator1, generator2 = nets.cogan_generators_conv(args)
+    elif args.g_arch == 'fc':
+        generator1, generator2 = nets.cogan_generators_fc(args)
+
+    if args.d_arch == 'conv':
+        discriminator1, discriminator2 = nets.cogan_discriminators_conv(args)
+    elif args.d_arch == 'fc':
+        discriminator1, discriminator2 = nets.cogan_discriminators_fc(args)
+
     return generator1, generator2, discriminator1, discriminator2
 
 

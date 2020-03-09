@@ -8,7 +8,7 @@ import time
 import Utils as u
 import argparse
 import os.path
-import o2img as o2i
+#import o2img as o2i
 #import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser()
@@ -22,9 +22,9 @@ parser.add_argument('--epochs',         type=int,           default=500)
 parser.add_argument('--disc_iters',     type=int,           default=1)
 parser.add_argument('--clip',           type=float,         default=0.01,       help='upper bound for clipping')
 parser.add_argument('--gp_lambda',      type=int,           default=10)
-parser.add_argument('--lr_d',           type=float,         default=1e-4)
-parser.add_argument('--lr_g',           type=float,         default=1e-4)
-parser.add_argument('--b1',             type=float,         default=0.9)
+parser.add_argument('--lr_d',           type=float,         default=0.0002)
+parser.add_argument('--lr_g',           type=float,         default=0.0002)
+parser.add_argument('--b1',             type=float,         default=0.5)
 parser.add_argument('--b2',             type=float,         default=0.999)
 parser.add_argument('--optim_d',        type=str,           default='adam',     help='adam | sgd | rms')
 parser.add_argument('--optim_g',        type=str,           default='adam',     help='adam | rms')
@@ -34,21 +34,23 @@ parser.add_argument('--dir',            type=str,           default='/user/stude
 parser.add_argument('--g_dim',          type=int,           default=256,        help='generator layer dimensions')
 parser.add_argument('--d_dim',          type=int,           default=64,         help='discriminator layer dimensions')
 parser.add_argument('--gan_type',       type=str,           default='cogan',    help='dcgan | infogan | tfgan | cifargan_u | cogan')
-parser.add_argument('--noise_dim',      type=int,           default=100,         help='size of the latent vector')
+parser.add_argument('--g_arch',         type=str,           default='fc',       help='conv | fc')
+parser.add_argument('--d_arch',         type=str,           default='fc',       help='conv | fc')
+parser.add_argument('--noise_dim',      type=int,           default=100,        help='size of the latent vector')
 parser.add_argument('--limit_dataset',  type=bool,          default=False,      help='True to limit mnist/cifar dataset to one class')
 parser.add_argument('--scale_data',     type=int,           default=0,          help='Scale images in dataset to MxM')
 parser.add_argument('--label_flipping', type=bool,          default=False,      help='Flip 5% of labels during training of disc')
 parser.add_argument('--label_smooth',   type=bool,          default=False,      help='Smooth the labels of the disc from 1 to 0 occasionally')
 parser.add_argument('--input_noise',    type=bool,          default=False,      help='Add gaussian noise to the discriminator inputs')
-parser.add_argument('--input_scale',    type=bool,          default=False,      help='True=-1,1 False=0,1')
+parser.add_argument('--input_scale',    type=bool,          default=True,      help='True=-1,1 False=0,1')
 parser.add_argument('--purpose',        type=str,		    default='',		    help='purpose of this experiment')
 parser.add_argument('--grayscale',      type=bool,		    default=False)
 
 args = parser.parse_args()
 
 # Debugging
-#args.dataset = 'mnist'
-#args.gan_type = 'cogan'
+args.dataset = 'mnist'
+args.gan_type = 'cogan'
 #args.scale_data = 64
 #args.batch_size = 2
 #args.noise_dim = 100
@@ -57,7 +59,7 @@ args = parser.parse_args()
 #args.gan_type='dcgan'
 #args.images_while_training = 1
 #args.limit_dataset = True
-#args.dir = 'C:/Users/marku/Desktop/backup'
+args.dir = 'C:/Users/marku/Desktop/gan_training_output'
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
 #o2i.test_trunc_trick(args)
 
@@ -112,9 +114,6 @@ if args.gan_type == 'cogan':
         print('Using CPU')
         ganTrainer = cogan_t.GANTrainer(generator1, generator2, discriminator1, discriminator2, train_dat)
         full_training_time = ganTrainer.train(args)
-
-    #np.save(os.path.join(args.dir, 'acc_fakes'), acc_fakes)
-    #np.save(os.path.join(args.dir, 'acc_reals'), acc_reals)
 
     generator1._name = 'gen1'
     discriminator1._name = 'disc1'

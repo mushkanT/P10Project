@@ -6,7 +6,6 @@ import os
 import matplotlib.pyplot as plt
 
 
-
 def select_dataset(args):
     if args.dataset == "toy":
         dat = createToyDataRing()

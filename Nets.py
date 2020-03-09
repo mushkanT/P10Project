@@ -23,7 +23,6 @@ init = 'glorot_uniform'
 #dcgan without batchnorm in disc (wgan, wgan-gp)
 bn_mom = 0.99
 
-
 # 32x32
 def cifargan_gen(args):
     g_dim = args.g_dim
@@ -199,7 +198,7 @@ def cogan_generators_conv(args):
 
 
 def cogan_generators_fc(args):
-    img_shape = (args.datset_dim[1], args.datset_dim[2], args.datset_dim[3])
+    img_shape = (args.dataset_dim[1], args.dataset_dim[2], args.dataset_dim[3])
 
     # Shared weights between generators
     model = keras.Sequential()
@@ -226,8 +225,6 @@ def cogan_generators_fc(args):
     g2 = tf.keras.layers.BatchNormalization(momentum=0.8)(g2)
     g2 = tf.keras.layers.Dense(np.prod(img_shape), activation='tanh')(g2)
     img2 = tf.keras.layers.Reshape(img_shape)(g2)
-
-    model.summary()
 
     return keras.Model(noise, img1), keras.Model(noise, img2)
 
