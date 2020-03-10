@@ -1,10 +1,7 @@
 from __future__ import print_function, division
-import scipy
 import matplotlib.pyplot as plt
 import tensorflow as tf
-import cv2
 import time
-import keras.backend as K
 import numpy as np
 import os
 import Utils as u
@@ -13,13 +10,14 @@ import Penalties as p
 
 class GANTrainer(object):
 
-    def __init__(self, g1, g2, d1, d2, data):
+    def __init__(self, g1, g2, d1, d2, domain1, domain2):
         self.domain2 = 1
         self.hist_g1 = []
         self.hist_g2 = []
         self.hist_d1 = []
         self.hist_d2 = []
-        self.data = data
+        self.X1 = domain1
+        self.X2 = domain2
         self.full_training_time = 0
 
         self.d1, self.d2 = d1, d2
@@ -27,28 +25,8 @@ class GANTrainer(object):
 
     def train(self, args):
 
-        # Split dataset
-        X1 = self.data[:int(self.data.shape[0] / 2)]
-        X2 = self.data[int(self.data.shape[0] / 2):]
-
-        # Create 2nd domain dataset: 1=rotate, 2=edge
-        if self.domain2 == 1:
-            X2 = scipy.ndimage.interpolation.rotate(X2, 90, axes=(1, 2))
-        elif self.domain2 == 2:
-            edges = np.zeros((X2.shape[0], 32, 32, 1))
-            for idx, i in enumerate(X2):
-                i = np.squeeze(i)
-                dilation = cv2.dilate(i, np.ones((3, 3), np.uint8), iterations=1)
-                edge = dilation - i
-                edges[idx - X2.shape[0], :, :, 0] = edge
-            X2 = tf.convert_to_tensor(edges)
-
-        X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(X1.shape[0]).batch(
-            args.batch_size).repeat()
-        X2 = tf.data.Dataset.from_tensor_slices(X2).shuffle(X2.shape[0]).batch(
-            args.batch_size).repeat()
-        it1 = iter(X1)
-        it2 = iter(X2)
+        it1 = iter(self.X1)
+        it2 = iter(self.X2)
 
         # Set loss functions
         d_loss_fn, g_loss_fn = u.set_losses(args)
@@ -69,7 +47,6 @@ class GANTrainer(object):
 
             # d1
             with tf.GradientTape() as tape:
-
                 # Generate a batch of new images
                 gen_batch1 = self.g1(noise, training=True)
 
@@ -83,10 +60,9 @@ class GANTrainer(object):
                 d1_loss = d1_loss + gp1 * args.gp_lambda
             gradients_of_discriminator = tape.gradient(d1_loss, self.d1.trainable_variables)
             args.gen_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d1.trainable_variables))
-            
+
             # d2
             with tf.GradientTape() as tape:
-
                 # Generate a batch of new images
                 gen_batch2 = self.g2(noise, training=True)
 
@@ -106,6 +82,7 @@ class GANTrainer(object):
             # ------------------
             
             with tf.GradientTape() as tape:
+                tape.watch(noise)
                 gen_fake = self.g1(noise, training=True)
                 disc_fake = self.d1(gen_fake, training=True)
                 g1_loss = g_loss_fn(disc_fake)
@@ -113,6 +90,7 @@ class GANTrainer(object):
             args.disc_optimizer.apply_gradients(zip(gradients_of_generator1, self.g1.trainable_variables))
 
             with tf.GradientTape() as tape:
+                tape.watch(noise)
                 gen_fake = self.g2(noise, training=True)
                 disc_fake = self.d2(gen_fake, training=True)
                 g2_loss = g_loss_fn(disc_fake)

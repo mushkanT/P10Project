@@ -4,30 +4,32 @@ import tensorflow_datasets as tfds
 from scipy.io import loadmat
 import os
 import matplotlib.pyplot as plt
+import scipy
+import cv2
 
 
-def select_dataset(args):
+def select_dataset_gan(args):
     if args.dataset == "toy":
         dat = createToyDataRing()
         # o2i.plot_toy_distribution(dat)
-        #train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+        train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
     elif args.dataset == "mnist":
         dat = mnist(args.input_scale, args.limit_dataset)
         if args.scale_data != 0:
             dat = tf.image.resize(dat, [args.scale_data, args.scale_data])
-        #train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+        train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
     elif args.dataset == "mnist-f":
         dat = mnist_f(args.input_scale, args.limit_dataset)
         if args.scale_data != 0:
             dat = tf.image.resize(dat, [args.scale_data, args.scale_data])
-        #train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+        train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
     elif args.dataset == 'cifar10':
         dat = cifar10(args.input_scale, args.limit_dataset)
         if args.scale_data != 0:
             dat = tf.image.resize(dat, [args.scale_data, args.scale_data])
         if args.grayscale:
             dat = tf.image.rgb_to_grayscale(dat)
-        #train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+        train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
     elif args.dataset == 'lsun':
         ImgDataGen = tf.keras.preprocessing.image.ImageDataGenerator(preprocessing_function=preprocess, dtype=tf.dtypes.float32)
                 
@@ -45,11 +47,18 @@ def select_dataset(args):
         data = np.pad(data, [(0, 0), (2, 2), (6, 6), (0, 0)], 'constant')
         # dat = data / 255.
         dat = (data - 127.5) / 127.5
-        #train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+        train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
     else:
         raise NotImplementedError()
+    if args.dataset != 'lsun':
+        shape = dat.shape
+    return train_dat, shape
 
-    return dat
+
+def select_dataset_cogan(args):
+    if 'mnist' in args.domain1 and 'mnist' in args.domain2:
+        X1, X2 = mnist_cogan(args.batch_size, args.domain1, args.domain2)
+    return X1, X2
 
 
 def createToyDataRing(n_mixtures=10, radius=3, Ntrain=5120, std=0.05): #50176
@@ -132,3 +141,37 @@ def cifar10(input_scale, restrict=False):
 def preprocess(img):
     img = (img - 127.5) / 127.5
     return img
+
+
+def mnist_cogan(batch_size, d1, d2):
+    (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
+
+    # 28x28 -> 32x32
+    train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
+    padding = tf.constant([[0,0], [2,2], [2,2], [0,0]])
+    train_images = tf.pad(train_images, padding, "CONSTANT")
+
+    # Split dataset
+    X1 = train_images[:int(train_images.shape[0] / 2)]
+    X2 = train_images[int(train_images.shape[0] / 2):]
+
+    # Create 2nd domain dataset: 1=rotate, 2=edge
+    if d2 == 'mnist_rotate':
+        X2 = scipy.ndimage.interpolation.rotate(X2, 90, axes=(1, 2))
+    elif d2 == 'mnist_edge':
+        edges = np.zeros((X2.shape[0], 32, 32, 1))
+        for idx, i in enumerate(X2):
+            i = np.squeeze(i)
+            dilation = cv2.dilate(i, np.ones((3, 3), np.uint8), iterations=1)
+            edge = dilation - i
+            edges[idx - X2.shape[0], :, :, 0] = edge
+        X2 = tf.convert_to_tensor(edges)
+
+    X1 = (X1 - 127.5) / 127.5  # Normalize the images to [-1, 1]
+    X2 = (X2 - 127.5) / 127.5  # Normalize the images to [-1, 1]
+
+    X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(X1.shape[0]).batch(
+        batch_size).repeat()
+    X2 = tf.data.Dataset.from_tensor_slices(X2).shuffle(X2.shape[0]).batch(
+        batch_size).repeat()
+    return X1, X2
