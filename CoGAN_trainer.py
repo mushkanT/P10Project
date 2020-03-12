@@ -35,11 +35,12 @@ class GANTrainer(object):
             start = time.time()
 
             # Select a random batch of images
-            batch1 = next(it1)
-            batch2 = next(it2)
+            batch1 = next(it1)[0]
+            batch2 = next(it2)[0]
 
             # Sample noise as generator input
             noise = tf.random.normal([args.batch_size, 100])
+            #gen_noise = tf.random.normal([args.batch_size, 100])
 
             # ----------------------
             #  Train Discriminators
@@ -59,7 +60,7 @@ class GANTrainer(object):
                 gp1 = p.calc_penalty(gen_batch1, batch1, self.d1, args)  # if loss is not wgan-gp then gp=0
                 d1_loss = d1_loss + gp1 * args.gp_lambda
             gradients_of_discriminator = tape.gradient(d1_loss, self.d1.trainable_variables)
-            args.gen_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d1.trainable_variables))
+            args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d1.trainable_variables))
 
             # d2
             with tf.GradientTape() as tape:
@@ -75,27 +76,25 @@ class GANTrainer(object):
                 gp2 = p.calc_penalty(gen_batch2, batch2, self.d2, args)  # if loss is not wgan-gp then gp=0
                 d2_loss = d2_loss + gp2 * args.gp_lambda
             gradients_of_discriminator = tape.gradient(d2_loss, self.d2.trainable_variables)
-            args.gen_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d2.trainable_variables))
+            args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d2.trainable_variables))
 
             # ------------------
             #  Train Generators
             # ------------------
             
             with tf.GradientTape() as tape:
-                tape.watch(noise)
                 gen_fake = self.g1(noise, training=True)
                 disc_fake = self.d1(gen_fake, training=True)
                 g1_loss = g_loss_fn(disc_fake)
             gradients_of_generator1 = tape.gradient(g1_loss, self.g1.trainable_variables)
-            args.disc_optimizer.apply_gradients(zip(gradients_of_generator1, self.g1.trainable_variables))
+            args.gen_optimizer.apply_gradients(zip(gradients_of_generator1, self.g1.trainable_variables))
 
             with tf.GradientTape() as tape:
-                tape.watch(noise)
                 gen_fake = self.g2(noise, training=True)
                 disc_fake = self.d2(gen_fake, training=True)
                 g2_loss = g_loss_fn(disc_fake)
             gradients_of_generator2 = tape.gradient(g2_loss, self.g2.trainable_variables)
-            args.disc_optimizer.apply_gradients(zip(gradients_of_generator2, self.g2.trainable_variables))
+            args.gen_optimizer.apply_gradients(zip(gradients_of_generator2, self.g2.trainable_variables))
 
             # Compute averages of generator gradients and use those for updates of shared weights
             '''
@@ -108,8 +107,8 @@ class GANTrainer(object):
             gg1.extend(gradients_of_generator1[8:])
             gg2.extend(GoGs)
             gg2.extend(gradients_of_generator2[8:])
-            self.optimizer.apply_gradients(zip(gg1, self.g1.trainable_variables))
-            self.optimizer.apply_gradients(zip(gg2, self.g2.trainable_variables))
+            args.gen_optimizer.apply_gradients(zip(gg1, self.g1.trainable_variables))
+            args.gen_optimizer.apply_gradients(zip(gg2, self.g2.trainable_variables))
             '''
 
             # Add time taken for this epoch to full training time (does not count sampling, weight checking as 'training time')

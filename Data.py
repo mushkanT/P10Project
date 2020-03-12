@@ -3,7 +3,6 @@ import numpy as np
 import tensorflow_datasets as tfds
 from scipy.io import loadmat
 import os
-import matplotlib.pyplot as plt
 import scipy
 import cv2
 
@@ -55,10 +54,44 @@ def select_dataset_gan(args):
     return train_dat, shape
 
 
+# TODO tror der skal laves if sætning pr kombination af datasets - virker ikke som om der er en nem måde at generalisere det på <.<
 def select_dataset_cogan(args):
+    # Same dataset
     if 'mnist' in args.domain1 and 'mnist' in args.domain2:
         X1, X2 = mnist_cogan(args.batch_size, args.domain1, args.domain2)
+    else:
+        # Domain 1
+        data, info = tfds.load(args.domain1, with_info=True, as_supervised=True)
+        X1, test = data['train'], data['test']
+        X1 = X1.map(format_example1)
+        num_examples = info.splits['train'].num_examples
+        X1 = X1.shuffle(num_examples).batch(args.batch_size).repeat()
+
+        # Domain 2
+        data, info = tfds.load(args.domain2, with_info=True, as_supervised=True)
+        X2, test = data['train'], data['test']
+        X2 = X2.map(format_example2)
+        num_examples = info.splits['train'].num_examples
+        X2 = X2.shuffle(num_examples).batch(args.batch_size).repeat()
     return X1, X2
+
+
+def format_example1(image, label):
+    image = tf.cast(image, tf.float32)
+    # Normalize the pixel values
+    image = (image - 127.5) / 127.5
+    # Resize the image
+    image = tf.image.resize(image, (32, 32))
+    image = tf.image.grayscale_to_rgb(image)
+    return (image, label)
+
+def format_example2(image, label):
+    image = tf.cast(image, tf.float32)
+    # Normalize the pixel values
+    image = (image - 127.5) / 127.5
+    # Resize the image
+    image = tf.image.resize(image, (32, 32))
+    return (image, label)
 
 
 def createToyDataRing(n_mixtures=10, radius=3, Ntrain=5120, std=0.05): #50176

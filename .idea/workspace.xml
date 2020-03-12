@@ -38,7 +38,7 @@
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="png" value="62" />
-          <entry key="py" value="286" />
+          <entry key="py" value="291" />
           <entry key="txt" value="1" />
         </counts>
       </usages-collector>
@@ -46,20 +46,20 @@
         <counts>
           <entry key="Image" value="62" />
           <entry key="PLAIN_TEXT" value="1" />
-          <entry key="Python" value="286" />
+          <entry key="Python" value="291" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="dummy" value="17" />
-          <entry key="py" value="57444" />
+          <entry key="py" value="59954" />
           <entry key="txt" value="5" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="22" />
-          <entry key="Python" value="57444" />
+          <entry key="Python" value="59954" />
         </counts>
       </usages-collector>
     </session>
@@ -97,11 +97,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="316">
-              <caret line="60" column="20" lean-forward="true" selection-start-line="60" selection-start-column="20" selection-end-line="60" selection-end-column="20" />
+            <state relative-caret-position="110">
+              <caret line="103" column="20" lean-forward="true" selection-start-line="103" selection-start-column="20" selection-end-line="103" selection-end-column="20" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
               </folding>
@@ -109,14 +109,14 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/CoGAN_trainer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1258">
-              <caret line="61" column="12" selection-start-line="61" selection-start-column="12" selection-end-line="61" selection-end-column="12" />
+            <state relative-caret-position="144">
+              <caret line="49" selection-start-line="49" selection-end-line="49" />
               <folding>
                 <element signature="e#0#47#0" expanded="true" />
-                <marker date="1583833435961" expanded="true" signature="213:559" ph="..." />
+                <marker date="1584053062631" expanded="true" signature="213:559" ph="..." />
               </folding>
             </state>
           </provider>
@@ -125,20 +125,31 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Nets.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="462">
-              <caret line="226" column="49" selection-start-line="226" selection-start-column="49" selection-end-line="226" selection-end-column="49" />
+            <state relative-caret-position="316">
+              <caret line="282" selection-start-line="282" selection-end-line="282" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
-                <element signature="e#181#534#0" />
-                <element signature="e#4595#5881#0" />
-                <element signature="e#5913#6905#0" />
-                <element signature="e#6940#8040#0" />
-                <element signature="e#8069#9022#0" />
-                <element signature="e#9049#9435#0" />
-                <element signature="e#9462#9839#0" />
-                <element signature="e#9895#11407#0" />
-                <element signature="e#12815#14152#0" />
-                <element signature="e#14202#15029#0" />
+                <element signature="e#6034#7465#0" />
+                <element signature="e#7503#8851#0" />
+                <element signature="e#10188#11492#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Data.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="129">
+              <caret line="56" selection-start-line="56" selection-end-line="56" />
+              <folding>
+                <element signature="e#0#23#0" expanded="true" />
+                <element signature="e#209#2677#0" />
+                <element signature="e#2735#3433#0" />
+                <element signature="e#5242#5872#0" />
+                <element signature="e#5900#5942#0" />
+                <marker date="1584056030594" expanded="true" signature="3648:4172" ph="..." />
+                <marker date="1584056030594" expanded="true" signature="7962:7963" ph="..." />
               </folding>
             </state>
           </provider>
@@ -147,11 +158,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="26" selection-start-line="26" selection-end-line="26" />
+            <state relative-caret-position="374">
+              <caret line="34" selection-start-line="34" selection-end-line="34" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
-                <marker date="1583791573798" expanded="true" signature="1251:1253" ph="..." />
+                <marker date="1584054133031" expanded="true" signature="1251:1253" ph="..." />
               </folding>
             </state>
           </provider>
@@ -173,47 +184,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/o2img.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="99">
+            <state relative-caret-position="507">
               <caret line="187" column="20" selection-start-line="187" selection-start-column="20" selection-end-line="187" selection-end-column="64" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
                 <element signature="e#711#1010#0" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Data.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
-              <caret line="152" selection-start-line="152" selection-end-line="152" />
-              <folding>
-                <element signature="e#0#23#0" expanded="true" />
-                <element signature="e#209#2677#0" />
-                <element signature="e#2735#3433#0" />
-                <element signature="e#3480#4310#0" />
-                <element signature="e#4359#5193#0" />
-                <element signature="e#5242#5872#0" />
-                <element signature="e#5900#5942#0" />
-                <marker date="1583832315340" expanded="true" signature="2711:2866" ph="..." />
-                <marker date="1583832315340" expanded="true" signature="6656:6657" ph="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/Desktop/backup/cogan.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="705">
-              <caret line="192" selection-start-line="192" selection-end-line="192" />
-              <folding>
-                <element signature="e#0#47#0" expanded="true" />
-                <element signature="e#1134#2646#0" />
-                <element signature="e#2692#4002#0" />
-                <element signature="e#4054#5391#0" />
-                <element signature="e#5441#6268#0" />
               </folding>
             </state>
           </provider>
@@ -230,9 +205,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>[0]</find>
-      <find>input_noise</find>
-      <find>plot_toy</find>
       <find>.png</find>
       <find>.pdf</find>
       <find>pdf</find>
@@ -260,6 +232,9 @@
       <find>dir</find>
       <find>data</find>
       <find>in</find>
+      <find>noise</find>
+      <find>scale_da</find>
+      <find>dataset_dim</find>
     </findStrings>
     <replaceStrings>
       <replace>n_dim</replace>
@@ -304,13 +279,13 @@
         <option value="$PROJECT_DIR$/Train.py" />
         <option value="$PROJECT_DIR$/GAN_trainer.py" />
         <option value="$PROJECT_DIR$/Penalties.py" />
-        <option value="$PROJECT_DIR$/Nets.py" />
         <option value="$PROJECT_DIR$/Losses.py" />
-        <option value="$PROJECT_DIR$/Utils.py" />
         <option value="$USER_HOME$/Desktop/backup/cogan.py" />
+        <option value="$PROJECT_DIR$/CoGAN_trainer.py" />
+        <option value="$PROJECT_DIR$/Utils.py" />
         <option value="$PROJECT_DIR$/Data.py" />
         <option value="$PROJECT_DIR$/Main.py" />
-        <option value="$PROJECT_DIR$/CoGAN_trainer.py" />
+        <option value="$PROJECT_DIR$/Nets.py" />
       </list>
     </option>
   </component>
@@ -597,13 +572,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/CoGAN_trainer.py</url>
-          <line>48</line>
-          <option name="timeStamp" value="486" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/CoGAN_trainer.py</url>
-          <line>64</line>
-          <option name="timeStamp" value="491" />
+          <line>49</line>
+          <option name="timeStamp" value="539" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -770,13 +740,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow_core/python/ops/array_ops.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="200">
-          <caret line="665" selection-start-line="665" selection-end-line="665" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_imps/_pydev_execfile.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="289">
@@ -871,59 +834,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Losses.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="10" column="45" selection-start-line="10" selection-start-column="25" selection-end-line="10" selection-end-column="45" />
-          <folding>
-            <marker date="1583789168074" expanded="true" signature="117:207" ph="..." />
-            <marker date="1583789168074" expanded="true" signature="605:689" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="26" selection-start-line="26" selection-end-line="26" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-            <marker date="1583791573798" expanded="true" signature="1251:1253" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Nets.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="462">
-          <caret line="226" column="49" selection-start-line="226" selection-start-column="49" selection-end-line="226" selection-end-column="49" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-            <element signature="e#181#534#0" />
-            <element signature="e#4595#5881#0" />
-            <element signature="e#5913#6905#0" />
-            <element signature="e#6940#8040#0" />
-            <element signature="e#8069#9022#0" />
-            <element signature="e#9049#9435#0" />
-            <element signature="e#9462#9839#0" />
-            <element signature="e#9895#11407#0" />
-            <element signature="e#12815#14152#0" />
-            <element signature="e#14202#15029#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/o2img.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="99">
-          <caret line="187" column="20" selection-start-line="187" selection-start-column="20" selection-end-line="187" selection-end-column="64" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-            <element signature="e#711#1010#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/Desktop/backup/cogan.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="705">
@@ -948,20 +858,31 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Data.py">
+    <entry file="file://$PROJECT_DIR$/Losses.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="152" selection-start-line="152" selection-end-line="152" />
+        <state relative-caret-position="170">
+          <caret line="10" column="45" selection-start-line="10" selection-start-column="25" selection-end-line="10" selection-end-column="45" />
+          <folding>
+            <marker date="1583789168074" expanded="true" signature="117:207" ph="..." />
+            <marker date="1583789168074" expanded="true" signature="605:689" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow_core/python/ops/array_ops.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="200">
+          <caret line="2784" selection-start-line="2784" selection-end-line="2784" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/o2img.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="507">
+          <caret line="187" column="20" selection-start-line="187" selection-start-column="20" selection-end-line="187" selection-end-column="64" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
-            <element signature="e#209#2677#0" />
-            <element signature="e#2735#3433#0" />
-            <element signature="e#3480#4310#0" />
-            <element signature="e#4359#5193#0" />
-            <element signature="e#5242#5872#0" />
-            <element signature="e#5900#5942#0" />
-            <marker date="1583832315340" expanded="true" signature="2711:2866" ph="..." />
-            <marker date="1583832315340" expanded="true" signature="6656:6657" ph="..." />
+            <element signature="e#711#1010#0" />
           </folding>
         </state>
       </provider>
@@ -973,23 +894,63 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Main.py">
+    <entry file="file://$PROJECT_DIR$/Utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="316">
-          <caret line="60" column="20" lean-forward="true" selection-start-line="60" selection-start-column="20" selection-end-line="60" selection-end-column="20" />
+        <state relative-caret-position="374">
+          <caret line="34" selection-start-line="34" selection-end-line="34" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
+            <marker date="1584054133031" expanded="true" signature="1251:1253" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Data.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="129">
+          <caret line="56" selection-start-line="56" selection-end-line="56" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+            <element signature="e#209#2677#0" />
+            <element signature="e#2735#3433#0" />
+            <element signature="e#5242#5872#0" />
+            <element signature="e#5900#5942#0" />
+            <marker date="1584056030594" expanded="true" signature="3648:4172" ph="..." />
+            <marker date="1584056030594" expanded="true" signature="7962:7963" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Nets.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="316">
+          <caret line="282" selection-start-line="282" selection-end-line="282" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+            <element signature="e#6034#7465#0" />
+            <element signature="e#7503#8851#0" />
+            <element signature="e#10188#11492#0" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/CoGAN_trainer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1258">
-          <caret line="61" column="12" selection-start-line="61" selection-start-column="12" selection-end-line="61" selection-end-column="12" />
+        <state relative-caret-position="144">
+          <caret line="49" selection-start-line="49" selection-end-line="49" />
           <folding>
             <element signature="e#0#47#0" expanded="true" />
-            <marker date="1583833435961" expanded="true" signature="213:559" ph="..." />
+            <marker date="1584053062631" expanded="true" signature="213:559" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="110">
+          <caret line="103" column="20" lean-forward="true" selection-start-line="103" selection-start-column="20" selection-end-line="103" selection-end-column="20" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
           </folding>
         </state>
       </provider>

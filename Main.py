@@ -18,7 +18,7 @@ parser.add_argument('--dataset',        type=str,           default='toy',      
 parser.add_argument('--loss',           type=str,           default='ce',       help='wgan-gp | wgan | ce')
 parser.add_argument('--penalty',        type=str,           default='none',       help='none | wgan-gp')
 parser.add_argument('--batch_size',     type=int,           default=128)
-parser.add_argument('--epochs',         type=int,           default=500)
+parser.add_argument('--epochs',         type=int,           default=5000)
 parser.add_argument('--disc_iters',     type=int,           default=1)
 parser.add_argument('--clip',           type=float,         default=0.01,       help='upper bound for clipping')
 parser.add_argument('--gp_lambda',      type=int,           default=10)
@@ -28,8 +28,8 @@ parser.add_argument('--b1',             type=float,         default=0.5)
 parser.add_argument('--b2',             type=float,         default=0.999)
 parser.add_argument('--optim_d',        type=str,           default='adam',     help='adam | sgd | rms')
 parser.add_argument('--optim_g',        type=str,           default='adam',     help='adam | rms')
-parser.add_argument('--num_samples_to_gen', type=int,       default=16)
-parser.add_argument('--images_while_training', type=int,    default=50,         help='Every x epoch to print images while training')
+parser.add_argument('--num_samples_to_gen', type=int,       default=8)
+parser.add_argument('--images_while_training', type=int,    default=200,         help='Every x epoch to print images while training')
 parser.add_argument('--dir',            type=str,           default='/user/student.aau.dk/mjuuln15/output_data',     help='Directory to save images, models, weights etc')
 parser.add_argument('--g_dim',          type=int,           default=256,        help='generator layer dimensions')
 parser.add_argument('--d_dim',          type=int,           default=64,         help='discriminator layer dimensions')
@@ -47,8 +47,8 @@ parser.add_argument('--grayscale',      type=bool,		    default=False)
 # CoGAN
 parser.add_argument('--g_arch',         type=str,           default='conv',       help='conv | fc')
 parser.add_argument('--d_arch',         type=str,           default='conv',       help='conv | fc')
-parser.add_argument('--domain1',        type=str,           default='mnist',      help='mnist | mnist_edge | mnist_rotate')
-parser.add_argument('--domain2',        type=str,           default='mnist_edge', help='mnist | mnist_edge | mnist_rotate')
+parser.add_argument('--domain1',        type=str,           default='mnist',      help='mnist | celeb_a | svhn_cropped')
+parser.add_argument('--domain2',        type=str,           default='mnist_edge', help='mnist_edge | mnist_rotate | celeb_a | svhn_cropped')
 
 
 
@@ -58,16 +58,15 @@ args = parser.parse_args()
 #args.dataset = 'mnist'
 #args.gan_type = 'cogan'
 #args.scale_data = 64
-#args.batch_size = 2
-#args.noise_dim = 100
 #args.epochs = 2
 #args.disc_iters = 5
-#args.gan_type='dcgan'
 #args.images_while_training = 1
 #args.limit_dataset = True
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
 #args.g_arch = 'fc'
 #args.d_arch = 'fc'
+#args.domain2 = 'svhn_cropped'
+
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
 #o2i.test_trunc_trick(args)
 
@@ -102,7 +101,7 @@ if args.gan_type == 'cogan':
     # Choose data
     start = time.time()
     domain1, domain2 = dt.select_dataset_cogan(args)
-    args.dataset_dim = domain1.element_spec.shape
+    args.dataset_dim = domain1.element_spec[0].shape
     data_load_time = time.time() - start
 
     # Select architectures
@@ -128,7 +127,7 @@ if args.gan_type == 'cogan':
     discriminator2._name = 'disc2'
 
     with open(os.path.join(args.dir, 'config.txt'), 'a') as file:
-        file.write('\nFull training time: ' + str(full_training_time) + '\nData load time: ' + str(data_load_time))
+        file.write('\nFull training time: ' + str(full_training_time) + '\nData load time: ' + str(data_load_time) + '\n')
         generator1.summary(print_fn=lambda x: file.write(x + '\n'))
         discriminator1.summary(print_fn=lambda x: file.write(x + '\n'))
         generator2.summary(print_fn=lambda x: file.write(x + '\n'))
