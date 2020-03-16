@@ -14,7 +14,7 @@ import os.path
 parser = argparse.ArgumentParser()
 
 # Settings
-parser.add_argument('--dataset',        type=str,           default='toy',      help=' toy | mnist | cifar10 | lsun | frey')
+parser.add_argument('--dataset',        type=str,           default='toy',      help=' toy | mnist | cifar10 | lsun | frey | svhn')
 parser.add_argument('--loss',           type=str,           default='ce',       help='wgan-gp | wgan | ce')
 parser.add_argument('--penalty',        type=str,           default='none',       help='none | wgan-gp')
 parser.add_argument('--batch_size',     type=int,           default=128)
@@ -47,16 +47,13 @@ parser.add_argument('--grayscale',      type=bool,		    default=False)
 # CoGAN
 parser.add_argument('--g_arch',         type=str,           default='conv',       help='conv | fc')
 parser.add_argument('--d_arch',         type=str,           default='conv',       help='conv | fc')
-parser.add_argument('--domain1',        type=str,           default='mnist',      help='mnist | celeb_a | svhn_cropped')
-parser.add_argument('--domain2',        type=str,           default='mnist_edge', help='mnist_edge | mnist_rotate | celeb_a | svhn_cropped')
-
-
+parser.add_argument('--cogan_data',     type=str,           default='mnist2svhn',      help='mnist2edge | mnist2rotate | mnist2svhn | celeb_a')
 
 args = parser.parse_args()
 
 # Debugging
-#args.dataset = 'mnist'
-#args.gan_type = 'cogan'
+#args.dataset = 'svhn'
+#args.gan_type = 'cifargan'
 #args.scale_data = 64
 #args.epochs = 2
 #args.disc_iters = 5
@@ -142,7 +139,7 @@ else:
     # Choose data
     start = time.time()
     train_dat = dt.select_dataset_gan(args)
-    args.dataset_dim = train_dat.element_spec.shape
+    args.dataset_dim = train_dat[1]
     data_load_time = time.time() - start
     if args.input_noise:
         args.variance = 0.1
@@ -157,11 +154,11 @@ else:
     if len(tf.config.experimental.list_physical_devices('GPU')) > 0:
         with tf.device('/GPU:0'):
             print('Using GPU')
-            ganTrainer = gan_t.GANTrainer(generator, discriminator, train_dat)
+            ganTrainer = gan_t.GANTrainer(generator, discriminator, train_dat[0])
             full_training_time = ganTrainer.train(args)
     else:
         print('Using CPU')
-        ganTrainer = gan_t.GANTrainer(generator, discriminator, train_dat)
+        ganTrainer = gan_t.GANTrainer(generator, discriminator, train_dat[0])
         full_training_time = ganTrainer.train(args)
 
     generator._name='gen'

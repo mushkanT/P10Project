@@ -2,7 +2,6 @@ import tensorflow as tf
 import numpy as np
 import tensorflow_datasets as tfds
 from scipy.io import loadmat
-import os
 import scipy
 import cv2
 
@@ -17,6 +16,13 @@ def select_dataset_gan(args):
         if args.scale_data != 0:
             dat = tf.image.resize(dat, [args.scale_data, args.scale_data])
         train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+    elif args.dataset == "svhn":
+        data, info = tfds.load('svhn_cropped', with_info=True, as_supervised=True)
+        X2, test = data['train'], data['test']
+        X2 = X2.map(format_example2)
+        num_examples = info.splits['train'].num_examples
+        train_dat = X2.shuffle(num_examples).batch(args.batch_size).repeat()
+        shape = train_dat.element_spec[0].shape
     elif args.dataset == "mnist-f":
         dat = mnist_f(args.input_scale, args.limit_dataset)
         if args.scale_data != 0:
@@ -49,26 +55,25 @@ def select_dataset_gan(args):
         train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
     else:
         raise NotImplementedError()
-    if args.dataset != 'lsun':
+    if args.dataset in ['lsun']:
         shape = dat.shape
     return train_dat, shape
 
 
-# TODO tror der skal laves if sætning pr kombination af datasets - virker ikke som om der er en nem måde at generalisere det på <.<
 def select_dataset_cogan(args):
     # Same dataset
-    if 'mnist' in args.domain1 and 'mnist' in args.domain2:
-        X1, X2 = mnist_cogan(args.batch_size, args.domain1, args.domain2)
-    else:
+    if args.cogan_data in ['mnist2edge', 'mnist2rotate']:
+        X1, X2 = mnist_cogan(args.batch_size, args.cogan_data)
+    elif args.cogan_data == 'mnist2svhn':
         # Domain 1
-        data, info = tfds.load(args.domain1, with_info=True, as_supervised=True)
+        data, info = tfds.load('mnist', with_info=True, as_supervised=True)
         X1, test = data['train'], data['test']
         X1 = X1.map(format_example1)
         num_examples = info.splits['train'].num_examples
         X1 = X1.shuffle(num_examples).batch(args.batch_size).repeat()
 
         # Domain 2
-        data, info = tfds.load(args.domain2, with_info=True, as_supervised=True)
+        data, info = tfds.load('svhn_cropped', with_info=True, as_supervised=True)
         X2, test = data['train'], data['test']
         X2 = X2.map(format_example2)
         num_examples = info.splits['train'].num_examples
@@ -85,6 +90,7 @@ def format_example1(image, label):
     image = tf.image.grayscale_to_rgb(image)
     return (image, label)
 
+
 def format_example2(image, label):
     image = tf.cast(image, tf.float32)
     # Normalize the pixel values
@@ -94,6 +100,7 @@ def format_example2(image, label):
     return (image, label)
 
 
+# Regular GAN data loaders
 def createToyDataRing(n_mixtures=10, radius=3, Ntrain=5120, std=0.05): #50176
     delta_theta = 2 * np.pi / n_mixtures
     centers_x = []
@@ -176,7 +183,9 @@ def preprocess(img):
     return img
 
 
-def mnist_cogan(batch_size, d1, d2):
+# CoGAN data loaders
+def mnist_cogan(batch_size, data):
+    d2 = data.split('2')[1]
     (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
 
     # 28x28 -> 32x32
@@ -189,9 +198,9 @@ def mnist_cogan(batch_size, d1, d2):
     X2 = train_images[int(train_images.shape[0] / 2):]
 
     # Create 2nd domain dataset: 1=rotate, 2=edge
-    if d2 == 'mnist_rotate':
+    if d2 == 'rotate':
         X2 = scipy.ndimage.interpolation.rotate(X2, 90, axes=(1, 2))
-    elif d2 == 'mnist_edge':
+    elif d2 == 'edge':
         edges = np.zeros((X2.shape[0], 32, 32, 1))
         for idx, i in enumerate(X2):
             i = np.squeeze(i)

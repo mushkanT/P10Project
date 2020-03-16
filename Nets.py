@@ -34,21 +34,27 @@ def cifargan_gen(args):
     model = keras.Sequential()
     # foundation for 4x4 image
     model.add(layers.Dense(g_dim * img_resize * img_resize, input_dim=z_dim, kernel_initializer=init))
-    model.add(layers.LeakyReLU(alpha=0.2))
     model.add(layers.Reshape((img_resize, img_resize, g_dim)))
     # upsample to 8x8
-    model.add(layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same', kernel_initializer=init))
+    model.add(layers.Conv2DTranspose(1024, (4, 4), strides=(1, 1), padding='same', kernel_initializer=init))
+    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
     model.add(layers.LeakyReLU(alpha=0.2))
     # upsample to 16x16
-    model.add(layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same', kernel_initializer=init))
+    model.add(layers.Conv2DTranspose(512, (4, 4), strides=(2, 2), padding='same', kernel_initializer=init))
+    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
     model.add(layers.LeakyReLU(alpha=0.2))
     # upsample to 32x32
+    model.add(layers.Conv2DTranspose(256, (4, 4), strides=(2, 2), padding='same', kernel_initializer=init))
+    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(layers.LeakyReLU(alpha=0.2))
+
     model.add(layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same', kernel_initializer=init))
+    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
     model.add(layers.LeakyReLU(alpha=0.2))
     # output layer
     if args.input_scale:
         print('tanh')
-        model.add(layers.Conv2D(channels, (3, 3), activation='tanh', padding='same', kernel_initializer=init))
+        model.add(layers.Conv2D(channels, (6, 6), activation='tanh', padding='same', kernel_initializer=init))
     else:
         print('sigmoid')
         model.add(layers.Conv2D(channels, (3, 3), activation='sigmoid', padding='same', kernel_initializer=init))
@@ -165,6 +171,7 @@ def toy_disc(args):
 
 # CoGAN
 def cogan_generators_conv(args):
+    channels = args.dataset_dim[3]
 
     # Shared weights between generators
     noise = tf.keras.layers.Input(shape=(args.noise_dim,))
@@ -189,10 +196,10 @@ def cogan_generators_conv(args):
     model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
 
     # Generator 1
-    img1 = tf.keras.layers.Conv2DTranspose(1, (6,6), strides=(1, 1), activation='tanh', padding='same')(model)
+    img1 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='tanh', padding='same')(model)
 
     # Generator 2
-    img2 = tf.keras.layers.Conv2DTranspose(1, (6,6), strides=(1, 1), activation='tanh', padding='same')(model)
+    img2 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='tanh', padding='same')(model)
 
     return keras.Model(noise, img1), keras.Model(noise, img2)
 

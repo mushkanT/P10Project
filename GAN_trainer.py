@@ -4,8 +4,9 @@ import numpy as np
 import time
 import Utils as u
 import random
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import random
+import os
 
 TINY = 1e-8
 
@@ -104,15 +105,13 @@ class GANTrainer(object):
         # Apply gradients
         gradients_of_discriminator = disc_tape.gradient(disc_loss, self.discriminator.trainable_variables)
         args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.discriminator.trainable_variables))
-        # Calc disc accuracy
-        acc_real = K.mean(K.equal(real_labels, K.round(tf.keras.activations.sigmoid(real_output))))
-        acc_fake = K.mean(K.equal(fake_labels, K.round(tf.keras.activations.sigmoid(fake_output))))
+
         # Clip weights if wgan loss function
         if args.loss == "wgan":
             for i, var in enumerate(self.discriminator.trainable_variables):
                 self.discriminator.trainable_variables[i].assign(tf.clip_by_value(var, -args.clip, args.clip))
 
-        return disc_loss, acc_fake, acc_real
+        return disc_loss
 
     def train_generator(self, args):
         noise = tf.random.normal([args.batch_size, args.noise_dim])
@@ -147,43 +146,27 @@ class GANTrainer(object):
             it = iter(self.dataset)
         else:
             it = self.dataset
-        batches_pr_epoch = args.dataset_dim[0] // args.batch_size
-        n_steps = batches_pr_epoch // args.disc_iters  # Steps per epoch (Generator iterations)
-
-        # Image before training
-        if args.images_while_training != 0:
-            if args.dataset == "toy":
-                images_while_training.append(u.draw_2d_samples(self.generator, args.noise_dim))
-            else:
-                images_while_training.append(u.draw_samples(self.generator, args.seed))
 
         for epoch in range(args.epochs):
             start = time.time()
 
-            for i in range(n_steps):
-                disc_iters_loss = []
-                # take x steps with critic before training generator
-                for i in range(args.disc_iters):
-                    batch = next(it)
-                       
-                    if isinstance(batch, np.ndarray):
-                        batch = tf.convert_to_tensor(batch)
-                    if batch.dtype == tf.float64:
-                        batch = tf.dtypes.cast(batch, dtype=tf.float32)
-                    if batch.shape[0] != args.batch_size:
-                        continue
-                    d_loss, acc_fake, acc_real = self.train_discriminator(batch, args)
-                    disc_iters_loss.append(d_loss)
-                    acc_fakes.append(acc_fake)
-                    acc_reals.append(acc_real)
-  
-   
-                    #disc_iters_loss.append(train_d(batch, args))
+            disc_iters_loss = []
+            # take x steps with critic before training generator
+            for i in range(args.disc_iters):
+                batch = next(it)
 
-                gen_loss.append(tf.reduce_mean(self.train_generator(args)).numpy())
-                disc_loss.append(tf.reduce_mean(disc_iters_loss).numpy())
+                if isinstance(batch, np.ndarray):
+                    batch = tf.convert_to_tensor(batch)
+                if batch[0].dtype == tf.float64:
+                    batch[0] = tf.dtypes.cast(batch[0], dtype=tf.float32)
+                if batch[0].shape[0] != args.batch_size:
+                    continue
+                d_loss = self.train_discriminator(batch[0], args)
+                disc_iters_loss.append(d_loss)
 
-            full_training_time += time.time()-start
+            gen_loss.append(tf.reduce_mean(self.train_generator(args)).numpy())
+            full_training_time += time.time() - start
+            disc_loss.append(tf.reduce_mean(disc_iters_loss).numpy())
 
             # Generate samples and save
             if args.images_while_training != 0:
@@ -191,6 +174,39 @@ class GANTrainer(object):
                     if args.dataset == "toy":
                         images_while_training.append(u.draw_2d_samples(self.generator, args.noise_dim))
                     else:
-                        images_while_training.append(u.draw_samples(self.generator, args.seed))
+                        self.sample_images(epoch, args.seed, args.dir)
 
-        return gen_loss, disc_loss, images_while_training, full_training_time, acc_fakes, acc_reals
+        self.plot_losses(args.dir, disc_loss, gen_loss)
+        return full_training_time
+
+    def sample_images(self, epoch, seed, dir):
+        r, c = 2, 2
+        gen_batch1 = self.generator.predict(seed)
+
+        # Rescale images 0 - 1
+        gen_imgs = 0.5 * gen_batch1 + 0.5
+
+        fig, axs = plt.subplots(r, c)
+        cnt = 0
+        for i in range(r):
+            for j in range(c):
+                axs[i, j].imshow(gen_imgs[cnt, :, :, 0], cmap='gray')
+                axs[i, j].axis('off')
+                cnt += 1
+        fig.savefig(os.path.join(dir, "images/%d.png" % epoch))
+        plt.close()
+
+    def plot_losses(self, dir, d_loss, gen_loss):
+        plt.plot(gen_loss, label='Generator loss')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.savefig(os.path.join(dir, 'losses/gen_loss.png'))
+        plt.close()
+
+        plt.plot(d_loss, label='Discriminator loss')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.savefig(os.path.join(dir, 'losses/disc_loss.png'))
+        plt.close()
