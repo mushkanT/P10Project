@@ -29,7 +29,7 @@ parser.add_argument('--b2',             type=float,         default=0.999)
 parser.add_argument('--optim_d',        type=str,           default='adam',     help='adam | sgd | rms')
 parser.add_argument('--optim_g',        type=str,           default='adam',     help='adam | rms')
 parser.add_argument('--num_samples_to_gen', type=int,       default=8)
-parser.add_argument('--images_while_training', type=int,    default=200,         help='Every x epoch to print images while training')
+parser.add_argument('--images_while_training', type=int,    default=1,         help='Every x epoch to print images while training')
 parser.add_argument('--dir',            type=str,           default='/user/student.aau.dk/mjuuln15/output_data',     help='Directory to save images, models, weights etc')
 parser.add_argument('--g_dim',          type=int,           default=256,        help='generator layer dimensions')
 parser.add_argument('--d_dim',          type=int,           default=64,         help='discriminator layer dimensions')
@@ -53,7 +53,8 @@ args = parser.parse_args()
 
 # Debugging
 #args.dataset = 'svhn'
-#args.gan_type = 'cifargan'
+#args.gan_type = 'cogan'
+#args.loss = 'wgan'
 #args.scale_data = 64
 #args.epochs = 2
 #args.disc_iters = 5
@@ -62,7 +63,7 @@ args = parser.parse_args()
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
 #args.g_arch = 'fc'
 #args.d_arch = 'fc'
-#args.domain2 = 'svhn_cropped'
+#args.cogan_data = 'mnist2edge'
 
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
 #o2i.test_trunc_trick(args)
@@ -97,8 +98,8 @@ else:
 if args.gan_type == 'cogan':
     # Choose data
     start = time.time()
-    domain1, domain2 = dt.select_dataset_cogan(args)
-    args.dataset_dim = domain1.element_spec[0].shape
+    domain1, domain2, shape = dt.select_dataset_cogan(args)
+    args.dataset_dim = shape
     data_load_time = time.time() - start
 
     # Select architectures
@@ -139,7 +140,7 @@ else:
     # Choose data
     start = time.time()
     train_dat = dt.select_dataset_gan(args)
-    args.dataset_dim = train_dat[1]
+    args.dataset_dim = train_dat.element_spec[0].shape
     data_load_time = time.time() - start
     if args.input_noise:
         args.variance = 0.1

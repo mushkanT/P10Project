@@ -138,9 +138,6 @@ class GANTrainer(object):
         gen_loss = []
         disc_loss = []
         images_while_training = []
-        fake_loss=[]
-        real_loss=[]
-        acc_fakes, acc_reals = [],[]
         full_training_time = 0
         if args.dataset != 'lsun':
             it = iter(self.dataset)
@@ -154,7 +151,6 @@ class GANTrainer(object):
             # take x steps with critic before training generator
             for i in range(args.disc_iters):
                 batch = next(it)
-
                 if isinstance(batch, np.ndarray):
                     batch = tf.convert_to_tensor(batch)
                 if batch[0].dtype == tf.float64:
@@ -174,12 +170,12 @@ class GANTrainer(object):
                     if args.dataset == "toy":
                         images_while_training.append(u.draw_2d_samples(self.generator, args.noise_dim))
                     else:
-                        self.sample_images(epoch, args.seed, args.dir)
+                        self.sample_images(epoch, args.seed, args.dir, args.dataset_dim[3])
 
         self.plot_losses(args.dir, disc_loss, gen_loss)
         return full_training_time
 
-    def sample_images(self, epoch, seed, dir):
+    def sample_images(self, epoch, seed, dir, channels):
         r, c = 2, 2
         gen_batch1 = self.generator.predict(seed)
 
@@ -188,13 +184,24 @@ class GANTrainer(object):
 
         fig, axs = plt.subplots(r, c)
         cnt = 0
-        for i in range(r):
-            for j in range(c):
-                axs[i, j].imshow(gen_imgs[cnt, :, :, 0], cmap='gray')
-                axs[i, j].axis('off')
-                cnt += 1
-        fig.savefig(os.path.join(dir, "images/%d.png" % epoch))
-        plt.close()
+        # black/white images
+        if channels == '1':
+            for i in range(r):
+                for j in range(c):
+                    axs[i, j].imshow(gen_imgs[cnt, :, :, 0], cmap='gray')
+                    axs[i, j].axis('off')
+                    cnt += 1
+            fig.savefig(os.path.join(dir, "images/%d.png" % epoch))
+            plt.close()
+        # color images
+        else:
+            for i in range(r):
+                for j in range(c):
+                    axs[i, j].imshow(gen_imgs[cnt, :, :, :])
+                    axs[i, j].axis('off')
+                    cnt += 1
+            fig.savefig(os.path.join(dir, "images/%d.png" % epoch))
+            plt.close()
 
     def plot_losses(self, dir, d_loss, gen_loss):
         plt.plot(gen_loss, label='Generator loss')
