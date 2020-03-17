@@ -30,7 +30,7 @@ parser.add_argument('--optim_d',        type=str,           default='adam',     
 parser.add_argument('--optim_g',        type=str,           default='adam',     help='adam | rms')
 parser.add_argument('--num_samples_to_gen', type=int,       default=8)
 parser.add_argument('--images_while_training', type=int,    default=1,         help='Every x epoch to print images while training')
-parser.add_argument('--dir',            type=str,           default='/user/student.aau.dk/mjuuln15/output_data',     help='Directory to save images, models, weights etc')
+parser.add_argument('--dir',            type=str,           default='c:/users/palmi/desktop/samples',     help='Directory to save images, models, weights etc')
 parser.add_argument('--g_dim',          type=int,           default=256,        help='generator layer dimensions')
 parser.add_argument('--d_dim',          type=int,           default=64,         help='discriminator layer dimensions')
 parser.add_argument('--gan_type',       type=str,           default='cogan',    help='dcgan | infogan | tfgan | cifargan_u | cogan')
@@ -45,9 +45,11 @@ parser.add_argument('--purpose',        type=str,		    default='',		    help='pu
 parser.add_argument('--grayscale',      type=bool,		    default=False)
 
 # CoGAN
-parser.add_argument('--g_arch',         type=str,           default='conv',       help='conv | fc')
-parser.add_argument('--d_arch',         type=str,           default='conv',       help='conv | fc')
-parser.add_argument('--cogan_data',     type=str,           default='mnist2svhn',      help='mnist2edge | mnist2rotate | mnist2svhn | celeb_a')
+parser.add_argument('--g_arch',         type=str,           default='cross',       help='conv | fc | cross')
+parser.add_argument('--d_arch',         type=str,           default='cross',       help='conv | fc | cross')
+parser.add_argument('--cogan_data',     type=str,           default='mnist2edge',      help='mnist2edge | mnist2rotate | mnist2svhn | celeb_a')
+parser.add_argument('--img_size',       type=int,           defautl=32,            help='image size to determine depth of model calculated by (log2(img_size) - 1)')
+parser.add_argument('--cross_depth',    type=int,           default=2,             help='The depth at which images should cross between coupled models. Must be <= model_depth (see argument above')
 
 args = parser.parse_args()
 

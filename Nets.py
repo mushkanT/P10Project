@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow import keras
 import numpy as np
+import math
 layers = tf.keras.layers
 
 
@@ -297,3 +298,97 @@ def cogan_discriminators_fc(args):
     validity2 = tf.keras.layers.Dense(1, activation='sigmoid')(img2_embedding)
 
     return keras.Model(img1, validity1), keras.Model(img2, validity2)
+
+
+# ---------------------- Cross-MSG-GAN ----------------------
+def generator_init_block(input):
+    input = tf.keras.layers.Dense(1024 * 4 * 4)(input)
+    input = tf.keras.layers.Reshape((4, 4, 1024))(input)
+    input = (tf.keras.layers.Conv2DTranspose(1024, (4, 4), strides=(1, 1), padding='same'))(input)
+    input = (tf.keras.layers.BatchNormalization(momentum=0.8))(input)
+    input = (tf.keras.layers.LeakyReLU(alpha=0.2))(input)
+    return input
+
+def generator_block(input, out_channels):
+    input = (tf.keras.layers.Conv2DTranspose(out_channels, (3, 3), strides=(2, 2), padding='same'))(input)
+    input = (tf.keras.layers.BatchNormalization(momentum=0.8))(input)
+    input = (tf.keras.layers.LeakyReLU(alpha=0.2))(input)
+    return input
+
+
+def cross_cogan_generators(args):
+    channels = args.dataset_dim[3]
+
+    depth = math.log2(float(args.img_size)) - 1
+    assert depth >= args.shared_depth, "shared_depth is greater than model depth"
+
+    # input noise vector shared by both generators
+    noise = tf.keras.layers.Input(shape=(args.noise_dim,))
+
+
+    # Initial filters from dense layer for both geneators and 4x4 generation
+    model1 = generator_init_block(noise)
+    model2 = generator_init_block(noise)
+
+    for i in range(0,depth):
+        model1 = generator_block(model1,128*(2^(depth-i)))
+        model2 = generator_block(model2,128*(2^(depth-i)))
+
+    # 8x8 image generation
+    model = (tf.keras.layers.Conv2DTranspose(512, (3, 3), strides=(2, 2), padding='same'))(model)
+    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
+
+    # 16x16 image generation
+    model = (tf.keras.layers.Conv2DTranspose(256, (3, 3), strides=(2, 2), padding='same'))(model)
+    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
+
+    # 32x32 image generation
+    model = (tf.keras.layers.Conv2DTranspose(128, (3, 3), strides=(2, 2), padding='same'))(model)
+    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
+
+    # Generator 1
+    img1 = tf.keras.layers.Conv2DTranspose(channels, (6, 6), strides=(1, 1), activation='tanh', padding='same')(model)
+
+    # Generator 2
+    img2 = tf.keras.layers.Conv2DTranspose(channels, (6, 6), strides=(1, 1), activation='tanh', padding='same')(model)
+
+    return keras.Model(noise, img1), keras.Model(noise, img2)
+
+def cross_cogan_discriminators(args):
+    img_shape = (args.dataset_dim[1], args.dataset_dim[2], args.dataset_dim[3])
+
+    # Discriminator 1
+    img1 = tf.keras.layers.Input(shape=img_shape)
+    # x1 = tf.keras.layers.Conv2D(20, (5, 5), padding='same')(img1)
+    # x1 = tf.keras.layers.MaxPool2D()(x1)
+
+    # Discriminator 2
+    img2 = tf.keras.layers.Input(shape=img_shape)
+    # x2 = tf.keras.layers.Conv2D(20, (5, 5), padding='same')(img2)
+    # x2 = tf.keras.layers.MaxPool2D()(x2)
+
+    # Shared discriminator layers
+    model = keras.Sequential()
+    model.add(tf.keras.layers.Conv2D(20, (5, 5), padding='same'))
+    model.add(tf.keras.layers.MaxPool2D())
+    model.add(tf.keras.layers.Conv2D(50, (5, 5), padding='same'))
+    model.add(tf.keras.layers.MaxPool2D())
+    model.add(tf.keras.layers.Flatten())
+    model.add(tf.keras.layers.Dense(500))
+    model.add(tf.keras.layers.LeakyReLU(alpha=0.2))
+    # model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+
+    # output1 = model(x1)
+    # output2 = model(x2)
+    img1_embedding = model(img1)
+    img2_embedding = model(img2)
+
+    # Discriminator 1
+    output1 = tf.keras.layers.Dense(1, activation='sigmoid')(img1_embedding)
+    # Discriminator 2
+    output2 = tf.keras.layers.Dense(1, activation='sigmoid')(img2_embedding)
+
+    return keras.Model(img1, output1), keras.Model(img2, output2)

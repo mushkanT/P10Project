@@ -28,11 +28,15 @@ def select_cogan_architecture(args):
         generator1, generator2 = nets.cogan_generators_conv(args)
     elif args.g_arch == 'fc':
         generator1, generator2 = nets.cogan_generators_fc(args)
+    elif args.g_arch == 'cross':
+        generator1, generator2 = nets.cross_cogan_generators(args)
 
     if args.d_arch == 'conv':
         discriminator1, discriminator2 = nets.cogan_discriminators_conv(args)
     elif args.d_arch == 'fc':
         discriminator1, discriminator2 = nets.cogan_discriminators_fc(args)
+    elif args.d_arch == 'cross':
+        discriminator1, discriminator2 = nets.cross_cogan_discriminators()
 
     return generator1, generator2, discriminator1, discriminator2
 

@@ -2,12 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="220b69cb-c454-4d63-b603-ea792d470aba" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CoGAN_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/CoGAN_trainer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Data.py" beforeDir="false" afterPath="$PROJECT_DIR$/Data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GAN_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/GAN_trainer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Nets.py" beforeDir="false" afterPath="$PROJECT_DIR$/Nets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/Utils.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -18,183 +16,6 @@
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/P9Project$Main.coverage" NAME="Main Coverage Results" MODIFIED="1584435665772" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
-  <component name="FUSProjectUsageTrigger">
-    <session id="1474987505">
-      <usages-collector id="statistics.lifecycle.project">
-        <counts>
-          <entry key="project.closed" value="29" />
-          <entry key="project.open.time.0" value="2" />
-          <entry key="project.open.time.1" value="3" />
-          <entry key="project.open.time.10" value="5" />
-          <entry key="project.open.time.11" value="2" />
-          <entry key="project.open.time.12" value="2" />
-          <entry key="project.open.time.15" value="3" />
-          <entry key="project.open.time.4" value="1" />
-          <entry key="project.open.time.7" value="1" />
-          <entry key="project.open.time.8" value="6" />
-          <entry key="project.open.time.9" value="10" />
-          <entry key="project.opened" value="35" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.extensions.open">
-        <counts>
-          <entry key="png" value="62" />
-          <entry key="py" value="291" />
-          <entry key="txt" value="1" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.types.open">
-        <counts>
-          <entry key="Image" value="62" />
-          <entry key="PLAIN_TEXT" value="1" />
-          <entry key="Python" value="291" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.extensions.edit">
-        <counts>
-          <entry key="dummy" value="17" />
-          <entry key="py" value="59954" />
-          <entry key="txt" value="5" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.types.edit">
-        <counts>
-          <entry key="PLAIN_TEXT" value="22" />
-          <entry key="Python" value="59954" />
-        </counts>
-      </usages-collector>
-    </session>
-    <session id="1028081004">
-      <usages-collector id="statistics.lifecycle.project">
-        <counts>
-          <entry key="project.closed" value="4" />
-          <entry key="project.open.time.0" value="1" />
-          <entry key="project.open.time.15" value="1" />
-          <entry key="project.open.time.30" value="2" />
-          <entry key="project.open.time.35" value="1" />
-          <entry key="project.opened" value="5" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.extensions.edit">
-        <counts>
-          <entry key="py" value="4327" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.types.edit">
-        <counts>
-          <entry key="Python" value="4327" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.extensions.open">
-        <counts>
-          <entry key="png" value="11" />
-          <entry key="py" value="24" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.types.open">
-        <counts>
-          <entry key="Image" value="11" />
-          <entry key="Python" value="24" />
-        </counts>
-      </usages-collector>
-    </session>
-  </component>
-  <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Main.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="280">
-              <caret line="65" column="29" selection-start-line="65" selection-start-column="29" selection-end-line="65" selection-end-column="29" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/CoGAN_trainer.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="416">
-              <caret line="53" selection-start-line="53" selection-end-line="53" />
-              <folding>
-                <element signature="e#0#47#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Nets.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-60">
-              <caret line="208" selection-start-line="208" selection-end-line="208" />
-              <folding>
-                <element signature="e#0#23#0" expanded="true" />
-                <element signature="e#200#553#0" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Data.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="227">
-              <caret line="220" column="10" selection-start-line="220" selection-start-column="10" selection-end-line="220" selection-end-column="10" />
-              <folding>
-                <element signature="e#0#23#0" expanded="true" />
-                <element signature="e#199#3010#0" />
-                <element signature="e#4002#4244#0" />
-                <element signature="e#4290#4620#0" />
-                <element signature="e#4668#4899#0" />
-                <element signature="e#4941#5138#0" />
-                <element signature="e#5250#5948#0" />
-                <element signature="e#5995#6825#0" />
-                <element signature="e#6874#7708#0" />
-                <element signature="e#7757#8387#0" />
-                <element signature="e#8415#8457#0" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Utils.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="493">
-              <caret line="29" selection-start-line="29" selection-end-line="29" />
-              <folding>
-                <element signature="e#0#23#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/o2img.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3366">
-              <caret line="204" column="51" selection-start-line="204" selection-start-column="20" selection-end-line="204" selection-end-column="51" />
-              <folding>
-                <element signature="e#0#23#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/GAN_trainer.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="217">
-              <caret line="99" column="35" selection-start-line="99" selection-start-column="35" selection-end-line="99" selection-end-column="35" />
-              <folding>
-                <element signature="e#0#23#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
-  </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
@@ -202,123 +23,15 @@
       </list>
     </option>
   </component>
-  <component name="FindInProjectRecents">
-    <findStrings>
-      <find>.pdf</find>
-      <find>pdf</find>
-      <find>lod</find>
-      <find>kernel</find>
-      <find>variance</find>
-      <find>plot</find>
-      <find>create</find>
-      <find>build</find>
-      <find>train</find>
-      <find>compile</find>
-      <find>layersin</find>
-      <find>t.</find>
-      <find>static_noise</find>
-      <find>acc</find>
-      <find>gray</find>
-      <find>seed</find>
-      <find>args.img_dim</find>
-      <find>numpy</find>
-      <find>imgs1</find>
-      <find>imgs2</find>
-      <find>generated_data</find>
-      <find>summary</find>
-      <find>shuffle</find>
-      <find>data</find>
-      <find>in</find>
-      <find>noise</find>
-      <find>scale_da</find>
-      <find>dataset_dim</find>
-      <find>penal</find>
-      <find>dir</find>
-    </findStrings>
-    <replaceStrings>
-      <replace>n_dim</replace>
-      <replace>gradient_l2_norm</replace>
-      <replace>l</replace>
-      <replace>args.</replace>
-      <replace>.</replace>
-      <replace>batch_size</replace>
-      <replace>g</replace>
-      <replace>disc_iters</replace>
-      <replace>disc_iters_loss</replace>
-      <replace>real_data</replace>
-      <replace>gan_t</replace>
-      <replace>gan_t.</replace>
-      <replace>bacth1</replace>
-      <replace>batch1</replace>
-      <replace>gen_batch1</replace>
-      <replace>gen_batch2</replace>
-      <replace>batch2</replace>
-      <replace>constant_noise</replace>
-      <replace>fake_Data</replace>
-    </replaceStrings>
-  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-  </component>
-  <component name="ProjectId" id="1ZFVX0NoMykbG3uiUxmPftzwWFV" />
-  <component name="IdeDocumentHistory">
-    <option name="CHANGED_PATHS">
-      <list>
-        <option value="$PROJECT_DIR$/../PresGANs/nets.py" />
-        <option value="$PROJECT_DIR$/../PresGANs/main.py" />
-        <option value="$PROJECT_DIR$/testing.py" />
-        <option value="$PROJECT_DIR$/train.py" />
-        <option value="$PROJECT_DIR$/MLM_keras_WGAN.py" />
-        <option value="$PROJECT_DIR$/utils.py" />
-        <option value="$PROJECT_DIR$/Utils_images.py" />
-        <option value="$PROJECT_DIR$/GAN_o2img.py" />
-        <option value="$PROJECT_DIR$/wgan_test.py" />
-        <option value="$PROJECT_DIR$/o2img.py" />
-        <option value="$PROJECT_DIR$/wgan_gp.py" />
-        <option value="$PROJECT_DIR$/mlm_wgan_gp.py" />
-        <option value="$PROJECT_DIR$/Train.py" />
-        <option value="$PROJECT_DIR$/Penalties.py" />
-        <option value="$PROJECT_DIR$/Losses.py" />
-        <option value="$USER_HOME$/Desktop/backup/cogan.py" />
-        <option value="$PROJECT_DIR$/Utils.py" />
-        <option value="$PROJECT_DIR$/GAN_trainer.py" />
-        <option value="$PROJECT_DIR$/Nets.py" />
-        <option value="$PROJECT_DIR$/CoGAN_trainer.py" />
-        <option value="$PROJECT_DIR$/Data.py" />
-        <option value="$PROJECT_DIR$/Main.py" />
-      </list>
-    </option>
-  </component>
-  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
-  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
-  <component name="JsGulpfileManager">
-    <detection-done>true</detection-done>
-    <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="-7" />
     <option name="width" value="974" />
     <option name="height" value="1047" />
   </component>
-  <component name="ProjectView">
-    <navigator proportions="" version="1">
-      <foldersAlwaysOnTop value="true" />
-    </navigator>
-    <panes>
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="P9Project" type="b2602c69:ProjectViewProjectNode" />
-              <item name="P9Project" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
-      <pane id="Scope" />
-    </panes>
-  </component>
+  <component name="ProjectId" id="1ZFVX0NoMykbG3uiUxmPftzwWFV" />
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$USER_HOME$/Desktop/backup/cogan.py" />
@@ -498,56 +211,6 @@
       <is-autoscroll-to-source value="true" />
     </todo-panel>
   </component>
-  <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
-    <editor active="true" />
-    <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.10394456" />
-      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.3286334" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49947312" visible="true" weight="0.24403471" />
-      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49947312" weight="0.31344903" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" weight="0.32968238" />
-      <window_info anchor="bottom" id="Version Control" order="7" weight="0.3295063" />
-      <window_info anchor="bottom" id="Terminal" order="8" weight="0.3295063" />
-      <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.50052685" side_tool="true" weight="0.39045554" />
-      <window_info anchor="bottom" id="Python Console" order="10" weight="0.3295063" />
-      <window_info anchor="bottom" id="Docker" order="11" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Database Changes" order="12" show_stripe_button="false" />
-      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Database" order="3" />
-      <window_info anchor="right" id="SciView" order="4" weight="0.32995737" />
-    </layout>
-    <layout-to-restore>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.09957851" />
-      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.3286334" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49947312" weight="0.24424973" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" sideWeight="0.49947312" visible="true" weight="0.31344903" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" weight="0.32968238" />
-      <window_info anchor="bottom" id="Version Control" order="7" weight="0.3295063" />
-      <window_info anchor="bottom" id="Terminal" order="8" weight="0.3295063" />
-      <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.50052685" side_tool="true" weight="0.39045554" />
-      <window_info anchor="bottom" id="Python Console" order="10" weight="0.3295063" />
-      <window_info anchor="bottom" id="Docker" order="11" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Database Changes" order="12" show_stripe_button="false" />
-      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Database" order="3" />
-      <window_info anchor="right" id="SciView" order="4" weight="0.32995737" />
-    </layout-to-restore>
-  </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
@@ -584,7 +247,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Main.py</url>
-          <line>142</line>
+          <line>144</line>
           <option name="timeStamp" value="567" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -593,9 +256,6 @@
           <option name="timeStamp" value="568" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/GAN_trainer.py</url>
-          <line>171</line>
-          <option name="timeStamp" value="555" />
           <url>file://$PROJECT_DIR$/Data.py</url>
           <line>21</line>
           <option name="timeStamp" value="569" />
@@ -614,189 +274,5 @@
         </breakpoint>
       </default-breakpoints>
     </breakpoint-manager>
-  </component>
-  <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/requests/adapters.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/requests/models.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow_datasets/core/download/extractor.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow_datasets/core/dataset_builder.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow_core/python/keras/engine/base_layer.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow_core/python/ops/random_ops.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow_core/python/keras/engine/input_spec.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow_core/python/keras/utils/generic_utils.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/pandas/core/internals/construction.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow_core/python/autograph/impl/api.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/scipy/io/matlab/mio.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow_core/python/data/ops/dataset_ops.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/keras_preprocessing/image.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow_core/python/keras/layers/advanced_activations.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow_core/python/saved_model/loader_impl.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/matplotlib/image.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/PIL/Image.py" />
-    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_imps/_pydev_execfile.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="17" selection-start-line="17" selection-end-line="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow_core/python/framework/constant_op.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow_core/python/ops/math_ops.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/matplotlib/axes/_subplots.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/numpy/lib/npyio.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/matplotlib/axes/_base.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/seaborn/distributions.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow_core/python/framework/ops.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/pandas/core/generic.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/pandas/plotting/_matplotlib/core.py" />
-    <entry file="file://$PROJECT_DIR$/wgan_test.py" />
-    <entry file="file://$PROJECT_DIR$/wgan_gp.py" />
-    <entry file="file://$PROJECT_DIR$/mlm_wgan_gp.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow_core/python/keras/engine/training.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/ntpath.py" />
-    <entry file="file://$PROJECT_DIR$/Penalties.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="408">
-          <caret line="24" column="16" lean-forward="true" selection-start-line="24" selection-start-column="4" selection-end-line="24" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Desktop/backup/cogan.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow_core/python/ops/array_ops.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/codecs.py" />
-    <entry file="file://C:/Program Files/Python36/Lib/site-packages/tensorflow_core/python/ops/math_ops.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="202">
-          <caret line="896" selection-start-line="896" selection-end-line="896" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Program Files/Python36/Lib/site-packages/tensorflow_core/python/keras/engine/base_layer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="202">
-          <caret line="727" selection-start-line="727" selection-end-line="727" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Losses.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="7" selection-start-line="7" selection-end-line="7" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Program Files/Python36/Lib/site-packages/tensorflow_core/python/data/ops/dataset_ops.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="518">
-          <caret line="2606" selection-start-line="2606" selection-end-line="2606" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Program Files/Python36/Lib/site-packages/tensorflow_core/python/util/tf_decorator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="314">
-          <caret line="225" selection-start-line="225" selection-end-line="225" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Program Files/Python36/Lib/site-packages/tensorflow_core/python/util/function_utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="202">
-          <caret line="90" selection-start-line="90" selection-end-line="90" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Program Files/Python36/Lib/codecs.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="236">
-          <caret line="310" selection-start-line="310" selection-end-line="310" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Program Files/Python36/Lib/ast.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="489">
-          <caret line="321" selection-start-line="321" selection-end-line="321" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/o2img.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3366">
-          <caret line="204" column="51" selection-start-line="204" selection-start-column="20" selection-end-line="204" selection-end-column="51" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/GAN_trainer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="217">
-          <caret line="99" column="35" selection-start-line="99" selection-start-column="35" selection-end-line="99" selection-end-column="35" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="493">
-          <caret line="29" selection-start-line="29" selection-end-line="29" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Nets.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-60">
-          <caret line="208" selection-start-line="208" selection-end-line="208" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-            <element signature="e#200#553#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/CoGAN_trainer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="416">
-          <caret line="53" selection-start-line="53" selection-end-line="53" />
-          <folding>
-            <element signature="e#0#47#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Data.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="227">
-          <caret line="220" column="10" selection-start-line="220" selection-start-column="10" selection-end-line="220" selection-end-column="10" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-            <element signature="e#199#3010#0" />
-            <element signature="e#4002#4244#0" />
-            <element signature="e#4290#4620#0" />
-            <element signature="e#4668#4899#0" />
-            <element signature="e#4941#5138#0" />
-            <element signature="e#5250#5948#0" />
-            <element signature="e#5995#6825#0" />
-            <element signature="e#6874#7708#0" />
-            <element signature="e#7757#8387#0" />
-            <element signature="e#8415#8457#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="280">
-          <caret line="65" column="29" selection-start-line="65" selection-start-column="29" selection-end-line="65" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
   </component>
 </project>
