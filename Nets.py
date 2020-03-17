@@ -23,6 +23,7 @@ init = 'glorot_uniform'
 #dcgan without batchnorm in disc (wgan, wgan-gp)
 bn_mom = 0.99
 
+
 # 32x32
 def cifargan_gen(args):
     g_dim = args.g_dim
@@ -65,8 +66,8 @@ def cifargan_disc(args):
     d_dim = args.d_dim
     input_dim = args.dataset_dim[1]
     channels = args.dataset_dim[3]
-    #const = ClipConstraint(0.01)
     model = keras.Sequential()
+
     # normal
     model.add(layers.Conv2D(64, (3, 3), padding='same', input_shape=[input_dim, input_dim, channels], kernel_initializer=init))
     model.add(layers.LeakyReLU(alpha=0.2))

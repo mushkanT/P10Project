@@ -34,10 +34,6 @@ class GANTrainer(object):
         for epoch in range(args.epochs):
             start = time.time()
 
-            # Select a random batch of images
-            batch1 = next(it1)[0]
-            batch2 = next(it2)[0]
-
             # Sample noise as generator input
             noise = tf.random.normal([args.batch_size, 100])
             #gen_noise = tf.random.normal([args.batch_size, 100])
@@ -45,38 +41,49 @@ class GANTrainer(object):
             # ----------------------
             #  Train Discriminators
             # ----------------------
+            for i in range(args.disc_iters):
+                # Select a random batch of images
+                if args.cogan_data == 'mnist2edge':
+                    batch1 = next(it1)
+                    batch2 = next(it2)
+                else:
+                    batch1 = next(it1)[0]
+                    batch2 = next(it2)[0]
 
-            # d1
-            with tf.GradientTape() as tape:
-                # Generate a batch of new images
-                gen_batch1 = self.g1(noise, training=True)
+                # d1
+                with tf.GradientTape() as tape:
+                    # Generate a batch of new images
+                    gen_batch1 = self.g1(noise, training=True)
 
-                # Disc response
-                disc_real1 = self.d1(batch1, training=True)
-                disc_fake1 = self.d1(gen_batch1, training=True)
+                    # Disc response
+                    disc_real1 = self.d1(batch1, training=True)
+                    disc_fake1 = self.d1(gen_batch1, training=True)
 
-                # Calc loss and penalty
-                d1_loss = d_loss_fn(disc_fake1, disc_real1)
-                gp1 = p.calc_penalty(gen_batch1, batch1, self.d1, args)  # if loss is not wgan-gp then gp=0
-                d1_loss = d1_loss + gp1 * args.gp_lambda
-            gradients_of_discriminator = tape.gradient(d1_loss, self.d1.trainable_variables)
-            args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d1.trainable_variables))
+                    # Calc loss and penalty
+                    d1_loss = d_loss_fn(disc_fake1, disc_real1)
+                    gp1 = p.calc_penalty(gen_batch1, batch1, self.d1, args)  # if loss is not wgan-gp then gp=0
+                    d1_loss = d1_loss + gp1 * args.gp_lambda
+                gradients_of_discriminator = tape.gradient(d1_loss, self.d1.trainable_variables)
+                args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d1.trainable_variables))
 
-            # d2
-            with tf.GradientTape() as tape:
-                # Generate a batch of new images
-                gen_batch2 = self.g2(noise, training=True)
+                # d2
+                with tf.GradientTape() as tape:
+                    # Generate a batch of new images
+                    gen_batch2 = self.g2(noise, training=True)
 
-                # Disc response
-                disc_real2 = self.d2(batch2, training=True)
-                disc_fake2 = self.d2(gen_batch2, training=True)
+                    # Disc response
+                    disc_real2 = self.d2(batch2, training=True)
+                    disc_fake2 = self.d2(gen_batch2, training=True)
 
-                # Calc loss and penalty
-                d2_loss = d_loss_fn(disc_fake2, disc_real2)
-                gp2 = p.calc_penalty(gen_batch2, batch2, self.d2, args)  # if loss is not wgan-gp then gp=0
-                d2_loss = d2_loss + gp2 * args.gp_lambda
-            gradients_of_discriminator = tape.gradient(d2_loss, self.d2.trainable_variables)
-            args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d2.trainable_variables))
+                    # Calc loss and penalty
+                    d2_loss = d_loss_fn(disc_fake2, disc_real2)
+                    gp2 = p.calc_penalty(gen_batch2, batch2, self.d2, args)  # if loss is not wgan-gp then gp=0
+                    d2_loss = d2_loss + gp2 * args.gp_lambda
+                gradients_of_discriminator = tape.gradient(d2_loss, self.d2.trainable_variables)
+                args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d2.trainable_variables))
+
+                if args.loss == 'wgan' and args.penalty == 'none':
+                    self.clip_weights(args.clip)
 
             # ------------------
             #  Train Generators
@@ -137,11 +144,11 @@ class GANTrainer(object):
 
             # If at save interval => save generated image samples
             if epoch % args.images_while_training == 0:
-                self.sample_images(epoch, args.seed, args.dir)
+                self.sample_images(epoch, args.seed, args.dir, args.dataset_dim[3])
         self.plot_losses(args.dir)
         return self.full_training_time
 
-    def sample_images(self, epoch, seed, dir):
+    def sample_images(self, epoch, seed, dir, channels):
         r, c = 4, 4
         gen_batch1 = self.g1.predict(seed)
         gen_batch2 = self.g2.predict(seed)
@@ -153,13 +160,23 @@ class GANTrainer(object):
 
         fig, axs = plt.subplots(r, c)
         cnt = 0
-        for i in range(r):
-            for j in range(c):
-                axs[i, j].imshow(gen_imgs[cnt, :, :, 0], cmap='gray')
-                axs[i, j].axis('off')
-                cnt += 1
-        fig.savefig(os.path.join(dir, "images/%d.png" % epoch))
-        plt.close()
+        if channels == 1:
+            for i in range(r):
+                for j in range(c):
+                    axs[i, j].imshow(gen_imgs[cnt, :, :, 0], cmap='gray')
+                    axs[i, j].axis('off')
+                    cnt += 1
+            fig.savefig(os.path.join(dir, "images/%d.png" % epoch))
+            plt.close()
+        # color images
+        else:
+            for i in range(r):
+                for j in range(c):
+                    axs[i, j].imshow(gen_imgs[cnt, :, :, :])
+                    axs[i, j].axis('off')
+                    cnt += 1
+            fig.savefig(os.path.join(dir, "images/%d.png" % epoch))
+            plt.close()
 
     def plot_losses(self, dir):
         plt.plot(self.hist_g1, label='Generator 1 loss')
@@ -177,3 +194,13 @@ class GANTrainer(object):
         plt.legend()
         plt.savefig(os.path.join(dir, 'losses/disc_loss.png'))
         plt.close()
+
+    def clip_weights(self, clip):
+        for i, var in enumerate(self.d1.trainable_variables):
+            self.d1.trainable_variables[i].assign(tf.clip_by_value(var, -clip, clip))
+            if not np.array_equiv(self.d1.trainable_variables[i].numpy(), self.d2.trainable_variables[i].numpy()):
+                print(i)
+        for i, var in enumerate(self.d2.trainable_variables[6:]):
+            self.d2.trainable_variables[i + 6].assign(tf.clip_by_value(var, -clip, clip))
+            if not np.array_equiv(self.d1.trainable_variables[i].numpy(), self.d2.trainable_variables[i].numpy()):
+                print(i)
