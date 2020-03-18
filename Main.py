@@ -45,25 +45,25 @@ parser.add_argument('--purpose',        type=str,		    default='',		    help='pu
 parser.add_argument('--grayscale',      type=bool,		    default=False)
 
 # CoGAN
-parser.add_argument('--g_arch',         type=str,           default='conv',       help='conv | fc')
-parser.add_argument('--d_arch',         type=str,           default='conv',       help='conv | fc')
-parser.add_argument('--cogan_data',     type=str,           default='mnist2svhn',      help='mnist2edge | mnist2rotate | mnist2svhn | celeb_a')
+parser.add_argument('--g_arch',         type=str,           default='digit',       help='digit | rotate')
+parser.add_argument('--d_arch',         type=str,           default='digit',       help='digit | rotate')
+parser.add_argument('--cogan_data',     type=str,           default='mnist2svhn',      help='mnist2edge | mnist2rotate | mnist2svhn | mnist2negative | celeb_a')
 
 args = parser.parse_args()
 
 # Debugging
-#args.dataset = 'svhn'
-#args.gan_type = 'cogan'
+#args.dataset = 'mnist'
+args.gan_type = 'cogan'
 #args.loss = 'wgan'
 #args.scale_data = 64
 #args.epochs = 2
 #args.disc_iters = 5
 #args.images_while_training = 1
 #args.limit_dataset = True
-#args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
+args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
 #args.g_arch = 'fc'
 #args.d_arch = 'fc'
-#args.cogan_data = 'mnist2edge'
+args.cogan_data = 'mnist2rotate'
 
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
 #o2i.test_trunc_trick(args)
@@ -155,11 +155,11 @@ else:
     if len(tf.config.experimental.list_physical_devices('GPU')) > 0:
         with tf.device('/GPU:0'):
             print('Using GPU')
-            ganTrainer = gan_t.GANTrainer(generator, discriminator, train_dat[0])
+            ganTrainer = gan_t.GANTrainer(generator, discriminator, train_dat)
             full_training_time = ganTrainer.train(args)
     else:
         print('Using CPU')
-        ganTrainer = gan_t.GANTrainer(generator, discriminator, train_dat[0])
+        ganTrainer = gan_t.GANTrainer(generator, discriminator, train_dat)
         full_training_time = ganTrainer.train(args)
 
     generator._name='gen'

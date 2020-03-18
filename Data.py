@@ -63,7 +63,7 @@ def select_dataset_gan(args):
 
 def select_dataset_cogan(args):
     # Same dataset
-    if args.cogan_data in ['mnist2edge', 'mnist2rotate']:
+    if args.cogan_data in ['mnist2edge', 'mnist2rotate', 'mnist2negative']:
         X1, X2 = mnist_cogan(args.batch_size, args.cogan_data)
         if args.cogan_data == 'mnist2edge':
             shape = X1.element_spec.shape
@@ -125,6 +125,16 @@ def format_example_to32(image, label):
     image = (image - 127.5) / 127.5
     # Resize the image
     image = tf.image.resize(image, (32, 32))
+    return (image, label)
+
+
+def format_example_negative(image, label):
+    image = tf.cast(image, tf.float32)
+    # Normalize the pixel values
+    image = (image - 127.5) / 127.5
+    # Resize the image
+    image = tf.image.resize(image, (32, 32))
+    image = tf.math.negative(image)
     return (image, label)
 
 
@@ -215,16 +225,18 @@ def preprocess(img):
 def mnist_cogan(batch_size, data):
     d2 = data.split('2')[1]
 
-    if d2 == 'rotate':
+    if d2 in ['rotate', 'negative']:
         X1, info = tfds.load('mnist', split='train[:50%]', with_info=True, as_supervised=True)
         X2, info2 = tfds.load('mnist', split='train[50%:]', with_info=True, as_supervised=True)
         X1 = X1.map(format_example_to32)
-        X2 = X2.map(format_example_rotate)
+        if d2 == 'rotate':
+            X2 = X2.map(format_example_rotate)
+        else:
+            X2 = X2.map(format_example_negative)
         num_examples = info.splits['train'].num_examples
         num_examples2 = info2.splits['train'].num_examples
         X1 = X1.shuffle(num_examples).batch(batch_size).repeat()
         X2 = X2.shuffle(num_examples2).batch(batch_size).repeat()
-
     elif d2 == 'edge':
         (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
         # 28x28 -> 32x32

@@ -35,7 +35,7 @@ class GANTrainer(object):
             start = time.time()
 
             # Sample noise as generator input
-            noise = tf.random.normal([args.batch_size, 100])
+            noise = tf.random.normal([args.batch_size, args.noise_dim])
             #gen_noise = tf.random.normal([args.batch_size, 100])
 
             # ----------------------

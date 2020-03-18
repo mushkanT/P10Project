@@ -24,15 +24,15 @@ def write_config(args):
 
 
 def select_cogan_architecture(args):
-    if args.g_arch == 'conv':
-        generator1, generator2 = nets.cogan_generators_conv(args)
-    elif args.g_arch == 'fc':
-        generator1, generator2 = nets.cogan_generators_fc(args)
+    if args.g_arch == 'digit':
+        generator1, generator2 = nets.cogan_generators_digit(args)
+    elif args.g_arch == 'rotate':
+        generator1, generator2 = nets.cogan_generators_rotate(args)
 
-    if args.d_arch == 'conv':
-        discriminator1, discriminator2 = nets.cogan_discriminators_conv(args)
-    elif args.d_arch == 'fc':
-        discriminator1, discriminator2 = nets.cogan_discriminators_fc(args)
+    if args.d_arch == 'digit':
+        discriminator1, discriminator2 = nets.cogan_discriminators_digit(args)
+    elif args.d_arch == 'rotate':
+        discriminator1, discriminator2 = nets.cogan_discriminators_rotate(args)
 
     return generator1, generator2, discriminator1, discriminator2
 

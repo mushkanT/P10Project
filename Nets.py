@@ -37,19 +37,19 @@ def cifargan_gen(args):
     model.add(layers.Dense(g_dim * img_resize * img_resize, input_dim=z_dim, kernel_initializer=init))
     model.add(layers.Reshape((img_resize, img_resize, g_dim)))
     # upsample to 8x8
-    model.add(layers.Conv2DTranspose(1024, (4, 4), strides=(1, 1), padding='same', kernel_initializer=init))
+    model.add(layers.Conv2DTranspose(128, (4, 4), strides=(1, 1), padding='same', kernel_initializer=init))
     model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
     model.add(layers.LeakyReLU(alpha=0.2))
     # upsample to 16x16
-    model.add(layers.Conv2DTranspose(512, (4, 4), strides=(2, 2), padding='same', kernel_initializer=init))
+    model.add(layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same', kernel_initializer=init))
     model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
     model.add(layers.LeakyReLU(alpha=0.2))
     # upsample to 32x32
-    model.add(layers.Conv2DTranspose(256, (4, 4), strides=(2, 2), padding='same', kernel_initializer=init))
+    model.add(layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same', kernel_initializer=init))
     model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
     model.add(layers.LeakyReLU(alpha=0.2))
 
-    model.add(layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same', kernel_initializer=init))
+    model.add(layers.Conv2DTranspose(256, (4, 4), strides=(2, 2), padding='same', kernel_initializer=init))
     model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
     model.add(layers.LeakyReLU(alpha=0.2))
     # output layer
@@ -171,7 +171,8 @@ def toy_disc(args):
 
 
 # CoGAN
-def cogan_generators_conv(args):
+# Mnist negative + edge
+def cogan_generators_digit(args):
     channels = args.dataset_dim[3]
 
     # Shared weights between generators
@@ -197,23 +198,58 @@ def cogan_generators_conv(args):
     model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
 
     # Generator 1
-    img1 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='tanh', padding='same')(model)
+    img1 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='sigmoid', padding='same')(model)
 
     # Generator 2
-    img2 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='tanh', padding='same')(model)
+    img2 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='sigmoid', padding='same')(model)
 
     return keras.Model(noise, img1), keras.Model(noise, img2)
 
 
-def cogan_generators_fc(args):
+def cogan_discriminators_digit(args):
+    img_shape = (args.dataset_dim[1], args.dataset_dim[2], args.dataset_dim[3])
+
+    # Discriminator 1
+    img1 = tf.keras.layers.Input(shape=img_shape)
+    x1 = tf.keras.layers.Conv2D(20, (5, 5), padding='same')(img1)
+    x1 = tf.keras.layers.MaxPool2D()(x1)
+
+    # Discriminator 2
+    img2 = tf.keras.layers.Input(shape=img_shape)
+    x2 = tf.keras.layers.Conv2D(20, (5, 5), padding='same')(img2)
+    x2 = tf.keras.layers.MaxPool2D()(x2)
+
+    # Shared discriminator layers
+    model = keras.Sequential()
+    model.add(tf.keras.layers.Conv2D(50, (5, 5), padding='same'))
+    model.add(tf.keras.layers.MaxPool2D())
+    model.add(tf.keras.layers.Flatten())
+    model.add(tf.keras.layers.Dense(500))
+    model.add(tf.keras.layers.LeakyReLU(alpha=0.2))
+    model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+
+    output1 = model(x1)
+    output2 = model(x2)
+
+    return keras.Model(img1, output1), keras.Model(img2, output2)
+
+
+# Mnist rotate
+def cogan_generators_rotate(args):
     img_shape = (args.dataset_dim[1], args.dataset_dim[2], args.dataset_dim[3])
 
     # Shared weights between generators
     model = keras.Sequential()
-    model.add(tf.keras.layers.Dense(256, input_dim=args.noise_dim))
+    model.add(tf.keras.layers.Dense(1024, input_dim=args.noise_dim))
     model.add(tf.keras.layers.LeakyReLU(alpha=0.2))
     model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
-    model.add(tf.keras.layers.Dense(512))
+    model.add(tf.keras.layers.Dense(1024))
+    model.add(tf.keras.layers.LeakyReLU(alpha=0.2))
+    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.Dense(1024))
+    model.add(tf.keras.layers.LeakyReLU(alpha=0.2))
+    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.Dense(1024))
     model.add(tf.keras.layers.LeakyReLU(alpha=0.2))
     model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
 
@@ -221,63 +257,22 @@ def cogan_generators_fc(args):
     feature_repr = model(noise)
 
     # Generator 1
-    g1 = tf.keras.layers.Dense(1024)(feature_repr)
-    g1 = tf.keras.layers.LeakyReLU(alpha=0.2)(g1)
-    g1 = tf.keras.layers.BatchNormalization(momentum=0.8)(g1)
-    g1 = tf.keras.layers.Dense(np.prod(img_shape), activation='tanh')(g1)
+    g1 = tf.keras.layers.Dense(np.prod(img_shape), activation='sigmoid')(feature_repr)
     img1 = tf.keras.layers.Reshape(img_shape)(g1)
 
     # Generator 2
-    g2 = tf.keras.layers.Dense(1024)(feature_repr)
-    g2 = tf.keras.layers.LeakyReLU(alpha=0.2)(g2)
-    g2 = tf.keras.layers.BatchNormalization(momentum=0.8)(g2)
-    g2 = tf.keras.layers.Dense(np.prod(img_shape), activation='tanh')(g2)
+    g2 = tf.keras.layers.Dense(np.prod(img_shape), activation='sigmoid')(feature_repr)
     img2 = tf.keras.layers.Reshape(img_shape)(g2)
 
     return keras.Model(noise, img1), keras.Model(noise, img2)
 
 
-def cogan_discriminators_conv(args):
+def cogan_discriminators_rotate(args):
     img_shape = (args.dataset_dim[1], args.dataset_dim[2], args.dataset_dim[3])
 
     # Discriminator 1
     img1 = tf.keras.layers.Input(shape=img_shape)
-    #x1 = tf.keras.layers.Conv2D(20, (5, 5), padding='same')(img1)
-    #x1 = tf.keras.layers.MaxPool2D()(x1)
-
     # Discriminator 2
-    img2 = tf.keras.layers.Input(shape=img_shape)
-    #x2 = tf.keras.layers.Conv2D(20, (5, 5), padding='same')(img2)
-    #x2 = tf.keras.layers.MaxPool2D()(x2)
-
-    # Shared discriminator layers
-    model = keras.Sequential()
-    model.add(tf.keras.layers.Conv2D(20, (5, 5), padding='same'))
-    model.add(tf.keras.layers.MaxPool2D())
-    model.add(tf.keras.layers.Conv2D(50, (5, 5), padding='same'))
-    model.add(tf.keras.layers.MaxPool2D())
-    model.add(tf.keras.layers.Flatten())
-    model.add(tf.keras.layers.Dense(500))
-    model.add(tf.keras.layers.LeakyReLU(alpha=0.2))
-    #model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
-
-    #output1 = model(x1)
-    #output2 = model(x2)
-    img1_embedding = model(img1)
-    img2_embedding = model(img2)
-
-    # Discriminator 1
-    output1 = tf.keras.layers.Dense(1, activation='sigmoid')(img1_embedding)
-    # Discriminator 2
-    output2 = tf.keras.layers.Dense(1, activation='sigmoid')(img2_embedding)
-
-    return keras.Model(img1, output1), keras.Model(img2, output2)
-
-
-def cogan_discriminators_fc(args):
-    img_shape = (args.dataset_dim[1], args.dataset_dim[2], args.dataset_dim[3])
-
-    img1 = tf.keras.layers.Input(shape=img_shape)
     img2 = tf.keras.layers.Input(shape=img_shape)
 
     # Shared discriminator layers
@@ -287,13 +282,9 @@ def cogan_discriminators_fc(args):
     model.add(tf.keras.layers.LeakyReLU(alpha=0.2))
     model.add(tf.keras.layers.Dense(256))
     model.add(tf.keras.layers.LeakyReLU(alpha=0.2))
+    model.aad(tf.keras.layers.Dense(1, activation='sigmoid'))
 
-    img1_embedding = model(img1)
-    img2_embedding = model(img2)
-
-    # Discriminator 1
-    validity1 = tf.keras.layers.Dense(1, activation='sigmoid')(img1_embedding)
-    # Discriminator 2
-    validity2 = tf.keras.layers.Dense(1, activation='sigmoid')(img2_embedding)
+    validity1 = model(img1)
+    validity2 = model(img2)
 
     return keras.Model(img1, validity1), keras.Model(img2, validity2)
