@@ -31,12 +31,17 @@ def select_cogan_architecture(args):
     elif args.g_arch == 'cross':
         generator1, generator2 = nets.cross_cogan_generators(args)
 
+        tf.keras.utils.plot_model(generator1, to_file='gen1.png', show_shapes=True, expand_nested=True)
+        tf.keras.utils.plot_model(generator2, to_file='gen2.png',how_shapes=True, expand_nested=True)
+        #print(generator1.summary())
+        #print(generator2.summary())
+
     if args.d_arch == 'conv':
         discriminator1, discriminator2 = nets.cogan_discriminators_conv(args)
     elif args.d_arch == 'fc':
         discriminator1, discriminator2 = nets.cogan_discriminators_fc(args)
     elif args.d_arch == 'cross':
-        discriminator1, discriminator2 = nets.cross_cogan_discriminators()
+        discriminator1, discriminator2 = 0
 
     return generator1, generator2, discriminator1, discriminator2
 

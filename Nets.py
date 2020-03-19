@@ -301,10 +301,10 @@ def cogan_discriminators_fc(args):
 
 
 # ---------------------- Cross-MSG-GAN ----------------------
-def generator_init_block(input):
-    input = tf.keras.layers.Dense(1024 * 4 * 4)(input)
-    input = tf.keras.layers.Reshape((4, 4, 1024))(input)
-    input = (tf.keras.layers.Conv2DTranspose(1024, (4, 4), strides=(1, 1), padding='same'))(input)
+def generator_init_block(input, out_channels):
+    input = tf.keras.layers.Dense(out_channels * 4 * 4)(input)
+    input = tf.keras.layers.Reshape((4, 4, out_channels))(input)
+    input = (tf.keras.layers.Conv2DTranspose(out_channels, (4, 4), strides=(1, 1), padding='same'))(input)
     input = (tf.keras.layers.BatchNormalization(momentum=0.8))(input)
     input = (tf.keras.layers.LeakyReLU(alpha=0.2))(input)
     return input
@@ -315,47 +315,49 @@ def generator_block(input, out_channels):
     input = (tf.keras.layers.LeakyReLU(alpha=0.2))(input)
     return input
 
+def to_rgb_conv(input, out_channels):
+    return tf.keras.layers.Conv2D(out_channels, (1,1))(input)
+
 
 def cross_cogan_generators(args):
-    channels = args.dataset_dim[3]
+    img_channels = args.dataset_dim[3]
 
+    # Calculate depth of generator according to image size.
+    # Example: img_size = 32 then we need to have upscaling for 4x4, 8x8, 16x16 and finally 32x32 so depth is 4
     depth = math.log2(float(args.img_size)) - 1
-    assert depth >= args.shared_depth, "shared_depth is greater than model depth"
+    assert depth >= args.cross_depth, "shared_depth is greater than model depth"
+
+    # output containers for images of all scales
+    outputs_model1 = []
+    outputs_model2 = []
 
     # input noise vector shared by both generators
     noise = tf.keras.layers.Input(shape=(args.noise_dim,))
 
+    # Initial conv block to produce many filters for convolutions and 4x4 image
+    model1 = generator_init_block(noise, 1024)
+    model2 = generator_init_block(noise, 1024)
 
-    # Initial filters from dense layer for both geneators and 4x4 generation
-    model1 = generator_init_block(noise)
-    model2 = generator_init_block(noise)
+    # Use to_rgb_conv to convert 1024 filter outputs to 3 filter outputs as rgb 4x4 images
+    outputs_model1.append(to_rgb_conv(model1,img_channels)) #4x4 image for model1
+    outputs_model2.append(to_rgb_conv(model2,img_channels)) #4x4 image for model2
 
-    for i in range(0,depth):
-        model1 = generator_block(model1,128*(2^(depth-i)))
-        model2 = generator_block(model2,128*(2^(depth-i)))
+    # Create dynamic model according to calculated depth
+    for i in range(0,int(depth-1)):                                 # depth-1 because we already have done the first 4x4
+        out_channels = int(math.pow(2,9-i))                         # TODO: Make dynamic since currently is fixed at 512 filters
+        model1 = generator_block(model1, out_channels)
+        model2 = generator_block(model2, out_channels)
+        outputs_model1.append(to_rgb_conv(model1,img_channels))
+        outputs_model2.append(to_rgb_conv(model2,img_channels))
 
-    # 8x8 image generation
-    model = (tf.keras.layers.Conv2DTranspose(512, (3, 3), strides=(2, 2), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
-    model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
-
-    # 16x16 image generation
-    model = (tf.keras.layers.Conv2DTranspose(256, (3, 3), strides=(2, 2), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
-    model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
-
-    # 32x32 image generation
-    model = (tf.keras.layers.Conv2DTranspose(128, (3, 3), strides=(2, 2), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
-    model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
 
     # Generator 1
-    img1 = tf.keras.layers.Conv2DTranspose(channels, (6, 6), strides=(1, 1), activation='tanh', padding='same')(model)
+    img1 = tf.keras.layers.Conv2DTranspose(img_channels, (6, 6), strides=(1, 1), activation='tanh', padding='same')(model1)
 
     # Generator 2
-    img2 = tf.keras.layers.Conv2DTranspose(channels, (6, 6), strides=(1, 1), activation='tanh', padding='same')(model)
+    img2 = tf.keras.layers.Conv2DTranspose(img_channels, (6, 6), strides=(1, 1), activation='tanh', padding='same')(model2)
 
-    return keras.Model(noise, img1), keras.Model(noise, img2)
+    return tf.keras.Model(inputs=noise, outputs=outputs_model1), keras.Model(inputs=noise, outputs=outputs_model2)
 
 def cross_cogan_discriminators(args):
     img_shape = (args.dataset_dim[1], args.dataset_dim[2], args.dataset_dim[3])

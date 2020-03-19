@@ -48,7 +48,7 @@ parser.add_argument('--grayscale',      type=bool,		    default=False)
 parser.add_argument('--g_arch',         type=str,           default='cross',       help='conv | fc | cross')
 parser.add_argument('--d_arch',         type=str,           default='cross',       help='conv | fc | cross')
 parser.add_argument('--cogan_data',     type=str,           default='mnist2edge',      help='mnist2edge | mnist2rotate | mnist2svhn | celeb_a')
-parser.add_argument('--img_size',       type=int,           defautl=32,            help='image size to determine depth of model calculated by (log2(img_size) - 1)')
+parser.add_argument('--img_size',       type=int,           default=32,            help='image size to determine depth of model calculated by (log2(img_size) - 1)')
 parser.add_argument('--cross_depth',    type=int,           default=2,             help='The depth at which images should cross between coupled models. Must be <= model_depth (see argument above')
 
 args = parser.parse_args()

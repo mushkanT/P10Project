@@ -1,5 +1,4 @@
 import tensorflow as tf
-import keras.backend as K
 import numpy as np
 import time
 import Utils as u
