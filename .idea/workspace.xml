@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="220b69cb-c454-4d63-b603-ea792d470aba" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CoGAN_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/CoGAN_trainer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Data.py" beforeDir="false" afterPath="$PROJECT_DIR$/Data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Nets.py" beforeDir="false" afterPath="$PROJECT_DIR$/Nets.py" afterDir="false" />
@@ -17,7 +15,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/P9Project$Main.coverage" NAME="Main Coverage Results" MODIFIED="1584538431901" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/P9Project$Main.coverage" NAME="Main Coverage Results" MODIFIED="1584712851681" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FUSProjectUsageTrigger">
     <session id="1474987505">
@@ -68,23 +66,25 @@
     <session id="1028081004">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="5" />
+          <entry key="project.closed" value="7" />
           <entry key="project.open.time.0" value="1" />
           <entry key="project.open.time.15" value="1" />
           <entry key="project.open.time.30" value="2" />
           <entry key="project.open.time.31" value="1" />
+          <entry key="project.open.time.32" value="1" />
+          <entry key="project.open.time.33" value="1" />
           <entry key="project.open.time.35" value="1" />
-          <entry key="project.opened" value="6" />
+          <entry key="project.opened" value="8" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="5168" />
+          <entry key="py" value="5970" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="5168" />
+          <entry key="Python" value="5970" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -103,11 +103,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="595">
-              <caret line="65" column="31" selection-start-line="65" selection-start-column="31" selection-end-line="65" selection-end-column="31" />
+            <state relative-caret-position="17">
+              <caret line="49" column="201" selection-start-line="49" selection-start-column="201" selection-end-line="49" selection-end-column="201" />
             </state>
           </provider>
         </entry>
@@ -115,7 +115,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/CoGAN_trainer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="629">
+            <state relative-caret-position="510">
               <caret line="37" column="69" selection-start-line="37" selection-start-column="69" selection-end-line="37" selection-end-column="69" />
               <folding>
                 <element signature="e#0#47#0" expanded="true" />
@@ -127,34 +127,44 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Nets.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="721">
-              <caret line="237" column="34" selection-start-line="237" selection-start-column="34" selection-end-line="237" selection-end-column="34" />
+            <state relative-caret-position="194">
+              <caret line="348" lean-forward="true" selection-start-line="348" selection-end-line="348" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
                 <element signature="e#200#553#0" />
+                <element signature="e#735#2386#0" />
+                <element signature="e#2418#3377#0" />
+                <element signature="e#3413#4513#0" />
+                <element signature="e#4542#5495#0" />
                 <element signature="e#5528#5914#0" />
                 <element signature="e#5941#6318#0" />
                 <element signature="e#6391#7878#0" />
-                <element signature="e#7923#9221#0" />
-                <element signature="e#10201#11477#0" />
-                <element signature="e#10224#10950#0" />
+                <element signature="e#7923#8846#0" />
+                <element signature="e#8903#10179#0" />
+                <element signature="e#10225#10951#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Data.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1806">
-              <caret line="224" column="34" selection-start-line="224" selection-start-column="34" selection-end-line="224" selection-end-column="34" />
+            <state relative-caret-position="382">
+              <caret line="84" column="49" lean-forward="true" selection-start-line="84" selection-start-column="49" selection-end-line="84" selection-end-column="49" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
+                <element signature="e#4139#4381#0" />
+                <element signature="e#4427#4757#0" />
+                <element signature="e#4805#5036#0" />
+                <element signature="e#5082#5279#0" />
+                <element signature="e#5850#6047#0" />
+                <element signature="e#5329#5562#0" />
                 <element signature="e#5674#6372#0" />
                 <element signature="e#6419#7249#0" />
                 <element signature="e#7298#8132#0" />
                 <element signature="e#8181#8811#0" />
-                <element signature="e#8944#10847#0" />
+                <element signature="e#8839#8881#0" />
               </folding>
             </state>
           </provider>
@@ -163,11 +173,10 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="479">
-              <caret line="33" column="31" selection-start-line="33" selection-start-column="31" selection-end-line="33" selection-end-column="31" />
+            <state relative-caret-position="195">
+              <caret line="34" selection-start-line="34" selection-end-line="34" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
-                <element signature="e#1292#2423#0" />
               </folding>
             </state>
           </provider>
@@ -208,7 +217,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>.pdf</find>
       <find>pdf</find>
       <find>lod</find>
       <find>kernel</find>
@@ -238,6 +246,7 @@
       <find>dataset_dim</find>
       <find>penal</find>
       <find>dir</find>
+      <find>aad</find>
     </findStrings>
     <replaceStrings>
       <replace>n_dim</replace>
@@ -264,7 +273,6 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectId" id="1ZFVX0NoMykbG3uiUxmPftzwWFV" />
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
@@ -285,10 +293,10 @@
         <option value="$PROJECT_DIR$/Losses.py" />
         <option value="$USER_HOME$/Desktop/backup/cogan.py" />
         <option value="$PROJECT_DIR$/GAN_trainer.py" />
-        <option value="$PROJECT_DIR$/Data.py" />
         <option value="$PROJECT_DIR$/CoGAN_trainer.py" />
-        <option value="$PROJECT_DIR$/Nets.py" />
         <option value="$PROJECT_DIR$/Utils.py" />
+        <option value="$PROJECT_DIR$/Data.py" />
+        <option value="$PROJECT_DIR$/Nets.py" />
         <option value="$PROJECT_DIR$/Main.py" />
       </list>
     </option>
@@ -305,6 +313,7 @@
     <option name="width" value="974" />
     <option name="height" value="1047" />
   </component>
+  <component name="ProjectId" id="1ZFVX0NoMykbG3uiUxmPftzwWFV" />
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
@@ -507,13 +516,13 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.10501066" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.10714286" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3286334" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49947312" visible="true" weight="0.24403471" />
-      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49947312" weight="0.31344903" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49947312" weight="0.24403471" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" sideWeight="0.49947312" visible="true" weight="0.31344903" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32968238" />
@@ -562,12 +571,21 @@
         <entry key="MAIN">
           <value>
             <State>
+              <option name="RECENTLY_FILTERED_USER_GROUPS">
+                <collection />
+              </option>
+              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+                <collection />
+              </option>
               <option name="COLUMN_ORDER" />
             </State>
           </value>
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -598,12 +616,19 @@
           <option name="timeStamp" value="568" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/GAN_trainer.py</url>
-          <line>171</line>
-          <option name="timeStamp" value="555" />
           <url>file://$PROJECT_DIR$/Data.py</url>
           <line>21</line>
           <option name="timeStamp" value="569" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Data.py</url>
+          <line>94</line>
+          <option name="timeStamp" value="576" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Data.py</url>
+          <line>85</line>
+          <option name="timeStamp" value="577" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -740,41 +765,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Nets.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="721">
-          <caret line="237" column="34" selection-start-line="237" selection-start-column="34" selection-end-line="237" selection-end-column="34" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-            <element signature="e#200#553#0" />
-            <element signature="e#5528#5914#0" />
-            <element signature="e#5941#6318#0" />
-            <element signature="e#6391#7878#0" />
-            <element signature="e#7923#9221#0" />
-            <element signature="e#10201#11477#0" />
-            <element signature="e#10224#10950#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Data.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1806">
-          <caret line="224" column="34" selection-start-line="224" selection-start-column="34" selection-end-line="224" selection-end-column="34" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-            <element signature="e#5674#6372#0" />
-            <element signature="e#6419#7249#0" />
-            <element signature="e#7298#8132#0" />
-            <element signature="e#8181#8811#0" />
-            <element signature="e#8944#10847#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/CoGAN_trainer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="629">
+        <state relative-caret-position="510">
           <caret line="37" column="69" selection-start-line="37" selection-start-column="69" selection-end-line="37" selection-end-column="69" />
           <folding>
             <element signature="e#0#47#0" expanded="true" />
@@ -784,19 +777,60 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="479">
-          <caret line="33" column="31" selection-start-line="33" selection-start-column="31" selection-end-line="33" selection-end-column="31" />
+        <state relative-caret-position="195">
+          <caret line="34" selection-start-line="34" selection-end-line="34" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
-            <element signature="e#1292#2423#0" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="595">
-          <caret line="65" column="31" selection-start-line="65" selection-start-column="31" selection-end-line="65" selection-end-column="31" />
+        <state relative-caret-position="17">
+          <caret line="49" column="201" selection-start-line="49" selection-start-column="201" selection-end-line="49" selection-end-column="201" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Nets.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="194">
+          <caret line="348" lean-forward="true" selection-start-line="348" selection-end-line="348" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+            <element signature="e#200#553#0" />
+            <element signature="e#735#2386#0" />
+            <element signature="e#2418#3377#0" />
+            <element signature="e#3413#4513#0" />
+            <element signature="e#4542#5495#0" />
+            <element signature="e#5528#5914#0" />
+            <element signature="e#5941#6318#0" />
+            <element signature="e#6391#7878#0" />
+            <element signature="e#7923#8846#0" />
+            <element signature="e#8903#10179#0" />
+            <element signature="e#10225#10951#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Data.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="382">
+          <caret line="84" column="49" lean-forward="true" selection-start-line="84" selection-start-column="49" selection-end-line="84" selection-end-column="49" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+            <element signature="e#4139#4381#0" />
+            <element signature="e#4427#4757#0" />
+            <element signature="e#4805#5036#0" />
+            <element signature="e#5082#5279#0" />
+            <element signature="e#5850#6047#0" />
+            <element signature="e#5329#5562#0" />
+            <element signature="e#5674#6372#0" />
+            <element signature="e#6419#7249#0" />
+            <element signature="e#7298#8132#0" />
+            <element signature="e#8181#8811#0" />
+            <element signature="e#8839#8881#0" />
+          </folding>
         </state>
       </provider>
     </entry>

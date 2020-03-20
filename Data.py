@@ -84,6 +84,17 @@ def select_dataset_cogan(args):
         num_examples = info.splits['train'].num_examples
         X2 = X2.shuffle(num_examples).batch(args.batch_size).repeat()
         shape = X1.element_spec[0].shape
+    elif args.cogan_data in ['apple2orange', 'horse2zebra', 'vangogh2photo']:
+        # Domains
+        data, info = tfds.load('cycle_gan/'+args.cogan_data, with_info=True, as_supervised=True)
+        X1, X2 = data['trainA'], data['trainB']
+        X1 = X1.map(format_example_scale)
+        X2 = X2.map(format_example_scale)
+        num_examples = info.splits['trainA'].num_examples
+
+        X1 = X1.shuffle(num_examples).batch(args.batch_size).repeat()
+        X2 = X2.shuffle(num_examples).batch(args.batch_size).repeat()
+        shape = (None, 256, 256, 3)
     return X1, X2, shape
 
 
@@ -125,6 +136,14 @@ def format_example_to32(image, label):
     image = (image - 127.5) / 127.5
     # Resize the image
     image = tf.image.resize(image, (32, 32))
+    return (image, label)
+
+
+def format_example_scale(image, label):
+    image = tf.cast(image, tf.float32)
+    # Normalize the pixel values
+    image = (image - 127.5) / 127.5
+    # Resize the image
     return (image, label)
 
 

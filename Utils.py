@@ -28,11 +28,15 @@ def select_cogan_architecture(args):
         generator1, generator2 = nets.cogan_generators_digit(args)
     elif args.g_arch == 'rotate':
         generator1, generator2 = nets.cogan_generators_rotate(args)
+    elif args.g_arch == '256':
+        generator1, generator2 = nets.cogan_generators_256(args)
 
     if args.d_arch == 'digit':
         discriminator1, discriminator2 = nets.cogan_discriminators_digit(args)
     elif args.d_arch == 'rotate':
         discriminator1, discriminator2 = nets.cogan_discriminators_rotate(args)
+    elif args.d_arch == '256':
+        discriminator1, discriminator2 = nets.cogan_discriminators_256(args)
 
     return generator1, generator2, discriminator1, discriminator2
 

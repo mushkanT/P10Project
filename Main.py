@@ -45,25 +45,25 @@ parser.add_argument('--purpose',        type=str,		    default='',		    help='pu
 parser.add_argument('--grayscale',      type=bool,		    default=False)
 
 # CoGAN
-parser.add_argument('--g_arch',         type=str,           default='digit',       help='digit | rotate')
-parser.add_argument('--d_arch',         type=str,           default='digit',       help='digit | rotate')
-parser.add_argument('--cogan_data',     type=str,           default='mnist2svhn',      help='mnist2edge | mnist2rotate | mnist2svhn | mnist2negative | celeb_a')
+parser.add_argument('--g_arch',         type=str,           default='digit',       help='digit | rotate | 256')
+parser.add_argument('--d_arch',         type=str,           default='digit',       help='digit | rotate | 256')
+parser.add_argument('--cogan_data',     type=str,           default='mnist2svhn',  help='mnist2edge | mnist2rotate | mnist2svhn | mnist2negative | celeb_a | apple2orange | horse2zebra | vangogh2photo')
 
 args = parser.parse_args()
 
 # Debugging
 #args.dataset = 'mnist'
-args.gan_type = 'cogan'
+#args.gan_type = 'cogan'
 #args.loss = 'wgan'
 #args.scale_data = 64
 #args.epochs = 2
 #args.disc_iters = 5
 #args.images_while_training = 1
 #args.limit_dataset = True
-args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-#args.g_arch = 'fc'
-#args.d_arch = 'fc'
-args.cogan_data = 'mnist2rotate'
+#args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
+#args.g_arch = '256'
+#args.d_arch = '256'
+#args.cogan_data = 'apple2orange'
 
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
 #o2i.test_trunc_trick(args)
