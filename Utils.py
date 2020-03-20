@@ -31,8 +31,8 @@ def select_cogan_architecture(args):
     elif args.g_arch == 'cross':
         generator1, generator2 = nets.cross_cogan_generators(args)
 
-        tf.keras.utils.plot_model(generator1, to_file='gen1.png', show_shapes=True, expand_nested=True)
-        tf.keras.utils.plot_model(generator2, to_file='gen2.png',how_shapes=True, expand_nested=True)
+        #tf.keras.utils.plot_model(generator1, to_file='gen1.png', show_shapes=True, expand_nested=True)
+        #tf.keras.utils.plot_model(generator2, to_file='gen2.png', show_shapes=True, expand_nested=True)
         #print(generator1.summary())
         #print(generator2.summary())
 
@@ -41,7 +41,11 @@ def select_cogan_architecture(args):
     elif args.d_arch == 'fc':
         discriminator1, discriminator2 = nets.cogan_discriminators_fc(args)
     elif args.d_arch == 'cross':
-        discriminator1, discriminator2 = 0
+        discriminator1, discriminator2 = nets.cross_cogan_discriminators(args)
+        tf.keras.utils.plot_model(discriminator1, to_file='discrim1.png', show_shapes=True, expand_nested=True)
+        tf.keras.utils.plot_model(discriminator2, to_file='discrim2.png', show_shapes=True, expand_nested=True)
+        #print(discriminator1.summary())
+        #print(discriminator2.summary())
 
     return generator1, generator2, discriminator1, discriminator2
 

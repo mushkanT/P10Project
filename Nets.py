@@ -315,7 +315,7 @@ def generator_block(input, out_channels):
     input = (tf.keras.layers.LeakyReLU(alpha=0.2))(input)
     return input
 
-def to_rgb_conv(input, out_channels):
+def rgb_converter_conv(input, out_channels):
     return tf.keras.layers.Conv2D(out_channels, (1,1))(input)
 
 
@@ -324,7 +324,7 @@ def cross_cogan_generators(args):
 
     # Calculate depth of generator according to image size.
     # Example: img_size = 32 then we need to have upscaling for 4x4, 8x8, 16x16 and finally 32x32 so depth is 4
-    depth = math.log2(float(args.img_size)) - 1
+    depth = math.log2(float(args.dataset_dim[1])) - 1
     assert depth >= args.cross_depth, "shared_depth is greater than model depth"
 
     # output containers for images of all scales
@@ -339,16 +339,16 @@ def cross_cogan_generators(args):
     model2 = generator_init_block(noise, 1024)
 
     # Use to_rgb_conv to convert 1024 filter outputs to 3 filter outputs as rgb 4x4 images
-    outputs_model1.append(to_rgb_conv(model1,img_channels)) #4x4 image for model1
-    outputs_model2.append(to_rgb_conv(model2,img_channels)) #4x4 image for model2
+    outputs_model1.append(rgb_converter_conv(model1,img_channels)) #4x4 image for model1
+    outputs_model2.append(rgb_converter_conv(model2,img_channels)) #4x4 image for model2
 
     # Create dynamic model according to calculated depth
     for i in range(0,int(depth-1)):                                 # depth-1 because we already have done the first 4x4
-        out_channels = int(math.pow(2,9-i))                         # TODO: Make dynamic since currently is fixed at 512 filters
+        out_channels = max(int(math.pow(2,9-i)), 128)               # TODO: Make dynamic since currently is fixed at max 512 filters and min 128 filters
         model1 = generator_block(model1, out_channels)
         model2 = generator_block(model2, out_channels)
-        outputs_model1.append(to_rgb_conv(model1,img_channels))
-        outputs_model2.append(to_rgb_conv(model2,img_channels))
+        outputs_model1.append(rgb_converter_conv(model1,img_channels))
+        outputs_model2.append(rgb_converter_conv(model2,img_channels))
 
 
     # Generator 1
@@ -359,38 +359,54 @@ def cross_cogan_generators(args):
 
     return tf.keras.Model(inputs=noise, outputs=outputs_model1), keras.Model(inputs=noise, outputs=outputs_model2)
 
+def discriminator_block(main_input, scale_input, out_channels):
+    main_input = tf.keras.layers.Conv2D(out_channels, (5, 5), padding='same')(main_input)
+    main_input = tf.keras.layers.MaxPool2D()(main_input)
+    main_input = tf.keras.layers.Concatenate()([main_input, rgb_converter_conv(scale_input, out_channels=out_channels)])
+    return main_input
+
 def cross_cogan_discriminators(args):
     img_shape = (args.dataset_dim[1], args.dataset_dim[2], args.dataset_dim[3])
 
-    # Discriminator 1
-    img1 = tf.keras.layers.Input(shape=img_shape)
-    # x1 = tf.keras.layers.Conv2D(20, (5, 5), padding='same')(img1)
-    # x1 = tf.keras.layers.MaxPool2D()(x1)
+    model1_inputlayers = [tf.keras.layers.Input(shape=img_shape)]
+    model2_inputlayers = [tf.keras.layers.Input(shape=img_shape)]
+    #Calculate depth of model according to image sizes
+    depth = int(math.log2(float(img_shape[0])) - 1)
 
-    # Discriminator 2
-    img2 = tf.keras.layers.Input(shape=img_shape)
-    # x2 = tf.keras.layers.Conv2D(20, (5, 5), padding='same')(img2)
-    # x2 = tf.keras.layers.MaxPool2D()(x2)
+    #Create all inputs layers for all resolutions
+    for i in range(1,depth):
+        newSize = int(model1_inputlayers[-1].shape[1] / 2)
+        input_shape = (newSize, newSize, img_shape[2])
+        model1_inputlayers.append(tf.keras.layers.Input(shape=input_shape))
+        model2_inputlayers.append(tf.keras.layers.Input(shape=input_shape))
 
+
+    model1 = model1_inputlayers[0]
     # Shared discriminator layers
-    model = keras.Sequential()
-    model.add(tf.keras.layers.Conv2D(20, (5, 5), padding='same'))
-    model.add(tf.keras.layers.MaxPool2D())
-    model.add(tf.keras.layers.Conv2D(50, (5, 5), padding='same'))
-    model.add(tf.keras.layers.MaxPool2D())
-    model.add(tf.keras.layers.Flatten())
-    model.add(tf.keras.layers.Dense(500))
-    model.add(tf.keras.layers.LeakyReLU(alpha=0.2))
-    # model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+    for i in range(1, depth):
+        model1 = discriminator_block(model1, model2_inputlayers[i], 20)
 
-    # output1 = model(x1)
-    # output2 = model(x2)
-    img1_embedding = model(img1)
-    img2_embedding = model(img2)
+    model1 = tf.keras.layers.Flatten()(model1)
+    model1 = tf.keras.layers.Dense(500)(model1)
+    model1 = tf.keras.layers.LeakyReLU(alpha=0.2)(model1)
+
+    model2 = model2_inputlayers[0]
+    # Shared discriminator layers
+    for i in range(1, depth):
+        model2 = discriminator_block(model2, model1_inputlayers[i], 20)
+
+    model2 = tf.keras.layers.Flatten()(model2)
+    model2 = tf.keras.layers.Dense(500)(model2)
+    model2 = tf.keras.layers.LeakyReLU(alpha=0.2)(model2)
+
 
     # Discriminator 1
-    output1 = tf.keras.layers.Dense(1, activation='sigmoid')(img1_embedding)
+    output1 = tf.keras.layers.Dense(1, activation='sigmoid')(model1)
     # Discriminator 2
-    output2 = tf.keras.layers.Dense(1, activation='sigmoid')(img2_embedding)
+    output2 = tf.keras.layers.Dense(1, activation='sigmoid')(model2)
+    input1 = model1_inputlayers[:1]
+    input2 = model2_inputlayers[:1]
+    input1.extend(model2_inputlayers[1:])
+    input2.extend(model1_inputlayers[1:])
 
-    return keras.Model(img1, output1), keras.Model(img2, output2)
+    return keras.Model(inputs=input1, outputs=output1), keras.Model(inputs=input2, outputs=output2)
