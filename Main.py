@@ -52,8 +52,8 @@ parser.add_argument('--cogan_data',     type=str,           default='mnist2svhn'
 args = parser.parse_args()
 
 # Debugging
-#args.dataset = 'mnist'
-#args.gan_type = 'cogan'
+#args.dataset = 'apple2orange'
+#args.gan_type = 'dcgan'
 #args.loss = 'wgan'
 #args.scale_data = 64
 #args.epochs = 2
@@ -139,8 +139,11 @@ if args.gan_type == 'cogan':
 else:
     # Choose data
     start = time.time()
-    train_dat = dt.select_dataset_gan(args)
-    args.dataset_dim = train_dat.element_spec[0].shape
+    train_dat, shape = dt.select_dataset_gan(args)
+    if shape is None:
+        args.dataset_dim = train_dat.element_spec[0].shape
+    else:
+        args.dataset_dim = shape
     data_load_time = time.time() - start
     if args.input_noise:
         args.variance = 0.1

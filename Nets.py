@@ -90,56 +90,64 @@ def cifargan_disc(args):
 
 # 64x64
 def dcgan_gen(args):
-    g_dim = args.g_dim
-    z_dim = args.noise_dim
-    img_dim = args.dataset_dim[1]
     channels = args.dataset_dim[3]
-    img_resize = img_dim//(2*2*2*2)
 
-    model = keras.Sequential()
-    # foundation for 4x4 image
-    model.add(layers.Dense(g_dim * img_resize * img_resize, input_dim=z_dim))
-    model.add(layers.LeakyReLU(alpha=0.2))
-    model.add(layers.Reshape((img_resize, img_resize, g_dim)))
-    # upsample to 8x8
-    model.add(layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same'))
-    model.add(layers.LeakyReLU(alpha=0.2))
+    # Shared weights between generators
+    noise = tf.keras.layers.Input(shape=(args.noise_dim,))
 
-    model.add(layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same'))
-    model.add(layers.LeakyReLU(alpha=0.2))
+    model = tf.keras.layers.Dense(1024*16*16)(noise)
+    model = tf.keras.layers.Reshape((16, 16, 1024))(model)
 
-    # upsample to 16x16
-    model.add(layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same'))
-    model.add(layers.LeakyReLU(alpha=0.2))
-    # upsample to 32x32
-    model.add(layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same'))
-    model.add(layers.LeakyReLU(alpha=0.2))
-    # output layer
-    model.add(layers.Conv2DTranspose(channels, (3, 3), activation='tanh', padding='same'))
-    return model
+    model = (tf.keras.layers.Conv2DTranspose(1024, (4,4), strides=(1, 1), padding='same'))(model)
+    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
+
+    model = (tf.keras.layers.Conv2DTranspose(512, (3,3), strides=(2, 2), padding='same'))(model)
+    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
+
+    model = (tf.keras.layers.Conv2DTranspose(256, (3,3), strides=(2, 2), padding='same'))(model)
+    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
+
+    model = (tf.keras.layers.Conv2DTranspose(128, (3,3), strides=(2, 2), padding='same'))(model)
+    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
+
+    model = (tf.keras.layers.Conv2DTranspose(128, (3,3), strides=(2, 2), padding='same'))(model)
+    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
+
+    # Generator 1
+    img1 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='sigmoid', padding='same')(model)
+
+    return keras.Model(noise, img1)
 
 
 def dcgan_disc(args):
     d_dim = args.d_dim
     input_dim = args.dataset_dim[1]
     channels = args.dataset_dim[3]
+    img_shape = (args.dataset_dim[1], args.dataset_dim[2], args.dataset_dim[3])
 
     model = keras.Sequential()
     # normal
-    model.add(layers.Conv2D(64, (3, 3), padding='same', input_shape=[input_dim, input_dim, channels]))
+    model.add(layers.Conv2D(64, (3, 3), padding='same', input_shape=img_shape))
     model.add(layers.LeakyReLU(alpha=0.2))
-    # downsample
+
     model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same'))
     model.add(layers.LeakyReLU(alpha=0.2))
-    # downsample
 
     model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same'))
     model.add(layers.LeakyReLU(alpha=0.2))
 
     model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same'))
     model.add(layers.LeakyReLU(alpha=0.2))
-    # downsample
+
     model.add(layers.Conv2D(256, (3, 3), strides=(2, 2), padding='same'))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # downsample
+    model.add(layers.Conv2D(512, (3, 3), strides=(2, 2), padding='same'))
     model.add(layers.LeakyReLU(alpha=0.2))
     # classifier
     model.add(layers.Flatten())
@@ -331,10 +339,10 @@ def cogan_generators_256(args):
     model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
 
     # Generator 1
-    img1 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='sigmoid', padding='same')(model)
+    img1 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='tanh', padding='same')(model)
 
     # Generator 2
-    img2 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='sigmoid', padding='same')(model)
+    img2 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='tanh', padding='same')(model)
 
     return keras.Model(noise, img1), keras.Model(noise, img2)
 

@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 
 
 def select_dataset_gan(args):
+    shape = None
     if args.dataset == "toy":
         dat = createToyDataRing()
         # o2i.plot_toy_distribution(dat)
@@ -24,6 +25,14 @@ def select_dataset_gan(args):
         X2 = X2.map(format_example_to32)
         num_examples = info.splits['train'].num_examples
         train_dat = X2.shuffle(num_examples).batch(args.batch_size).repeat()
+    elif args.dataset == "apple2orange":
+        data, info = tfds.load('cycle_gan/'+args.cogan_data, with_info=True, as_supervised=True)
+        X1, X2 = data['trainA'], data['trainB']
+        X1 = X1.concatenate(X2)
+        X1 = X1.map(format_example_scale)
+        num_examples = info.splits['trainA'].num_examples
+        shape = (None, 256, 256, 3)
+        train_dat = X1.shuffle(num_examples).batch(args.batch_size).repeat()
     elif args.dataset == "mnist-f":
         dat = mnist_f(args.input_scale, args.limit_dataset)
         if args.scale_data != 0:
@@ -58,7 +67,7 @@ def select_dataset_gan(args):
         raise NotImplementedError()
     if args.dataset in ['lsun']:
         shape = dat.shape
-    return train_dat
+    return train_dat, shape
 
 
 def select_dataset_cogan(args):
