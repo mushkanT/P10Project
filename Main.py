@@ -48,7 +48,7 @@ parser.add_argument('--grayscale',      type=bool,		    default=False)
 # CoGAN
 parser.add_argument('--g_arch',         type=str,           default='cross',       help='conv | fc | cross')
 parser.add_argument('--d_arch',         type=str,           default='cross',       help='conv | fc | cross')
-parser.add_argument('--cogan_data',     type=str,           default='mnist2edge',      help='mnist2edge | mnist2rotate | mnist2svhn | celeb_a')
+parser.add_argument('--cogan_data',     type=str,           default='mnist2edge',  help='mnist2edge | mnist2rotate | mnist2svhn | celeb_a')
 parser.add_argument('--cross_depth',    type=int,           default=2,             help='The depth at which images should cross between coupled models. Must be <= model_depth (see argument above')
 
 args = parser.parse_args()
@@ -116,7 +116,10 @@ if args.gan_type == 'cogan':
         with tf.device('/GPU:0'):
             print('Using GPU')
             ganTrainer = cogan_t.GANTrainer(generator1, generator2, discriminator1, discriminator2, domain1, domain2)
-            full_training_time = ganTrainer.train(args)
+            if args.g_arch == 'cross':
+                full_training_time = ganTrainer.cross_train(args)
+            else:
+                full_training_time = ganTrainer.train(args)
     else:
         print('Using CPU')
         ganTrainer = cogan_t.GANTrainer(generator1, generator2, discriminator1, discriminator2, domain1, domain2)
