@@ -8,6 +8,7 @@ import time
 import Utils as u
 import argparse
 import os.path
+import math
 #import o2img as o2i
 #import matplotlib.pyplot as plt
 
@@ -102,6 +103,7 @@ if args.gan_type == 'cogan':
     domain1, domain2, shape = dt.select_dataset_cogan(args)
     args.dataset_dim = shape
     data_load_time = time.time() - start
+    args.depth = int(math.log2(float(args.dataset_dim[1])) - 1)
 
     # Select architectures
     generator1, generator2, discriminator1, discriminator2 = u.select_cogan_architecture(args)
@@ -118,7 +120,10 @@ if args.gan_type == 'cogan':
     else:
         print('Using CPU')
         ganTrainer = cogan_t.GANTrainer(generator1, generator2, discriminator1, discriminator2, domain1, domain2)
-        full_training_time = ganTrainer.train(args)
+        if args.g_arch == 'cross':
+            full_training_time = ganTrainer.cross_train(args)
+        else:
+            full_training_time = ganTrainer.train(args)
 
     generator1._name = 'gen1'
     discriminator1._name = 'disc1'

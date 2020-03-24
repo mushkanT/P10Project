@@ -42,8 +42,8 @@ def select_cogan_architecture(args):
         discriminator1, discriminator2 = nets.cogan_discriminators_fc(args)
     elif args.d_arch == 'cross':
         discriminator1, discriminator2 = nets.cross_cogan_discriminators(args)
-        tf.keras.utils.plot_model(discriminator1, to_file='discrim1.png', show_shapes=True, expand_nested=True)
-        tf.keras.utils.plot_model(discriminator2, to_file='discrim2.png', show_shapes=True, expand_nested=True)
+        #tf.keras.utils.plot_model(discriminator1, to_file='discrim1.png', show_shapes=True, expand_nested=True)
+        #tf.keras.utils.plot_model(discriminator2, to_file='discrim2.png', show_shapes=True, expand_nested=True)
         #print(discriminator1.summary())
         #print(discriminator2.summary())
 

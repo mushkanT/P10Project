@@ -368,8 +368,11 @@ def discriminator_block(main_input, scale_input, out_channels):
 def cross_cogan_discriminators(args):
     img_shape = (args.dataset_dim[1], args.dataset_dim[2], args.dataset_dim[3])
 
+    layer_filters = [20,50,100] # TODO: Currently hardcoded filter sizes for discriminator
+
     model1_inputlayers = [tf.keras.layers.Input(shape=img_shape)]
     model2_inputlayers = [tf.keras.layers.Input(shape=img_shape)]
+
     #Calculate depth of model according to image sizes
     depth = int(math.log2(float(img_shape[0])) - 1)
 
@@ -380,30 +383,29 @@ def cross_cogan_discriminators(args):
         model1_inputlayers.append(tf.keras.layers.Input(shape=input_shape))
         model2_inputlayers.append(tf.keras.layers.Input(shape=input_shape))
 
-
+    #create model 1
     model1 = model1_inputlayers[0]
-    # Shared discriminator layers
     for i in range(1, depth):
-        model1 = discriminator_block(model1, model2_inputlayers[i], 20)
+        model1 = discriminator_block(model1, model2_inputlayers[i], layer_filters[i-1])
 
     model1 = tf.keras.layers.Flatten()(model1)
     model1 = tf.keras.layers.Dense(500)(model1)
     model1 = tf.keras.layers.LeakyReLU(alpha=0.2)(model1)
 
+    #create model 2
     model2 = model2_inputlayers[0]
-    # Shared discriminator layers
     for i in range(1, depth):
-        model2 = discriminator_block(model2, model1_inputlayers[i], 20)
+        model2 = discriminator_block(model2, model1_inputlayers[i], layer_filters[i-1])
 
     model2 = tf.keras.layers.Flatten()(model2)
     model2 = tf.keras.layers.Dense(500)(model2)
     model2 = tf.keras.layers.LeakyReLU(alpha=0.2)(model2)
 
 
-    # Discriminator 1
     output1 = tf.keras.layers.Dense(1, activation='sigmoid')(model1)
-    # Discriminator 2
     output2 = tf.keras.layers.Dense(1, activation='sigmoid')(model2)
+
+    #prepare cross-input to discriminator
     input1 = model1_inputlayers[:1]
     input2 = model2_inputlayers[:1]
     input1.extend(model2_inputlayers[1:])
