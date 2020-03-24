@@ -63,6 +63,8 @@ class GANTrainer(object):
                 # Generate a batch of new images
                 gen_batch1 = self.g1(noise, training=False)
                 gen_batch2 = self.g2(noise, training=False)
+                gen_batch1 = list(reversed(gen_batch1))
+                gen_batch2 = list(reversed(gen_batch2))
 
                 # d1
                 with tf.GradientTape() as tape:
@@ -105,6 +107,7 @@ class GANTrainer(object):
 
             with tf.GradientTape() as tape:
                 gen_fake = self.g1(noise, training=True)
+                gen_fake = list(reversed(gen_fake))
                 disc_fake = self.d1(gen_fake, training=False)
                 g1_loss = g_loss_fn(disc_fake)
             gradients_of_generator1 = tape.gradient(g1_loss, self.g1.trainable_variables)
@@ -112,6 +115,7 @@ class GANTrainer(object):
 
             with tf.GradientTape() as tape:
                 gen_fake = self.g2(noise, training=True)
+                gen_fake = list(reversed(gen_fake))
                 disc_fake = self.d2(gen_fake, training=False)
                 g2_loss = g_loss_fn(disc_fake)
             gradients_of_generator2 = tape.gradient(g2_loss, self.g2.trainable_variables)
@@ -135,19 +139,6 @@ class GANTrainer(object):
             # Add time taken for this epoch to full training time (does not count sampling, weight checking as 'training time')
             self.full_training_time += time.time() - start
 
-            # Check if shared weights are equal between generators
-            a = self.g1.trainable_variables
-            b = self.g2.trainable_variables
-            mask = []
-
-            for i in range(8):
-                if np.array_equal(a[i].numpy(), b[i].numpy()):
-                    mask.append(1)
-                else:
-                    mask.append(0)
-            if 0 in mask:
-                print("ERROR - weight sharing failure:" + mask)
-
             # Collect loss values
             self.hist_d1.append(d1_loss)
             self.hist_d2.append(d2_loss)
@@ -159,7 +150,7 @@ class GANTrainer(object):
 
             # If at save interval => save generated image samples
             if epoch % args.images_while_training == 0:
-                self.sample_images(epoch, args.seed, args.dir, args.dataset_dim[3])
+                self.sample_images(epoch, args.seed, args.dir, args.dataset_dim[3], scaled_images=True)
         self.plot_losses(args.dir)
         return self.full_training_time
 
@@ -289,12 +280,14 @@ class GANTrainer(object):
         self.plot_losses(args.dir)
         return self.full_training_time
 
-    def sample_images(self, epoch, seed, dir, channels):
+    def sample_images(self, epoch, seed, dir, channels, scaled_images=False):
         r, c = 4, 4
         gen_batch1 = self.g1.predict(seed)
         gen_batch2 = self.g2.predict(seed)
-
-        gen_imgs = np.concatenate([gen_batch1, gen_batch2])
+        if scaled_images:
+            gen_imgs = np.concatenate([gen_batch1[-1], gen_batch2[-1]])
+        else:
+            gen_imgs = np.concatenate([gen_batch1, gen_batch2])
 
         # Rescale images 0 - 1
         gen_imgs = 0.5 * gen_imgs + 0.5
