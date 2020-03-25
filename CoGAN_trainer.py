@@ -36,14 +36,14 @@ class GANTrainer(object):
 
             # Sample noise as generator input
             noise = tf.random.normal([args.batch_size, args.noise_dim])
-            #gen_noise = tf.random.normal([args.batch_size, 100])
 
             # ----------------------
             #  Train Discriminators
             # ----------------------
+
             for i in range(args.disc_iters):
                 # Select a random batch of images
-                if args.cogan_data == 'mnist2edge':
+                if args.cogan_data in ['mnist2edge', 'Eyeglasses']:
                     batch1 = next(it1)
                     batch2 = next(it2)
                 else:
@@ -63,6 +63,7 @@ class GANTrainer(object):
                     d1_loss = d_loss_fn(disc_fake1, disc_real1)
                     gp1 = p.calc_penalty(gen_batch1, batch1, self.d1, args)  # if loss is not wgan-gp then gp=0
                     d1_loss = d1_loss + gp1 * args.gp_lambda
+
                 gradients_of_discriminator = tape.gradient(d1_loss, self.d1.trainable_variables)
                 args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d1.trainable_variables))
 
@@ -121,6 +122,7 @@ class GANTrainer(object):
             # Add time taken for this epoch to full training time (does not count sampling, weight checking as 'training time')
             self.full_training_time += time.time() - start
 
+            '''
             # Check if shared weights are equal between generators
             a = self.g1.trainable_variables
             b = self.g2.trainable_variables
@@ -133,6 +135,7 @@ class GANTrainer(object):
                     mask.append(0)
             if 0 in mask:
                 print("ERROR - weight sharing failure:" + mask)
+            '''
 
             # Collect loss values
             self.hist_d1.append(d1_loss)

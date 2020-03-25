@@ -308,6 +308,104 @@ def cogan_discriminators_rotate(args):
     return keras.Model(img1, validity1), keras.Model(img2, validity2)
 
 
+# Faces
+def cogan_generators_faces(args):
+    channels = args.dataset_dim[3]
+
+    # Shared weights between generators
+    noise = tf.keras.layers.Input(shape=(args.noise_dim,))
+
+    model = tf.keras.layers.Dense(1024*4*4)(noise)
+    model = tf.keras.layers.Reshape((4, 4, 1024))(model)
+
+    model = (tf.keras.layers.Conv2DTranspose(1024, (4,4), strides=(1, 1), padding='same'))(model)
+    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.PReLU())(model)
+
+    model = (tf.keras.layers.Conv2DTranspose(512, (4,4), strides=(2, 2), padding='same'))(model)
+    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.PReLU())(model)
+
+    model = (tf.keras.layers.Conv2DTranspose(256, (4,4), strides=(2, 2), padding='same'))(model)
+    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.PReLU())(model)
+
+    model = (tf.keras.layers.Conv2DTranspose(128, (4,4), strides=(2, 2), padding='same'))(model)
+    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.PReLU())(model)
+
+    model = (tf.keras.layers.Conv2DTranspose(64, (4,4), strides=(2, 2), padding='same'))(model)
+    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.PReLU())(model)
+
+    # Generator 1
+    img1 = (tf.keras.layers.Conv2DTranspose(32, (4,4), strides=(2, 2), padding='same'))(model)
+    img1 = (tf.keras.layers.BatchNormalization(momentum=0.8))(img1)
+    img1 = (tf.keras.layers.PReLU())(img1)
+    img1 = tf.keras.layers.Conv2DTranspose(channels, (3,3), strides=(1, 1), activation='tanh', padding='same')(img1)
+
+    # Generator 2
+    img2 = (tf.keras.layers.Conv2DTranspose(32, (4,4), strides=(2, 2), padding='same'))(model)
+    img2 = (tf.keras.layers.BatchNormalization(momentum=0.8))(img2)
+    img2 = (tf.keras.layers.PReLU())(img2)
+    img2 = tf.keras.layers.Conv2DTranspose(channels, (3,3), strides=(1, 1), activation='tanh', padding='same')(img2)
+
+    return keras.Model(noise, img1), keras.Model(noise, img2)
+
+
+def cogan_discriminators_faces(args):
+    img_shape = (args.dataset_dim[1], args.dataset_dim[2], args.dataset_dim[3])
+
+    # Discriminator 1
+    img1 = tf.keras.layers.Input(shape=img_shape)
+    x1 = tf.keras.layers.Conv2D(32, (5, 5), strides=(2, 2), padding='same')(img1)
+    x1 = tf.keras.layers.BatchNormalization(momentum=0.8)(x1)
+    x1 = tf.keras.layers.PReLU()(x1)
+    x1 = tf.keras.layers.Conv2D(64, (5, 5), strides=(2, 2), padding='same')(x1)
+    x1 = tf.keras.layers.BatchNormalization(momentum=0.8)(x1)
+    x1 = tf.keras.layers.PReLU()(x1)
+
+    # Discriminator 2
+    img2 = tf.keras.layers.Input(shape=img_shape)
+    x2 = tf.keras.layers.Conv2D(32, (5, 5), strides=(2, 2), padding='same')(img2)
+    x2 = tf.keras.layers.BatchNormalization(momentum=0.8)(x2)
+    x2 = tf.keras.layers.PReLU()(x2)
+    x2 = tf.keras.layers.Conv2D(64, (5, 5), strides=(2, 2), padding='same')(x2)
+    x2 = tf.keras.layers.BatchNormalization(momentum=0.8)(x2)
+    x2 = tf.keras.layers.PReLU()(x2)
+
+    # Shared discriminator layers
+    model = keras.Sequential()
+    model.add(tf.keras.layers.Conv2D(128, (5, 5), strides=(2, 2), padding='same'))
+    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.PReLU())
+
+    model.add(tf.keras.layers.Conv2D(256, (5, 5), strides=(2, 2), padding='same'))
+    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.PReLU())
+
+    model.add(tf.keras.layers.Conv2D(512, (5, 5), strides=(2, 2), padding='same'))
+    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.PReLU())
+
+    model.add(tf.keras.layers.Conv2D(1024, (5, 5), strides=(2, 2), padding='same'))
+    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.PReLU())
+
+    model.add(tf.keras.layers.Flatten())
+    model.add(tf.keras.layers.Dense(2048))
+    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.PReLU())
+    model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+
+    output1 = model(x1)
+    output2 = model(x2)
+
+    return keras.Model(img1, output1), keras.Model(img2, output2)
+
+
+
+
 # 256x256 CoGANs
 def cogan_generators_256(args):
     channels = args.dataset_dim[3]

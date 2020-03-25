@@ -5,6 +5,7 @@ from scipy.io import loadmat
 import scipy
 import cv2
 import matplotlib.pyplot as plt
+import glob
 
 
 def select_dataset_gan(args):
@@ -26,7 +27,7 @@ def select_dataset_gan(args):
         num_examples = info.splits['train'].num_examples
         train_dat = X2.shuffle(num_examples).batch(args.batch_size).repeat()
     elif args.dataset == "apple2orange":
-        data, info = tfds.load('cycle_gan/'+args.cogan_data, with_info=True, as_supervised=True)
+        data, info = tfds.load('cycle_gan/'+args.dataset, with_info=True, as_supervised=True)
         X1, X2 = data['trainA'], data['trainB']
         X1 = X1.concatenate(X2)
         X1 = X1.map(format_example_scale)
@@ -104,6 +105,48 @@ def select_dataset_cogan(args):
         X1 = X1.shuffle(num_examples).batch(args.batch_size).repeat()
         X2 = X2.shuffle(num_examples).batch(args.batch_size).repeat()
         shape = (None, 256, 256, 3)
+    elif args.cogan_data in ['Eyeglasses']:
+        #lines = [line.rstrip() for line in open('C:/Users/marku/Desktop/list_attr_celeba.txt', 'r')]
+        lines = [line.rstrip() for line in open('/user/student.aau.dk/mjuuln15/list_attr_celeba.txt', 'r')]
+        all_attr_names = lines[1].split()
+        attr2idx = {}
+        idx2attr = {}
+        mask = []
+        dataset = []
+        for i, attr_name in enumerate(all_attr_names):
+            attr2idx[attr_name] = i
+            idx2attr[i] = attr_name
+        lines = lines[2:]
+        for i, line in enumerate(lines):
+            split = line.split()
+            filename = split[0]
+            values = split[1:]
+            for attr_name in ['Eyeglasses']:
+                idx = attr2idx[attr_name]
+                label = (values[idx] == '1')
+            mask.append(label)
+
+        #images = glob.glob('C:/Users/marku/Desktop/test/*.jpg')
+        images = glob.glob('/user/student.aau.dk/mjuuln15/img_align_celeba/*.jpg')
+        for i in images:
+            image = cv2.imread(i)
+            dataset.append(image)
+
+        mask = np.array(mask)
+        dataset = np.array(dataset)
+        X1 = dataset[mask]
+        X2 = dataset[np.invert(mask)]
+
+        X1 = X1.reshape(X1.shape[0], X1.shape[1], X1.shape[2], X1.shape[3]).astype('float32')
+        X2 = X2.reshape(X2.shape[0], X2.shape[1], X2.shape[2], X2.shape[3]).astype('float32')
+
+        X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(len(X1)).batch(args.batch_size).repeat()
+        X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(X2)).shuffle(len(X2)).batch(args.batch_size).repeat()
+
+        X1 = X1.map(format_example_to128)
+        X2 = X2.map(format_example_to128)
+        shape = X2.element_spec.shape
+
     return X1, X2, shape
 
 
@@ -146,6 +189,15 @@ def format_example_to32(image, label):
     # Resize the image
     image = tf.image.resize(image, (32, 32))
     return (image, label)
+
+
+def format_example_to128(image):
+    image = tf.cast(image, tf.float32)
+    # Normalize the pixel values
+    image = (image - 127.5) / 127.5
+    # Resize the image
+    image = tf.image.resize(image, (128, 128))
+    return image
 
 
 def format_example_scale(image, label):
