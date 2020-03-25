@@ -56,27 +56,16 @@ def select_gan_architecture(args):
     if args.dataset == 'toy':
         generator = nets.toy_gen(args.noise_dim)
         discriminator = nets.toy_disc(args)
-    elif args.gan_type == 'infogan':
-        generator = nets.infogan_gen(args)
-        discriminator, auxiliary = nets.infogan_disc(args)
-    elif args.gan_type == 'tfgan':
-        generator = nets.tfgan_gen(args)
-        discriminator = nets.tfgan_disc(args)
-    elif args.gan_type == 'dcgan':
-        generator = nets.dcgan_gen(args)
-        discriminator = nets.dcgan_disc(args)
+    elif args.gan_type == '64':
+        generator = nets.gan64_gen(args)
+        discriminator = nets.gan64_disc(args)
+    elif args.gan_type == '128':
+        generator = nets.gan128_gen(args)
+        discriminator = nets.gan128_disc(args)
     elif args.gan_type == 'cifargan':
         generator = nets.cifargan_gen(args)
         discriminator = nets.cifargan_disc(args)
-    elif args.gan_type == 'cifargan_u':
-        generator = nets.cifargan_ups_gen(args)
-        discriminator = nets.cifargan_disc(args)
-    elif args.gan_type == 'cifargan_bn':
-        generator = nets.cifargan_bn_gen(args)
-        discriminator = nets.cifargan_bn_disc(args)
-    elif args.gan_type == 'cifargan_bn_g':
-        generator = nets.cifargan_bn_gen(args)
-        discriminator = nets.cifargan_disc(args)
+
     else:
         raise NotImplementedError()
 

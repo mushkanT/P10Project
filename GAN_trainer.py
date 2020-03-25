@@ -150,14 +150,18 @@ class GANTrainer(object):
             disc_iters_loss = []
             # take x steps with critic before training generator
             for i in range(args.disc_iters):
-                batch = next(it)
+                if args.dataset in ['celeba']:
+                    batch = next(it)
+                else:
+                    batch = next(it)[0]
+
                 if isinstance(batch, np.ndarray):
                     batch = tf.convert_to_tensor(batch)
                 if batch[0].dtype == tf.float64:
                     batch[0] = tf.dtypes.cast(batch[0], dtype=tf.float32)
                 if batch[0].shape[0] != args.batch_size:
                     continue
-                d_loss = self.train_discriminator(batch[0], args)
+                d_loss = self.train_discriminator(batch, args)
                 disc_iters_loss.append(d_loss)
 
             gen_loss.append(tf.reduce_mean(self.train_generator(args)).numpy())

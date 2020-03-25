@@ -30,10 +30,22 @@ def select_dataset_gan(args):
         data, info = tfds.load('cycle_gan/'+args.dataset, with_info=True, as_supervised=True)
         X1, X2 = data['trainA'], data['trainB']
         X1 = X1.concatenate(X2)
-        X1 = X1.map(format_example_scale)
+        X1 = X1.map(format_example_to128_2)
         num_examples = info.splits['trainA'].num_examples
-        shape = (None, 256, 256, 3)
+        shape = (None,X1.element_spec[0].shape[0],X1.element_spec[0].shape[1],X1.element_spec[0].shape[2])
         train_dat = X1.shuffle(num_examples).batch(args.batch_size).repeat()
+    elif args.dataset == "celeba":
+        images = glob.glob('C:/Users/marku/Desktop/img_align_celeba/*.jpg')
+        #images = glob.glob('/user/student.aau.dk/mjuuln15/img_align_celeba/*.jpg')
+        dataset = []
+        for i in images:
+            image = plt.imread(i)
+            dataset.append(image)
+        dataset = np.array(dataset)
+        X1 = dataset.reshape(dataset.shape[0], dataset.shape[1], dataset.shape[2], dataset.shape[3]).astype('float32')
+        X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(len(X1)).batch(args.batch_size).repeat()
+        train_dat = X1.map(format_example_to128)
+        shape = train_dat.element_spec.shape
     elif args.dataset == "mnist-f":
         dat = mnist_f(args.input_scale, args.limit_dataset)
         if args.scale_data != 0:
@@ -104,7 +116,7 @@ def select_dataset_cogan(args):
 
         X1 = X1.shuffle(num_examples).batch(args.batch_size).repeat()
         X2 = X2.shuffle(num_examples).batch(args.batch_size).repeat()
-        shape = (None, 256, 256, 3)
+        shape = (None, X1.element_spec[0].shape[0], X1.element_spec[0].shape[1], X1.element_spec[0].shape[2])
     elif args.cogan_data in ['Eyeglasses']:
         #lines = [line.rstrip() for line in open('C:/Users/marku/Desktop/list_attr_celeba.txt', 'r')]
         lines = [line.rstrip() for line in open('/user/student.aau.dk/mjuuln15/list_attr_celeba.txt', 'r')]
@@ -119,17 +131,16 @@ def select_dataset_cogan(args):
         lines = lines[2:]
         for i, line in enumerate(lines):
             split = line.split()
-            filename = split[0]
             values = split[1:]
             for attr_name in ['Eyeglasses']:
                 idx = attr2idx[attr_name]
                 label = (values[idx] == '1')
             mask.append(label)
 
-        #images = glob.glob('C:/Users/marku/Desktop/test/*.jpg')
+        #images = glob.glob('C:/Users/marku/Desktop/img_align_celeba/*.jpg')
         images = glob.glob('/user/student.aau.dk/mjuuln15/img_align_celeba/*.jpg')
         for i in images:
-            image = cv2.imread(i)
+            image = plt.imread(i)
             dataset.append(image)
 
         mask = np.array(mask)
@@ -198,6 +209,15 @@ def format_example_to128(image):
     # Resize the image
     image = tf.image.resize(image, (128, 128))
     return image
+
+
+def format_example_to128_2(image,label):
+    image = tf.cast(image, tf.float32)
+    # Normalize the pixel values
+    image = (image - 127.5) / 127.5
+    # Resize the image
+    image = tf.image.resize(image, (128, 128))
+    return image,label
 
 
 def format_example_scale(image, label):
