@@ -415,3 +415,95 @@ def cross_cogan_discriminators(args):
     input2.extend(model1_inputlayers[1:])
 
     return keras.Model(inputs=input1, outputs=output1), keras.Model(inputs=input2, outputs=output2)
+
+
+'''
+******************************************
+------------- CROSS MSG GAN --------------
+******************************************
+'''
+def cross_msg_cogan_generators(args):
+    img_channels = args.dataset_dim[3]
+
+    # output containers for images of all scales
+    outputs_model1 = []
+    outputs_model2 = []
+
+    # input noise vector shared by both generators
+    noise = tf.keras.layers.Input(shape=(args.noise_dim,))
+
+    # Initial conv block to produce many filters for convolutions and 4x4 image
+    model1 = generator_init_block(noise, args.g_filters[0])
+    model2 = generator_init_block(noise, args.g_filters[0])
+
+    # Use to_rgb_conv to convert 1024 filter outputs to 3 filter outputs as rgb 4x4 images
+    outputs_model1.append(rgb_converter_conv(model1,img_channels)) # 4x4 image for model1
+    outputs_model2.append(rgb_converter_conv(model2,img_channels)) # 4x4 image for model2
+
+    # Create dynamic model according to calculated depth
+    for i in range(1,args.depth):                                 # 1 to args.depth since we have done the first layer above
+        model1 = generator_block(model1, args.g_filters[i])
+        model2 = generator_block(model2, args.g_filters[i])
+        if args.cross_depth > i:
+            outputs_model1.append(rgb_converter_conv(model1,img_channels))
+            outputs_model2.append(rgb_converter_conv(model2,img_channels))
+
+    # TODO: KIG LIGE PÅ OM DETTE SKAL VÆRE SIDSTE LAG I MODELLEN
+    # Generator 1
+    outputs_model1.append(tf.keras.layers.Conv2DTranspose(img_channels, (6, 6), strides=(1, 1), activation='tanh', padding='same')(model1))
+
+    # Generator 2
+    outputs_model2.append(tf.keras.layers.Conv2DTranspose(img_channels, (6, 6), strides=(1, 1), activation='tanh', padding='same')(model2))
+
+    return tf.keras.Model(inputs=noise, outputs=outputs_model1), keras.Model(inputs=noise, outputs=outputs_model2)
+
+def cross_msg_cogan_discriminators(args):
+    img_shape = (args.dataset_dim[1], args.dataset_dim[2], args.dataset_dim[3])
+
+    # First input layers corresponding to full image shape
+    model1_inputlayers = [tf.keras.layers.Input(shape=img_shape)]
+    model2_inputlayers = [tf.keras.layers.Input(shape=img_shape)]
+
+    nr_skip_cross = args.depth - args.cross_depth
+    new_input_size = img_shape[0] / (math.pow(2,nr_skip_cross))     # calculate shape of first skipped inputlayer
+    #  all inputs layers for cross resolutions
+    for i in range(0,args.cross_depth):
+        input_shape = (new_input_size, new_input_size, img_shape[2])
+        model1_inputlayers.append(tf.keras.layers.Input(shape=input_shape))
+        model2_inputlayers.append(tf.keras.layers.Input(shape=input_shape))
+        new_input_size = new_input_size / 2     # Assume that all subsequent layers are inputlayers
+
+    #create model 1
+    model1 = model1_inputlayers[0]
+    for i in range(1,args.depth):
+        if nr_skip_cross <= i:  #If we have skipped all the depth connection uptil our wanted cross connection
+            model1 = discriminator_block(model1, model2_inputlayers[i-nr_skip_cross+1], args.d_filters[i-1])
+        else:   # Otherwise we do not add the cross connection
+            model1 = discriminator_block(model1, None, args.d_filters[i-1])
+
+    model1 = tf.keras.layers.Flatten()(model1)
+    model1 = tf.keras.layers.Dense(args.d_filters[-1])(model1)
+    model1 = tf.keras.layers.LeakyReLU(alpha=0.2)(model1)
+
+    #create model 2
+    model2 = model2_inputlayers[0]
+    for i in range(1, args.depth):
+        if nr_skip_cross <= i:
+            model2 = discriminator_block(model2, model1_inputlayers[i-nr_skip_cross+1], args.d_filters[i-1])
+        else:
+            model2 = discriminator_block(model2, None, args.d_filters[i-1])
+    model2 = tf.keras.layers.Flatten()(model2)
+    model2 = tf.keras.layers.Dense(args.d_filters[-1])(model2)
+    model2 = tf.keras.layers.LeakyReLU(alpha=0.2)(model2)
+
+
+    output1 = tf.keras.layers.Dense(1, activation='sigmoid')(model1)
+    output2 = tf.keras.layers.Dense(1, activation='sigmoid')(model2)
+
+    #prepare cross-input to discriminator
+    input1 = model1_inputlayers[:1]
+    input2 = model2_inputlayers[:1]
+    input1.extend(model2_inputlayers[1:])
+    input2.extend(model1_inputlayers[1:])
+
+    return keras.Model(inputs=input1, outputs=output1), keras.Model(inputs=input2, outputs=output2)
