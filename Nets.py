@@ -300,7 +300,11 @@ def cogan_discriminators_fc(args):
     return keras.Model(img1, validity1), keras.Model(img2, validity2)
 
 
-# ---------------------- Cross-MSG-GAN ----------------------
+'''
+******************************************
+--------------- CROSS GAN ----------------
+******************************************
+'''
 def generator_init_block(input, out_channels):
     input = tf.keras.layers.Dense(out_channels * 4 * 4)(input)
     input = tf.keras.layers.Reshape((4, 4, out_channels))(input)
@@ -334,51 +338,56 @@ def cross_cogan_generators(args):
     model2 = generator_init_block(noise, args.g_filters[0])
 
     # Use to_rgb_conv to convert 1024 filter outputs to 3 filter outputs as rgb 4x4 images
-    outputs_model1.append(rgb_converter_conv(model1,img_channels)) #4x4 image for model1
-    outputs_model2.append(rgb_converter_conv(model2,img_channels)) #4x4 image for model2
+    outputs_model1.append(rgb_converter_conv(model1,img_channels)) # 4x4 image for model1
+    outputs_model2.append(rgb_converter_conv(model2,img_channels)) # 4x4 image for model2
 
     # Create dynamic model according to calculated depth
-    for i in range(1,args.depth):                                 # 1 -> depth since we have done the first layer above
+    for i in range(1,args.depth):                                 # 1 to args.depth since we have done the first layer above
         model1 = generator_block(model1, args.g_filters[i])
         model2 = generator_block(model2, args.g_filters[i])
-        outputs_model1.append(rgb_converter_conv(model1,img_channels))
-        outputs_model2.append(rgb_converter_conv(model2,img_channels))
+        if args.cross_depth > i:
+            outputs_model1.append(rgb_converter_conv(model1,img_channels))
+            outputs_model2.append(rgb_converter_conv(model2,img_channels))
 
     # TODO: KIG LIGE PÅ OM DETTE SKAL VÆRE SIDSTE LAG I MODELLEN
     # Generator 1
-    img1 = tf.keras.layers.Conv2DTranspose(img_channels, (6, 6), strides=(1, 1), activation='tanh', padding='same')(model1)
+    outputs_model1.append(tf.keras.layers.Conv2DTranspose(img_channels, (6, 6), strides=(1, 1), activation='tanh', padding='same')(model1))
 
     # Generator 2
-    img2 = tf.keras.layers.Conv2DTranspose(img_channels, (6, 6), strides=(1, 1), activation='tanh', padding='same')(model2)
+    outputs_model2.append(tf.keras.layers.Conv2DTranspose(img_channels, (6, 6), strides=(1, 1), activation='tanh', padding='same')(model2))
 
     return tf.keras.Model(inputs=noise, outputs=outputs_model1), keras.Model(inputs=noise, outputs=outputs_model2)
 
 def discriminator_block(main_input, scale_input, out_channels):
     main_input = tf.keras.layers.Conv2D(out_channels, (5, 5), padding='same')(main_input)
     main_input = tf.keras.layers.MaxPool2D()(main_input)
-    main_input = tf.keras.layers.Concatenate()([main_input, rgb_converter_conv(scale_input, out_channels=out_channels)])
+    if scale_input is not None: # Only apply concatination layer if scale input is submitted
+        main_input = tf.keras.layers.Concatenate()([main_input, rgb_converter_conv(scale_input, out_channels=out_channels)])
     return main_input
 
 def cross_cogan_discriminators(args):
     img_shape = (args.dataset_dim[1], args.dataset_dim[2], args.dataset_dim[3])
 
-    layer_filters = [20,50,100] # TODO: Currently hardcoded filter sizes for discriminator
-
+    # First input layers corresponding to full image shape
     model1_inputlayers = [tf.keras.layers.Input(shape=img_shape)]
     model2_inputlayers = [tf.keras.layers.Input(shape=img_shape)]
 
-
-    #Create all inputs layers for all resolutions
-    for i in range(1,args.depth):
-        newSize = int(model1_inputlayers[-1].shape[1] / 2)
-        input_shape = (newSize, newSize, img_shape[2])
+    nr_skip_cross = args.depth - args.cross_depth
+    new_input_size = img_shape[0] / (math.pow(2,nr_skip_cross))     # calculate shape of first skipped inputlayer
+    #  all inputs layers for cross resolutions
+    for i in range(0,args.cross_depth):
+        input_shape = (new_input_size, new_input_size, img_shape[2])
         model1_inputlayers.append(tf.keras.layers.Input(shape=input_shape))
         model2_inputlayers.append(tf.keras.layers.Input(shape=input_shape))
+        new_input_size = new_input_size / 2     # Assume that all subsequent layers are inputlayers
 
     #create model 1
     model1 = model1_inputlayers[0]
     for i in range(1, args.depth):
-        model1 = discriminator_block(model1, model2_inputlayers[i], args.d_filters[i-1])
+        if args.cross_depth <= i:   # If the cross layers are reached we add the model2 inputs layers for concatination
+            model1 = discriminator_block(model1, model2_inputlayers[i+1-args.cross_depth], args.d_filters[i-1])
+        else:   # Otherwise we do not add the cross connection
+            model1 = discriminator_block(model1, None, args.d_filters[i-1])
 
     model1 = tf.keras.layers.Flatten()(model1)
     model1 = tf.keras.layers.Dense(args.d_filters[-1])(model1)
@@ -387,8 +396,10 @@ def cross_cogan_discriminators(args):
     #create model 2
     model2 = model2_inputlayers[0]
     for i in range(1, args.depth):
-        model2 = discriminator_block(model2, model1_inputlayers[i], args.d_filters[i-1])
-
+        if args.cross_depth <= i:
+            model2 = discriminator_block(model2, model1_inputlayers[i+1-args.cross_depth], args.d_filters[i-1])
+        else:
+            model2 = discriminator_block(model2, None, args.d_filters[i-1])
     model2 = tf.keras.layers.Flatten()(model2)
     model2 = tf.keras.layers.Dense(args.d_filters[-1])(model2)
     model2 = tf.keras.layers.LeakyReLU(alpha=0.2)(model2)
