@@ -378,7 +378,7 @@ def cross_cogan_discriminators(args):
     #create model 1
     model1 = model1_inputlayers[0]
     for i in range(1, args.depth):
-        model1 = discriminator_block(model1, model2_inputlayers[i], args.d_filters[i-1])
+        model1 = discriminator_block(model1, model1_inputlayers[i], args.d_filters[i-1])
 
     model1 = tf.keras.layers.Flatten()(model1)
     model1 = tf.keras.layers.Dense(args.d_filters[-1])(model1)
@@ -387,7 +387,7 @@ def cross_cogan_discriminators(args):
     #create model 2
     model2 = model2_inputlayers[0]
     for i in range(1, args.depth):
-        model2 = discriminator_block(model2, model1_inputlayers[i], args.d_filters[i-1])
+        model2 = discriminator_block(model2, model2_inputlayers[i], args.d_filters[i-1])
 
     model2 = tf.keras.layers.Flatten()(model2)
     model2 = tf.keras.layers.Dense(args.d_filters[-1])(model2)
