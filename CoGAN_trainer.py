@@ -60,6 +60,10 @@ class GANTrainer(object):
                 for i in range(1,args.depth):
                     batch2.append(avg_pool2D(batch2[i-1]))
 
+                # Delete intermediate images if they do not need to be shared
+                del batch1[1:args.depth - args.cross_depth]
+                del batch2[1:args.depth - args.cross_depth]
+
                 # Generate a batch of new images
                 gen_batch1 = self.g1(noise, training=False)
                 gen_batch2 = self.g2(noise, training=False)
