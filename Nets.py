@@ -322,11 +322,6 @@ def rgb_converter_conv(input, out_channels):
 def cross_cogan_generators(args):
     img_channels = args.dataset_dim[3]
 
-    # Calculate depth of generator according to image size.
-    # Example: img_size = 32 then we need to have upscaling for 4x4, 8x8, 16x16 and finally 32x32 so depth is 4
-    depth = math.log2(float(args.dataset_dim[1])) - 1
-    assert depth >= args.cross_depth, "shared_depth is greater than model depth"
-
     # output containers for images of all scales
     outputs_model1 = []
     outputs_model2 = []
@@ -335,22 +330,21 @@ def cross_cogan_generators(args):
     noise = tf.keras.layers.Input(shape=(args.noise_dim,))
 
     # Initial conv block to produce many filters for convolutions and 4x4 image
-    model1 = generator_init_block(noise, 1024)
-    model2 = generator_init_block(noise, 1024)
+    model1 = generator_init_block(noise, args.g_filters[0])
+    model2 = generator_init_block(noise, args.g_filters[0])
 
     # Use to_rgb_conv to convert 1024 filter outputs to 3 filter outputs as rgb 4x4 images
     outputs_model1.append(rgb_converter_conv(model1,img_channels)) #4x4 image for model1
     outputs_model2.append(rgb_converter_conv(model2,img_channels)) #4x4 image for model2
 
     # Create dynamic model according to calculated depth
-    for i in range(0,int(depth-1)):                                 # depth-1 because we already have done the first 4x4
-        out_channels = max(int(math.pow(2,9-i)), 128)               # TODO: Make dynamic since currently is fixed at max 512 filters and min 128 filters
-        model1 = generator_block(model1, out_channels)
-        model2 = generator_block(model2, out_channels)
+    for i in range(1,args.depth):                                 # 1 -> depth since we have done the first layer above
+        model1 = generator_block(model1, args.g_filters[i])
+        model2 = generator_block(model2, args.g_filters[i])
         outputs_model1.append(rgb_converter_conv(model1,img_channels))
         outputs_model2.append(rgb_converter_conv(model2,img_channels))
 
-
+    # TODO: KIG LIGE PÅ OM DETTE SKAL VÆRE SIDSTE LAG I MODELLEN
     # Generator 1
     img1 = tf.keras.layers.Conv2DTranspose(img_channels, (6, 6), strides=(1, 1), activation='tanh', padding='same')(model1)
 
@@ -373,11 +367,9 @@ def cross_cogan_discriminators(args):
     model1_inputlayers = [tf.keras.layers.Input(shape=img_shape)]
     model2_inputlayers = [tf.keras.layers.Input(shape=img_shape)]
 
-    #Calculate depth of model according to image sizes
-    depth = int(math.log2(float(img_shape[0])) - 1)
 
     #Create all inputs layers for all resolutions
-    for i in range(1,depth):
+    for i in range(1,args.depth):
         newSize = int(model1_inputlayers[-1].shape[1] / 2)
         input_shape = (newSize, newSize, img_shape[2])
         model1_inputlayers.append(tf.keras.layers.Input(shape=input_shape))
@@ -385,20 +377,20 @@ def cross_cogan_discriminators(args):
 
     #create model 1
     model1 = model1_inputlayers[0]
-    for i in range(1, depth):
-        model1 = discriminator_block(model1, model2_inputlayers[i], layer_filters[i-1])
+    for i in range(1, args.depth):
+        model1 = discriminator_block(model1, model2_inputlayers[i], args.d_filters[i-1])
 
     model1 = tf.keras.layers.Flatten()(model1)
-    model1 = tf.keras.layers.Dense(500)(model1)
+    model1 = tf.keras.layers.Dense(args.d_filters[-1])(model1)
     model1 = tf.keras.layers.LeakyReLU(alpha=0.2)(model1)
 
     #create model 2
     model2 = model2_inputlayers[0]
-    for i in range(1, depth):
-        model2 = discriminator_block(model2, model1_inputlayers[i], layer_filters[i-1])
+    for i in range(1, args.depth):
+        model2 = discriminator_block(model2, model1_inputlayers[i], args.d_filters[i-1])
 
     model2 = tf.keras.layers.Flatten()(model2)
-    model2 = tf.keras.layers.Dense(500)(model2)
+    model2 = tf.keras.layers.Dense(args.d_filters[-1])(model2)
     model2 = tf.keras.layers.LeakyReLU(alpha=0.2)(model2)
 
 
