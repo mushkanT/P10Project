@@ -49,9 +49,10 @@ parser.add_argument('--grayscale',      type=bool,		    default=False)
 parser.add_argument('--g_arch',         type=str,           default='cross',       help='conv | fc | cross')
 parser.add_argument('--d_arch',         type=str,           default='cross',       help='conv | fc | cross')
 parser.add_argument('--cogan_data',     type=str,           default='mnist2edge',  help='mnist2edge | mnist2rotate | mnist2svhn | celeb_a')
-parser.add_argument('--cross_depth',    type=int,           default=2,             help='The depth at which images should cross between coupled models. Must be <= model_depth (see argument above')
+parser.add_argument('--cross_depth',    type=int,           default=3,             help='The depth at which images should cross between coupled models. Must be <= model_depth (see argument above')
 parser.add_argument('--g_filters',      type=int, nargs='+', default=[1024, 512, 256, 128], help='filters for each depth of generator')
 parser.add_argument('--d_filters',      type=int, nargs='+', default=[20, 50, 100, 500], help='filters for each depth of discriminators')
+parser.add_argument('--apply_MSG',      type=bool,          default=False,         help='Determines if MSG is applied to each model')
 
 args = parser.parse_args()
 
@@ -110,6 +111,9 @@ if args.gan_type == 'cogan':
     # Example: img_size = 32 then we need to have upscaling for 4x4, 8x8, 16x16 and finally 32x32 so depth is 4
     args.depth = int(math.log2(float(args.dataset_dim[1])) - 1)
     assert args.depth >= args.cross_depth, "cross_depth is greater than total model depth"
+    assert len(args.g_filters) == args.depth, "Number of generator filters does not correspond to depth of model"
+    assert len(args.d_filters) == args.depth, "Number of discriminator filters does not correspond to depth of model"
+    assert args.d_arch == args.g_arch, "Generator and discriminator architectures must be equal"
 
     # Select architectures
     generator1, generator2, discriminator1, discriminator2 = u.select_cogan_architecture(args)
