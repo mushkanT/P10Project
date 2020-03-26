@@ -159,8 +159,6 @@ class GANTrainer(object):
                     batch = tf.convert_to_tensor(batch)
                 if batch[0].dtype == tf.float64:
                     batch[0] = tf.dtypes.cast(batch[0], dtype=tf.float32)
-                if batch[0].shape[0] != args.batch_size:
-                    continue
                 d_loss = self.train_discriminator(batch, args)
                 disc_iters_loss.append(d_loss)
 
@@ -189,7 +187,7 @@ class GANTrainer(object):
         fig, axs = plt.subplots(r, c)
         cnt = 0
         # black/white images
-        if channels == '1':
+        if channels == 1:
             for i in range(r):
                 for j in range(c):
                     axs[i, j].imshow(gen_imgs[cnt, :, :, 0], cmap='gray')

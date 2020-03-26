@@ -41,11 +41,11 @@ def select_dataset_gan(args):
         for i in images:
             image = plt.imread(i)
             dataset.append(image)
-        dataset = np.array(dataset)
-        X1 = dataset.reshape(dataset.shape[0], dataset.shape[1], dataset.shape[2], dataset.shape[3]).astype('float32')
+        X1 = np.array(dataset)
         X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(len(X1)).batch(args.batch_size).repeat()
         train_dat = X1.map(format_example_to128)
         shape = train_dat.element_spec.shape
+
     elif args.dataset == "mnist-f":
         dat = mnist_f(args.input_scale, args.limit_dataset)
         if args.scale_data != 0:
@@ -148,8 +148,8 @@ def select_dataset_cogan(args):
         X1 = dataset[mask]
         X2 = dataset[np.invert(mask)]
 
-        X1 = X1.reshape(X1.shape[0], X1.shape[1], X1.shape[2], X1.shape[3]).astype('float32')
-        X2 = X2.reshape(X2.shape[0], X2.shape[1], X2.shape[2], X2.shape[3]).astype('float32')
+        #X1 = X1.reshape(X1.shape[0], X1.shape[1], X1.shape[2], X1.shape[3]).astype('float32')
+        #X2 = X2.reshape(X2.shape[0], X2.shape[1], X2.shape[2], X2.shape[3]).astype('float32')
 
         X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(len(X1)).batch(args.batch_size).repeat()
         X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(X2)).shuffle(len(X2)).batch(args.batch_size).repeat()

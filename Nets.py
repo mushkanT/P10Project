@@ -202,33 +202,33 @@ def gan128_disc(args):
     # Discriminator 1
     img1 = tf.keras.layers.Input(shape=img_shape)
     x1 = tf.keras.layers.Conv2D(32, (5, 5), strides=(2, 2), padding='same')(img1)
-    x1 = tf.keras.layers.BatchNormalization(momentum=0.8)(x1)
+    x1 = tf.keras.layers.BatchNormalization()(x1)
     x1 = tf.keras.layers.PReLU()(x1)
     x1 = tf.keras.layers.Conv2D(64, (5, 5), strides=(2, 2), padding='same')(x1)
-    x1 = tf.keras.layers.BatchNormalization(momentum=0.8)(x1)
+    x1 = tf.keras.layers.BatchNormalization()(x1)
     x1 = tf.keras.layers.PReLU()(x1)
 
     # Shared discriminator layers
     model = keras.Sequential()
     model.add(tf.keras.layers.Conv2D(128, (5, 5), strides=(2, 2), padding='same'))
-    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU())
 
     model.add(tf.keras.layers.Conv2D(256, (5, 5), strides=(2, 2), padding='same'))
-    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU())
 
     model.add(tf.keras.layers.Conv2D(512, (5, 5), strides=(2, 2), padding='same'))
-    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU())
 
     model.add(tf.keras.layers.Conv2D(1024, (5, 5), strides=(2, 2), padding='same'))
-    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU())
 
     model.add(tf.keras.layers.Flatten())
     model.add(tf.keras.layers.Dense(2048))
-    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU())
     model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
 
@@ -270,19 +270,19 @@ def cogan_generators_digit(args):
     model = tf.keras.layers.Reshape((4, 4, 1024))(model)
 
     model = (tf.keras.layers.Conv2DTranspose(1024, (4,4), strides=(1, 1), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
 
     model = (tf.keras.layers.Conv2DTranspose(512, (3,3), strides=(2, 2), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
 
     model = (tf.keras.layers.Conv2DTranspose(256, (3,3), strides=(2, 2), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
 
     model = (tf.keras.layers.Conv2DTranspose(128, (3,3), strides=(2, 2), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
 
     # Generator 1
@@ -332,16 +332,16 @@ def cogan_generators_rotate(args):
     model = keras.Sequential()
     model.add(tf.keras.layers.Dense(1024, input_dim=args.noise_dim))
     model.add(tf.keras.layers.LeakyReLU(alpha=0.2))
-    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.Dense(1024))
     model.add(tf.keras.layers.LeakyReLU(alpha=0.2))
-    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.Dense(1024))
     model.add(tf.keras.layers.LeakyReLU(alpha=0.2))
-    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.Dense(1024))
     model.add(tf.keras.layers.LeakyReLU(alpha=0.2))
-    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.BatchNormalization())
 
     feature_repr = model(noise)
 
@@ -399,34 +399,34 @@ def cogan_generators_faces(args):
     model = tf.keras.layers.Reshape((4, 4, 1024))(model)
 
     model = (tf.keras.layers.Conv2DTranspose(1024, (4,4), strides=(1, 1), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.PReLU())(model)
 
     model = (tf.keras.layers.Conv2DTranspose(512, (4,4), strides=(2, 2), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.PReLU())(model)
 
     model = (tf.keras.layers.Conv2DTranspose(256, (4,4), strides=(2, 2), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.PReLU())(model)
 
     model = (tf.keras.layers.Conv2DTranspose(128, (4,4), strides=(2, 2), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.PReLU())(model)
 
     model = (tf.keras.layers.Conv2DTranspose(64, (4,4), strides=(2, 2), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.PReLU())(model)
 
     # Generator 1
     img1 = (tf.keras.layers.Conv2DTranspose(32, (4,4), strides=(2, 2), padding='same'))(model)
-    img1 = (tf.keras.layers.BatchNormalization(momentum=0.8))(img1)
+    img1 = (tf.keras.layers.BatchNormalization())(img1)
     img1 = (tf.keras.layers.PReLU())(img1)
     img1 = tf.keras.layers.Conv2DTranspose(channels, (3,3), strides=(1, 1), activation='tanh', padding='same')(img1)
 
     # Generator 2
     img2 = (tf.keras.layers.Conv2DTranspose(32, (4,4), strides=(2, 2), padding='same'))(model)
-    img2 = (tf.keras.layers.BatchNormalization(momentum=0.8))(img2)
+    img2 = (tf.keras.layers.BatchNormalization())(img2)
     img2 = (tf.keras.layers.PReLU())(img2)
     img2 = tf.keras.layers.Conv2DTranspose(channels, (3,3), strides=(1, 1), activation='tanh', padding='same')(img2)
 
@@ -439,42 +439,42 @@ def cogan_discriminators_faces(args):
     # Discriminator 1
     img1 = tf.keras.layers.Input(shape=img_shape)
     x1 = tf.keras.layers.Conv2D(32, (5, 5), strides=(2, 2), padding='same')(img1)
-    x1 = tf.keras.layers.BatchNormalization(momentum=0.8)(x1)
+    x1 = tf.keras.layers.BatchNormalization()(x1)
     x1 = tf.keras.layers.PReLU()(x1)
     x1 = tf.keras.layers.Conv2D(64, (5, 5), strides=(2, 2), padding='same')(x1)
-    x1 = tf.keras.layers.BatchNormalization(momentum=0.8)(x1)
+    x1 = tf.keras.layers.BatchNormalization()(x1)
     x1 = tf.keras.layers.PReLU()(x1)
 
     # Discriminator 2
     img2 = tf.keras.layers.Input(shape=img_shape)
     x2 = tf.keras.layers.Conv2D(32, (5, 5), strides=(2, 2), padding='same')(img2)
-    x2 = tf.keras.layers.BatchNormalization(momentum=0.8)(x2)
+    x2 = tf.keras.layers.BatchNormalization()(x2)
     x2 = tf.keras.layers.PReLU()(x2)
     x2 = tf.keras.layers.Conv2D(64, (5, 5), strides=(2, 2), padding='same')(x2)
-    x2 = tf.keras.layers.BatchNormalization(momentum=0.8)(x2)
+    x2 = tf.keras.layers.BatchNormalization()(x2)
     x2 = tf.keras.layers.PReLU()(x2)
 
     # Shared discriminator layers
     model = keras.Sequential()
     model.add(tf.keras.layers.Conv2D(128, (5, 5), strides=(2, 2), padding='same'))
-    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU())
 
-    model.add(tf.keras.layers.Conv2D(256, (5, 5), strides=(2, 2), padding='same'))
-    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.Conv2D(256, (3, 3), strides=(2, 2), padding='same'))
+    model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU())
 
-    model.add(tf.keras.layers.Conv2D(512, (5, 5), strides=(2, 2), padding='same'))
-    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.Conv2D(512, (3, 3), strides=(2, 2), padding='same'))
+    model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU())
 
-    model.add(tf.keras.layers.Conv2D(1024, (5, 5), strides=(2, 2), padding='same'))
-    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.Conv2D(1024, (3, 3), strides=(2, 2), padding='same'))
+    model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU())
 
     model.add(tf.keras.layers.Flatten())
     model.add(tf.keras.layers.Dense(2048))
-    model.add(tf.keras.layers.BatchNormalization(momentum=0.8))
+    model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU())
     model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
 
@@ -495,23 +495,23 @@ def cogan_generators_256(args):
     model = tf.keras.layers.Reshape((16, 16, 1024))(model)
 
     model = (tf.keras.layers.Conv2DTranspose(1024, (4,4), strides=(1, 1), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
 
     model = (tf.keras.layers.Conv2DTranspose(512, (3,3), strides=(2, 2), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
 
     model = (tf.keras.layers.Conv2DTranspose(256, (3,3), strides=(2, 2), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
 
     model = (tf.keras.layers.Conv2DTranspose(128, (3,3), strides=(2, 2), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
 
     model = (tf.keras.layers.Conv2DTranspose(128, (3,3), strides=(2, 2), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
 
     # Generator 1

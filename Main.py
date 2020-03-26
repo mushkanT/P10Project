@@ -52,8 +52,8 @@ parser.add_argument('--cogan_data',     type=str,           default='mnist2svhn'
 args = parser.parse_args()
 
 # Debugging
-#args.dataset = 'celeba'
-#args.gan_type = 'cogan'
+#args.dataset = 'mnist'
+#args.gan_type = 'cifargan'
 #args.loss = 'wgan'
 #args.scale_data = 64
 #args.epochs = 2
