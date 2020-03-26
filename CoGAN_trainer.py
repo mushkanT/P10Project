@@ -65,8 +65,8 @@ class GANTrainer(object):
                 del batch2[1:args.depth - args.cross_depth]
 
                 # Generate a batch of new images
-                gen_batch1 = self.g1(noise, training=False)
-                gen_batch2 = self.g2(noise, training=False)
+                gen_batch1 = self.g1(noise, training=True)
+                gen_batch2 = self.g2(noise, training=True)
                 gen_batch1 = list(reversed(gen_batch1))
                 gen_batch2 = list(reversed(gen_batch2))
 
