@@ -383,9 +383,9 @@ def cross_cogan_discriminators(args):
 
     #create model 1
     model1 = model1_inputlayers[0]
-    for i in range(1, args.depth):
-        if args.cross_depth <= i:   # If the cross layers are reached we add the model2 inputs layers for concatination
-            model1 = discriminator_block(model1, model2_inputlayers[i+1-args.cross_depth], args.d_filters[i-1])
+    for i in range(1,args.depth):
+        if nr_skip_cross <= i:  #If we have skipped all the depth connection uptil our wanted cross connection
+            model1 = discriminator_block(model1, model2_inputlayers[i-nr_skip_cross+1], args.d_filters[i-1])
         else:   # Otherwise we do not add the cross connection
             model1 = discriminator_block(model1, None, args.d_filters[i-1])
 
@@ -396,8 +396,8 @@ def cross_cogan_discriminators(args):
     #create model 2
     model2 = model2_inputlayers[0]
     for i in range(1, args.depth):
-        if args.cross_depth <= i:
-            model2 = discriminator_block(model2, model1_inputlayers[i+1-args.cross_depth], args.d_filters[i-1])
+        if nr_skip_cross <= i:
+            model2 = discriminator_block(model2, model1_inputlayers[i-nr_skip_cross+1], args.d_filters[i-1])
         else:
             model2 = discriminator_block(model2, None, args.d_filters[i-1])
     model2 = tf.keras.layers.Flatten()(model2)
