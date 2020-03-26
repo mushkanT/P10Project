@@ -398,9 +398,9 @@ def cross_cogan_discriminators(args):
     output2 = tf.keras.layers.Dense(1, activation='sigmoid')(model2)
 
     #prepare cross-input to discriminator
-    input1 = model1_inputlayers[:1]
-    input2 = model2_inputlayers[:1]
-    input1.extend(model2_inputlayers[1:])
-    input2.extend(model1_inputlayers[1:])
+    #input1 = model1_inputlayers[:1]
+    #input2 = model2_inputlayers[:1]
+    #input1.extend(model2_inputlayers[1:])
+    #input2.extend(model1_inputlayers[1:])
 
-    return keras.Model(inputs=input1, outputs=output1), keras.Model(inputs=input2, outputs=output2)
+    return keras.Model(inputs=model1_inputlayers, outputs=output1), keras.Model(inputs=model2_inputlayers, outputs=output2)
