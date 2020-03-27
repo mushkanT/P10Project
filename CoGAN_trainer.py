@@ -112,7 +112,7 @@ class GANTrainer(object):
             with tf.GradientTape() as tape:
                 gen_fake = self.g1(noise, training=True)
                 gen_fake = list(reversed(gen_fake))
-                disc_fake = self.d1(gen_fake, training=False)
+                disc_fake = self.d1(gen_fake, training=True)
                 g1_loss = g_loss_fn(disc_fake)
             gradients_of_generator1 = tape.gradient(g1_loss, self.g1.trainable_variables)
             args.gen_optimizer.apply_gradients(zip(gradients_of_generator1, self.g1.trainable_variables))
@@ -120,7 +120,7 @@ class GANTrainer(object):
             with tf.GradientTape() as tape:
                 gen_fake = self.g2(noise, training=True)
                 gen_fake = list(reversed(gen_fake))
-                disc_fake = self.d2(gen_fake, training=False)
+                disc_fake = self.d2(gen_fake, training=True)
                 g2_loss = g_loss_fn(disc_fake)
             gradients_of_generator2 = tape.gradient(g2_loss, self.g2.trainable_variables)
             args.gen_optimizer.apply_gradients(zip(gradients_of_generator2, self.g2.trainable_variables))
