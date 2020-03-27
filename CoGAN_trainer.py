@@ -52,6 +52,7 @@ class GANTrainer(object):
                     batch2 = next(it2)[0]
 
                 batch1 = [batch1]
+                batch2 = tf.cast(batch2, tf.float32)
                 batch2 = [batch2]
 
                 for i in range(1,args.depth):
