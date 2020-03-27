@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser()
 
 # Settings
 parser.add_argument('--dataset',        type=str,           default='toy',      help=' toy | mnist | cifar10 | lsun | frey | svhn')
-parser.add_argument('--loss',           type=str,           default='ce',       help='wgan-gp | wgan | ce')
+parser.add_argument('--loss',           type=str,           default='ce',       help='wgan | ce')
 parser.add_argument('--penalty',        type=str,           default='none',     help='none | wgan-gp')
 parser.add_argument('--batch_size',     type=int,           default=128)
 parser.add_argument('--epochs',         type=int,           default=5000)
