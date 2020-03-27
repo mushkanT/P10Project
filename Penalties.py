@@ -3,9 +3,9 @@ import tensorflow as tf
 
 def wasserstein_gp(fake_data, real_data, discriminator):
 
-    if fake_data is list:
+    if type(fake_data) is list:
         fake_data = fake_data[0]
-    if real_data is list:
+    if type(real_data) is list:
         real_data = real_data[0]
     # Interpolation constant
     alpha = tf.random.uniform(shape=[real_data.shape[3],1,1,1], minval=0., maxval=1.)
