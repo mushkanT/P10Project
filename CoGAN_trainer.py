@@ -72,24 +72,24 @@ class GANTrainer(object):
 
                 # d1
                 with tf.GradientTape() as tape:
-                    #gen_batch_combined = gen_batch1[:1]
-                    #gen_batch_combined.extend(gen_batch2[1:])
+                    gen_batch_combined = gen_batch1[:1]
+                    gen_batch_combined.extend(gen_batch2[1:])
 
                     # Disc response
                     disc_real1 = self.d1(batch1, training=True)
-                    disc_fake1 = self.d1(gen_batch1, training=True)
+                    disc_fake1 = self.d1(gen_batch_combined, training=True)
 
                     # Calc loss and penalty
                     d1_loss = d_loss_fn(disc_fake1, disc_real1)
-                    gp1 = p.calc_penalty(gen_batch1, batch1, self.d1, args)  # if loss is not wgan-gp then gp=0
+                    gp1 = p.calc_penalty(gen_batch_combined, batch1, self.d1, args)  # if loss is not wgan-gp then gp=0
                     d1_loss = d1_loss + gp1 * args.gp_lambda
                 gradients_of_discriminator = tape.gradient(d1_loss, self.d1.trainable_variables)
                 args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d1.trainable_variables))
 
                 # d2
                 with tf.GradientTape() as tape:
-                    #gen_batch_combined = gen_batch2[:1]
-                    #gen_batch_combined.extend(gen_batch1[1:])
+                    gen_batch_combined = gen_batch2[:1]
+                    gen_batch_combined.extend(gen_batch1[1:])
 
                     # Disc response
                     disc_real2 = self.d2(batch2, training=True)
@@ -97,7 +97,7 @@ class GANTrainer(object):
 
                     # Calc loss and penalty
                     d2_loss = d_loss_fn(disc_fake2, disc_real2)
-                    gp2 = p.calc_penalty(gen_batch2, batch2, self.d2, args)  # if loss is not wgan-gp then gp=0
+                    gp2 = p.calc_penalty(gen_batch_combined, batch2, self.d2, args)  # if loss is not wgan-gp then gp=0
                     d2_loss = d2_loss + gp2 * args.gp_lambda
                 gradients_of_discriminator = tape.gradient(d2_loss, self.d2.trainable_variables)
                 args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d2.trainable_variables))
