@@ -64,14 +64,15 @@ class GANTrainer(object):
                 del batch1[1:args.depth - args.cross_depth]
                 del batch2[1:args.depth - args.cross_depth]
 
-                # Generate a batch of new images
-                gen_batch1 = self.g1(noise, training=True)
-                gen_batch2 = self.g2(noise, training=True)
-                gen_batch1 = list(reversed(gen_batch1))
-                gen_batch2 = list(reversed(gen_batch2))
+
 
                 # d1
                 with tf.GradientTape() as tape:
+                    # Generate a batch of new images
+                    gen_batch1 = self.g1(noise, training=True)
+                    gen_batch2 = self.g2(noise, training=True)
+                    gen_batch1 = list(reversed(gen_batch1))
+                    gen_batch2 = list(reversed(gen_batch2))
                     gen_batch_combined = gen_batch1[:1]
                     gen_batch_combined.extend(gen_batch2[1:])
 
@@ -88,6 +89,11 @@ class GANTrainer(object):
 
                 # d2
                 with tf.GradientTape() as tape:
+                    # Generate a batch of new images
+                    gen_batch1 = self.g1(noise, training=True)
+                    gen_batch2 = self.g2(noise, training=True)
+                    gen_batch1 = list(reversed(gen_batch1))
+                    gen_batch2 = list(reversed(gen_batch2))
                     gen_batch_combined = gen_batch2[:1]
                     gen_batch_combined.extend(gen_batch1[1:])
 
