@@ -93,7 +93,7 @@ class GANTrainer(object):
 
                     # Disc response
                     disc_real2 = self.d2(batch2, training=True)
-                    disc_fake2 = self.d2(gen_batch2, training=True)
+                    disc_fake2 = self.d2(gen_batch_combined, training=True)
 
                     # Calc loss and penalty
                     d2_loss = d_loss_fn(disc_fake2, disc_real2)
