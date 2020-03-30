@@ -51,6 +51,8 @@ class GANTrainer(object):
                     batch1 = next(it1)[0]
                     batch2 = next(it2)[0]
 
+                if(batch2.shape[0] < args.batch_size):
+                    break
                 batch1 = [batch1]
                 batch2 = tf.cast(batch2, tf.float32)
                 batch2 = [batch2]
@@ -105,6 +107,8 @@ class GANTrainer(object):
 
                 if args.loss == 'wgan' and args.penalty == 'none':
                     self.clip_weights(args.clip)
+            else:
+                continue
 
             # ------------------
             #  Train Generators
