@@ -51,8 +51,7 @@ class GANTrainer(object):
                     batch1 = next(it1)[0]
                     batch2 = next(it2)[0]
 
-                if(batch2.shape[0] < args.batch_size):
-                    break
+
                 batch1 = [batch1]
                 batch2 = tf.cast(batch2, tf.float32)
                 batch2 = [batch2]
@@ -107,57 +106,56 @@ class GANTrainer(object):
 
                 if args.loss == 'wgan' and args.penalty == 'none':
                     self.clip_weights(args.clip)
-            else:
-                # ------------------
-                #  Train Generators
-                # ------------------
+            # ------------------
+            #  Train Generators
+            # ------------------
 
-                with tf.GradientTape() as tape:
-                    gen_fake = self.g1(noise, training=True)
-                    gen_fake = list(reversed(gen_fake))
-                    disc_fake = self.d1(gen_fake, training=True)
-                    g1_loss = g_loss_fn(disc_fake)
-                gradients_of_generator1 = tape.gradient(g1_loss, self.g1.trainable_variables)
-                args.gen_optimizer.apply_gradients(zip(gradients_of_generator1, self.g1.trainable_variables))
+            with tf.GradientTape() as tape:
+                gen_fake = self.g1(noise, training=True)
+                gen_fake = list(reversed(gen_fake))
+                disc_fake = self.d1(gen_fake, training=True)
+                g1_loss = g_loss_fn(disc_fake)
+            gradients_of_generator1 = tape.gradient(g1_loss, self.g1.trainable_variables)
+            args.gen_optimizer.apply_gradients(zip(gradients_of_generator1, self.g1.trainable_variables))
 
-                with tf.GradientTape() as tape:
-                    gen_fake = self.g2(noise, training=True)
-                    gen_fake = list(reversed(gen_fake))
-                    disc_fake = self.d2(gen_fake, training=True)
-                    g2_loss = g_loss_fn(disc_fake)
-                gradients_of_generator2 = tape.gradient(g2_loss, self.g2.trainable_variables)
-                args.gen_optimizer.apply_gradients(zip(gradients_of_generator2, self.g2.trainable_variables))
+            with tf.GradientTape() as tape:
+                gen_fake = self.g2(noise, training=True)
+                gen_fake = list(reversed(gen_fake))
+                disc_fake = self.d2(gen_fake, training=True)
+                g2_loss = g_loss_fn(disc_fake)
+            gradients_of_generator2 = tape.gradient(g2_loss, self.g2.trainable_variables)
+            args.gen_optimizer.apply_gradients(zip(gradients_of_generator2, self.g2.trainable_variables))
 
-                # Compute averages of generator gradients and use those for updates of shared weights
-                '''
-                GoGs = []
-                gg1 = []
-                gg2 = []
-                for i in range(8):
-                    GoGs.append((gradients_of_generator1[i]+gradients_of_generator2[i])/2)
-                gg1.extend(GoGs)
-                gg1.extend(gradients_of_generator1[8:])
-                gg2.extend(GoGs)
-                gg2.extend(gradients_of_generator2[8:])
-                args.gen_optimizer.apply_gradients(zip(gg1, self.g1.trainable_variables))
-                args.gen_optimizer.apply_gradients(zip(gg2, self.g2.trainable_variables))
-                '''
+            # Compute averages of generator gradients and use those for updates of shared weights
+            '''
+            GoGs = []
+            gg1 = []
+            gg2 = []
+            for i in range(8):
+                GoGs.append((gradients_of_generator1[i]+gradients_of_generator2[i])/2)
+            gg1.extend(GoGs)
+            gg1.extend(gradients_of_generator1[8:])
+            gg2.extend(GoGs)
+            gg2.extend(gradients_of_generator2[8:])
+            args.gen_optimizer.apply_gradients(zip(gg1, self.g1.trainable_variables))
+            args.gen_optimizer.apply_gradients(zip(gg2, self.g2.trainable_variables))
+            '''
 
-                # Add time taken for this epoch to full training time (does not count sampling, weight checking as 'training time')
-                self.full_training_time += time.time() - start
+            # Add time taken for this epoch to full training time (does not count sampling, weight checking as 'training time')
+            self.full_training_time += time.time() - start
 
-                # Collect loss values
-                self.hist_d1.append(d1_loss)
-                self.hist_d2.append(d2_loss)
-                self.hist_g1.append(g1_loss)
-                self.hist_g2.append(g2_loss)
+            # Collect loss values
+            self.hist_d1.append(d1_loss)
+            self.hist_d2.append(d2_loss)
+            self.hist_g1.append(g1_loss)
+            self.hist_g2.append(g2_loss)
 
-                print("%d [D1 loss: %f] [D2 loss: %f] [G1 loss: %f] [G2 loss: %f]" % (
-                    epoch, d1_loss, d2_loss, g1_loss, g2_loss))
+            print("%d [D1 loss: %f] [D2 loss: %f] [G1 loss: %f] [G2 loss: %f]" % (
+                epoch, d1_loss, d2_loss, g1_loss, g2_loss))
 
-                # If at save interval => save generated image samples
-                if epoch % args.images_while_training == 0:
-                    self.sample_images(epoch, args.seed, args.dir, args.dataset_dim[3], scaled_images=True)
+            # If at save interval => save generated image samples
+            if epoch % args.images_while_training == 0:
+                self.sample_images(epoch, args.seed, args.dir, args.dataset_dim[3], scaled_images=True)
 
 
         self.plot_losses(args.dir)

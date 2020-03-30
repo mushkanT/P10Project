@@ -247,8 +247,8 @@ def mnist_cogan(batch_size, data):
         X1 = (X1 - 127.5) / 127.5  # Normalize the images to [-1, 1]
         X2 = (X2 - 127.5) / 127.5  # Normalize the images to [-1, 1]
 
-        X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(X1.shape[0]).batch(
-            batch_size).repeat()
-        X2 = tf.data.Dataset.from_tensor_slices(X2).shuffle(X2.shape[0]).batch(
-            batch_size).repeat()
+        X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(X1.shape[0]).repeat().batch(
+            batch_size)
+        X2 = tf.data.Dataset.from_tensor_slices(X2).shuffle(X2.shape[0]).repeat().batch(
+            batch_size)
     return X1, X2
