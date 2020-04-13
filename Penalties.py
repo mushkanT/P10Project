@@ -1,4 +1,5 @@
 import tensorflow as tf
+import math
 
 
 class DiscriminatorPenalties:
@@ -23,23 +24,26 @@ class DiscriminatorPenalties:
         return gradient_penalty
 
     def calc_penalty(self, fake_data, real_data, discriminator, args):
-        if args.penalty == 'wgan-gp':
+        if args.disc_penalty == 'wgan-gp':
             return self.wasserstein_gp(fake_data, real_data, discriminator)
-        elif args.penalty == 'none':
+        elif args.disc_penalty == 'none':
             return 0
 
 
 class GeneratorPenalties:
-    def weight_regularizer(self, generator):
-
+    def weight_regularizer(self, g1, g2, shared_layers):
+        distance = 0
+        for idx in range(shared_layers):
+            distance = distance + tf.reduce_mean(tf.math.squared_difference(g1.trainable_variables[idx], g2.trainable_variables[idx]))
+        return distance
 
     def feature_regularizer(self, generator):
         print("Til ham som det er der er rigtig hyped på shadowlands")
 
-    def calc_penalty(self, gen):
+    def calc_penalty(self, g1, g2, shared_layers, args):
         if args.gen_penalty == 'weight':
-            return self.weight_regularizer(gen)
+            return self.weight_regularizer(g1, g2, shared_layers)
         if args.gen_penalty == 'feature':
             return self.feature_regularizer(gen)
-        else:
+        if args.gen_penalty == 'none':
             return 0

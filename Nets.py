@@ -322,6 +322,84 @@ def cogan_discriminators_digit(args):
     return keras.Model(img1, output1), keras.Model(img2, output2)
 
 
+def cogan_generators_digit_noshare(args):
+    channels = args.dataset_dim[3]
+
+    # Shared weights between generators
+    noise = tf.keras.layers.Input(shape=(args.noise_dim,))
+
+    model = tf.keras.layers.Dense(1024*4*4)(noise)
+    model = tf.keras.layers.Reshape((4, 4, 1024))(model)
+
+    # Generator 1
+    model1 = (tf.keras.layers.Conv2DTranspose(1024, (4,4), strides=(1, 1), padding='same'))(model)
+    model1 = (tf.keras.layers.BatchNormalization())(model1)
+    model1 = (tf.keras.layers.PReLU())(model1)
+
+    model1 = (tf.keras.layers.Conv2DTranspose(512, (3,3), strides=(2, 2), padding='same'))(model1)
+    model1 = (tf.keras.layers.BatchNormalization())(model1)
+    model1 = (tf.keras.layers.PReLU())(model1)
+
+    model1 = (tf.keras.layers.Conv2DTranspose(256, (3,3), strides=(2, 2), padding='same'))(model1)
+    model1 = (tf.keras.layers.BatchNormalization())(model1)
+    model1 = (tf.keras.layers.PReLU())(model1)
+
+    model1 = (tf.keras.layers.Conv2DTranspose(128, (3,3), strides=(2, 2), padding='same'))(model1)
+    model1 = (tf.keras.layers.BatchNormalization())(model1)
+    model1 = (tf.keras.layers.PReLU())(model1)
+    img1 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='sigmoid', padding='same')(model1)
+
+    # Generator 2
+    model2 = (tf.keras.layers.Conv2DTranspose(1024, (4,4), strides=(1, 1), padding='same'))(model)
+    model2 = (tf.keras.layers.BatchNormalization())(model2)
+    model2 = (tf.keras.layers.PReLU())(model2)
+
+    model2 = (tf.keras.layers.Conv2DTranspose(512, (3,3), strides=(2, 2), padding='same'))(model2)
+    model2 = (tf.keras.layers.BatchNormalization())(model2)
+    model2 = (tf.keras.layers.PReLU())(model2)
+
+    model2 = (tf.keras.layers.Conv2DTranspose(256, (3,3), strides=(2, 2), padding='same'))(model2)
+    model2 = (tf.keras.layers.BatchNormalization())(model2)
+    model2 = (tf.keras.layers.PReLU())(model2)
+
+    model2 = (tf.keras.layers.Conv2DTranspose(128, (3,3), strides=(2, 2), padding='same'))(model2)
+    model2 = (tf.keras.layers.BatchNormalization())(model2)
+    model2 = (tf.keras.layers.PReLU())(model2)
+    img2 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='sigmoid', padding='same')(model2)
+
+    return keras.Model(noise, img1), keras.Model(noise, img2)
+
+
+def cogan_discriminators_digit_noshare(args):
+    img_shape = (args.dataset_dim[1], args.dataset_dim[2], args.dataset_dim[3])
+
+    # Discriminator 1
+    img1 = tf.keras.layers.Input(shape=img_shape)
+    x1 = tf.keras.layers.Conv2D(20, (5, 5), padding='same')(img1)
+    x1 = tf.keras.layers.MaxPool2D()(x1)
+
+    model1 = tf.keras.layers.Conv2D(50, (5, 5), padding='same')(x1)
+    model1 = tf.keras.layers.MaxPool2D()(model1)
+    model1 = tf.keras.layers.Flatten()(model1)
+    model1 = tf.keras.layers.Dense(500)(model1)
+    model1 = tf.keras.layers.PReLU()(model1)
+    model1 = tf.keras.layers.Dense(1, activation='sigmoid')(model1)
+
+    # Discriminator 2
+    img2 = tf.keras.layers.Input(shape=img_shape)
+    x2 = tf.keras.layers.Conv2D(20, (5, 5), padding='same')(img2)
+    x2 = tf.keras.layers.MaxPool2D()(x2)
+
+    model2 = tf.keras.layers.Conv2D(50, (5, 5), padding='same')(x2)
+    model2 = tf.keras.layers.MaxPool2D()(model2)
+    model2 = tf.keras.layers.Flatten()(model2)
+    model2 = tf.keras.layers.Dense(500)(model2)
+    model2 = tf.keras.layers.PReLU()(model2)
+    model2 = tf.keras.layers.Dense(1, activation='sigmoid')(model2)
+
+    return keras.Model(img1, model1), keras.Model(img2, model2)
+
+
 # Mnist rotate
 def cogan_generators_rotate(args):
     img_shape = (args.dataset_dim[1], args.dataset_dim[2], args.dataset_dim[3])

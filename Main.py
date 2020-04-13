@@ -47,8 +47,8 @@ parser.add_argument('--purpose',        type=str,		    default='',		    help='pu
 parser.add_argument('--grayscale',      type=bool,		    default=False)
 
 # CoGAN
-parser.add_argument('--g_arch',         type=str,           default='digit',       help='digit | rotate | 256 | face')
-parser.add_argument('--d_arch',         type=str,           default='digit',       help='digit | rotate | 256 | face')
+parser.add_argument('--g_arch',         type=str,           default='digit',       help='digit | rotate | 256 | face | digit_noshare')
+parser.add_argument('--d_arch',         type=str,           default='digit',       help='digit | rotate | 256 | face | digit_noshare')
 parser.add_argument('--cogan_data',     type=str,           default='mnist2svhn',  help='mnist2edge | mnist2rotate | mnist2svhn | mnist2negative | celeb_a | apple2orange | horse2zebra | vangogh2photo')
 
 args = parser.parse_args()
@@ -56,16 +56,17 @@ args = parser.parse_args()
 # Debugging
 #args.dataset = 'celeba'
 #args.gan_type = "cogan"
-#args.loss = 'wgan'
-#args.penalty = 'wgan-gp'
+#args.loss = 'ce'
+#args.disc_penalty = 'wgan-gp'
+#args.gen_penalty = 'weight'
 #args.scale_data = 64
 #args.epochs = 2
 #args.disc_iters = 5
 #args.images_while_training = 1
 #args.limit_dataset = True
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-#args.g_arch = '256'
-#args.d_arch = '256'
+#args.g_arch = 'digit_noshare'
+#args.d_arch = 'digit_noshare'
 #args.cogan_data = 'apple2orange'
 #args.batch_size = 1
 
