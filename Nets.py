@@ -263,6 +263,8 @@ def toy_disc(args):
 def cogan_generators_digit(args):
     channels = args.dataset_dim[3]
 
+    outputs = []
+
     # Shared weights between generators
     noise = tf.keras.layers.Input(shape=(args.noise_dim,))
 
@@ -275,15 +277,18 @@ def cogan_generators_digit(args):
 
     model = (tf.keras.layers.Conv2DTranspose(512, (3,3), strides=(2, 2), padding='same'))(model)
     model = (tf.keras.layers.BatchNormalization())(model)
-    model = (tf.keras.layers.PReLU())(model)
+    features_8x8 = (tf.keras.layers.PReLU())(model)
+    outputs.append(features_8x8)
 
-    model = (tf.keras.layers.Conv2DTranspose(256, (3,3), strides=(2, 2), padding='same'))(model)
+    model = (tf.keras.layers.Conv2DTranspose(256, (3,3), strides=(2, 2), padding='same'))(features_8x8)
+    model = (tf.keras.layers.BatchNormalization())(model)
+    features_16x16 = (tf.keras.layers.PReLU())(model)
+    outputs.append(features_16x16)
+
+    model = (tf.keras.layers.Conv2DTranspose(128, (3,3), strides=(2, 2), padding='same'))(features_16x16)
     model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.PReLU())(model)
-
-    model = (tf.keras.layers.Conv2DTranspose(128, (3,3), strides=(2, 2), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization())(model)
-    model = (tf.keras.layers.PReLU())(model)
+    outputs.append(model)
 
     # Generator 1
     img1 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='sigmoid', padding='same')(model)
@@ -291,7 +296,11 @@ def cogan_generators_digit(args):
     # Generator 2
     img2 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='sigmoid', padding='same')(model)
 
-    return keras.Model(noise, img1), keras.Model(noise, img2)
+    outputs.append(img1)
+    outputs.append(img2)
+
+
+    return keras.Model(noise, outputs), keras.Model(noise, outputs)
 
 
 def cogan_discriminators_digit(args):
