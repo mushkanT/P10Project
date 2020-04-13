@@ -31,7 +31,15 @@ class DiscriminatorPenalties:
 
 class GeneratorPenalties:
     def weight_regularizer(self, generator):
-        print("Til Markus")
+
 
     def feature_regularizer(self, generator):
         print("Til ham som det er der er rigtig hyped på shadowlands")
+
+    def calc_penalty(self, gen):
+        if args.gen_penalty == 'weight':
+            return self.weight_regularizer(gen)
+        if args.gen_penalty == 'feature':
+            return self.feature_regularizer(gen)
+        else:
+            return 0

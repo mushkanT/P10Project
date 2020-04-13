@@ -16,12 +16,14 @@ parser = argparse.ArgumentParser()
 # Settings
 parser.add_argument('--dataset',        type=str,           default='toy',      help=' toy | mnist | cifar10 | lsun | frey | svhn')
 parser.add_argument('--loss',           type=str,           default='ce',       help=' wgan | ce')
-parser.add_argument('--penalty',        type=str,           default='none',       help='none | wgan-gp')
+parser.add_argument('--disc_penalty',   type=str,           default='none',       help='none | wgan-gp')
+parser.add_argument('--gen_penalty',    type=str,           default='none',       help='weight | feature')
 parser.add_argument('--batch_size',     type=int,           default=128)
 parser.add_argument('--epochs',         type=int,           default=5000)
 parser.add_argument('--disc_iters',     type=int,           default=1)
 parser.add_argument('--clip',           type=float,         default=0.01,       help='upper bound for clipping')
-parser.add_argument('--gp_lambda',      type=int,           default=10)
+parser.add_argument('--penalty_weight_d',      type=int,           default=10)
+parser.add_argument('--penalty_weight_g',      type=int,           default=10)
 parser.add_argument('--lr_d',           type=float,         default=0.0002)
 parser.add_argument('--lr_g',           type=float,         default=0.0002)
 parser.add_argument('--b1',             type=float,         default=0.5)
@@ -53,19 +55,19 @@ args = parser.parse_args()
 
 # Debugging
 #args.dataset = 'celeba'
-args.gan_type = "cogan"
-args.loss = 'wgan'
-args.penalty = 'wgan-gp'
+#args.gan_type = "cogan"
+#args.loss = 'wgan'
+#args.penalty = 'wgan-gp'
 #args.scale_data = 64
 #args.epochs = 2
 #args.disc_iters = 5
 #args.images_while_training = 1
 #args.limit_dataset = True
-args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
+#args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
 #args.g_arch = '256'
 #args.d_arch = '256'
 #args.cogan_data = 'apple2orange'
-args.batch_size = 1
+#args.batch_size = 1
 
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
 #o2i.test_trunc_trick(args)
