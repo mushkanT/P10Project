@@ -292,7 +292,7 @@ class GANTrainer(object):
         gen_batch1 = self.g1.predict(seed)
         gen_batch2 = self.g2.predict(seed)
         if scaled_images:
-            gen_imgs = np.concatenate([gen_batch1[1], gen_batch2[1]])
+            gen_imgs = np.concatenate([gen_batch1[-1], gen_batch2[-1]])
         else:
             gen_imgs = np.concatenate([gen_batch1, gen_batch2])
 
