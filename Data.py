@@ -13,54 +13,49 @@ def select_dataset_gan(args):
     if args.dataset == "toy":
         dat = createToyDataRing()
         # o2i.plot_toy_distribution(dat)
-        train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+        train = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+
     elif args.dataset == "mnist":
         data, info = tfds.load('mnist', with_info=True, as_supervised=True)
-        X2, test = data['train'], data['test']
-        X2 = X2.map(format_example_to32)
-        num_examples = info.splits['train'].num_examples
-        train_dat = X2.shuffle(num_examples).batch(args.batch_size).repeat()
+        train, test = data['train'], data['test']
+        train = train.map(format_example_to32)
+
     elif args.dataset == "svhn":
         data, info = tfds.load('svhn_cropped', with_info=True, as_supervised=True)
-        X2, test = data['train'], data['test']
-        X2 = X2.map(format_example_to32)
-        num_examples = info.splits['train'].num_examples
-        train_dat = X2.shuffle(num_examples).batch(args.batch_size).repeat()
+        train, test = data['train'], data['test']
+        train = train.map(format_example_to32)
+
     elif args.dataset == "apple2orange":
         data, info = tfds.load('cycle_gan/'+args.dataset, with_info=True, as_supervised=True)
-        X1, X2 = data['trainA'], data['trainB']
-        X1 = X1.concatenate(X2)
-        X1 = X1.map(format_example_to128_2)
-        num_examples = info.splits['trainA'].num_examples
-        shape = (None,X1.element_spec[0].shape[0],X1.element_spec[0].shape[1],X1.element_spec[0].shape[2])
-        train_dat = X1.shuffle(num_examples).batch(args.batch_size).repeat()
+        trainA, trainB = data['trainA'], data['trainB']
+        train = trainA.concatenate(trainB)
+        train = train.map(format_example_to128_2)
+        shape = (None,train.element_spec[0].shape[0],train.element_spec[0].shape[1],train.element_spec[0].shape[2])
+
     elif args.dataset == "celeba":
-        images = glob.glob('C:/Users/marku/Desktop/img_align_celeba/*.jpg')
-        #images = glob.glob('/user/student.aau.dk/mjuuln15/img_align_celeba/*.jpg')
+        #images = glob.glob('C:/Users/marku/Desktop/img_align_celeba/*.jpg')
+        images = glob.glob('/user/student.aau.dk/mjuuln15/img_align_celeba/*.jpg')
         dataset = []
         for i in images:
             image = plt.imread(i)
             dataset.append(image)
         X1 = np.array(dataset)
         X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(len(X1)).batch(args.batch_size).repeat()
-        train_dat = X1.map(format_example_to128)
-        shape = train_dat.element_spec.shape
+        train = X1.map(format_example_to128)
+        shape = train.element_spec.shape
 
     elif args.dataset == "mnist-f":
-        dat = mnist_f(args.input_scale, args.limit_dataset)
-        if args.scale_data != 0:
-            dat = tf.image.resize(dat, [args.scale_data, args.scale_data])
-        train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+        data, info = tfds.load('fashion_mnist', with_info=True, as_supervised=True)
+        train, test = data['train'], data['test']
+        train = train.map(format_example_to32)
+
     elif args.dataset == 'cifar10':
-        dat = cifar10(args.input_scale, args.limit_dataset)
-        if args.scale_data != 0:
-            dat = tf.image.resize(dat, [args.scale_data, args.scale_data])
-        if args.grayscale:
-            dat = tf.image.rgb_to_grayscale(dat)
-        train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
+        data, info = tfds.load(args.dataset, with_info=True, as_supervised=True)
+        train, test = data['train'], data['test']
+        train = train.map(format_example_scale)
+
     elif args.dataset == 'lsun':
         ImgDataGen = tf.keras.preprocessing.image.ImageDataGenerator(preprocessing_function=preprocess, dtype=tf.dtypes.float32)
-                
         train_dat = ImgDataGen.flow_from_directory('/user/student.aau.dk/mjuuln15/lsun_data/', target_size=(args.scale_data, args.scale_data), batch_size=args.batch_size, seed=2019, class_mode=None, interpolation="nearest")
                
         amount = 2554932
@@ -78,9 +73,14 @@ def select_dataset_gan(args):
         train_dat = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
     else:
         raise NotImplementedError()
-    if args.dataset in ['lsun']:
-        shape = dat.shape
-    return train_dat, shape
+
+    if args.dataset not in ['lsun', 'celeba']:
+        if args.limit_dataset:
+            train = train.filter(class_filter)
+        num_examples = info.splits['train'].num_examples
+        train = train.shuffle(num_examples).batch(args.batch_size).repeat()
+
+    return train, shape
 
 
 def select_dataset_cogan(args):
@@ -116,7 +116,8 @@ def select_dataset_cogan(args):
 
         X1 = X1.shuffle(num_examples).batch(args.batch_size).repeat()
         X2 = X2.shuffle(num_examples).batch(args.batch_size).repeat()
-        shape = (None, X1.element_spec[0].shape[0], X1.element_spec[0].shape[1], X1.element_spec[0].shape[2])
+        shape = (None, 256, 256, 3)
+
     elif args.cogan_data in ['Eyeglasses']:
         #lines = [line.rstrip() for line in open('C:/Users/marku/Desktop/list_attr_celeba.txt', 'r')]
         lines = [line.rstrip() for line in open('/user/student.aau.dk/mjuuln15/list_attr_celeba.txt', 'r')]
@@ -129,7 +130,7 @@ def select_dataset_cogan(args):
             attr2idx[attr_name] = i
             idx2attr[i] = attr_name
         lines = lines[2:]
-        for i, line in enumerate(lines):
+        for i, line in enumerate(lines[:3700]):
             split = line.split()
             values = split[1:]
             for attr_name in ['Eyeglasses']:
@@ -161,6 +162,12 @@ def select_dataset_cogan(args):
     return X1, X2, shape
 
 
+def class_filter(image, label, allowed_labels=tf.constant([1.])):
+    isallowed = tf.equal(allowed_labels, tf.cast(label, tf.float32))
+    reduced = tf.reduce_sum(tf.cast(isallowed, tf.float32))
+    return tf.greater(reduced, tf.constant(0.))
+
+
 def format_example_g2rgb(image, label):
     image = tf.cast(image, tf.float32)
     # Normalize the pixel values
@@ -168,18 +175,6 @@ def format_example_g2rgb(image, label):
     # Resize the image
     image = tf.image.resize(image, (32, 32))
     image = tf.image.grayscale_to_rgb(image)
-    return (image, label)
-
-
-def format_example_edge(image, label):
-    image = tf.cast(image, tf.float32)
-    # Normalize the pixel values
-    image = (image - 127.5) / 127.5
-    # Resize the image
-    image = tf.image.resize(image, (32, 32))
-    image = np.squeeze(image)
-    dilation = cv2.dilate(image, np.ones((3, 3), np.uint8), iterations=1)
-    image = dilation - image
     return (image, label)
 
 

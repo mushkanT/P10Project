@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser()
 
 # Settings
 parser.add_argument('--dataset',        type=str,           default='toy',      help=' toy | mnist | cifar10 | lsun | frey | svhn')
-parser.add_argument('--loss',           type=str,           default='ce',       help='wgan-gp | wgan | ce')
+parser.add_argument('--loss',           type=str,           default='ce',       help=' wgan | ce')
 parser.add_argument('--penalty',        type=str,           default='none',       help='none | wgan-gp')
 parser.add_argument('--batch_size',     type=int,           default=128)
 parser.add_argument('--epochs',         type=int,           default=5000)
@@ -35,7 +35,7 @@ parser.add_argument('--g_dim',          type=int,           default=256,        
 parser.add_argument('--d_dim',          type=int,           default=64,         help='discriminator layer dimensions')
 parser.add_argument('--gan_type',       type=str,           default='cogan',    help='64 | 128 | cifargan | cogan')
 parser.add_argument('--noise_dim',      type=int,           default=100,        help='size of the latent vector')
-parser.add_argument('--limit_dataset',  type=bool,          default=False,      help='True to limit mnist/cifar dataset to one class')
+parser.add_argument('--limit_dataset',  type=bool,          default=False,      help='limit dataset to one class')
 parser.add_argument('--scale_data',     type=int,           default=0,          help='Scale images in dataset to MxM')
 parser.add_argument('--label_flipping', type=bool,          default=False,      help='Flip 5% of labels during training of disc')
 parser.add_argument('--label_smooth',   type=bool,          default=False,      help='Smooth the labels of the disc from 1 to 0 occasionally')
@@ -52,19 +52,20 @@ parser.add_argument('--cogan_data',     type=str,           default='mnist2svhn'
 args = parser.parse_args()
 
 # Debugging
-#args.dataset = 'mnist'
-#args.gan_type = 'cifargan'
+#args.dataset = 'celeba'
+#args.gan_type = "cogan"
 #args.loss = 'wgan'
+#args.penalty = 'wgan-gp'
 #args.scale_data = 64
 #args.epochs = 2
 #args.disc_iters = 5
 #args.images_while_training = 1
 #args.limit_dataset = True
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-#args.g_arch = 'face'
-#args.d_arch = 'face'
-#args.cogan_data = 'Eyeglasses'
-#args.batch_size = 64
+#args.g_arch = '256'
+#args.d_arch = '256'
+#args.cogan_data = 'apple2orange'
+#args.batch_size = 1
 
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
 #o2i.test_trunc_trick(args)

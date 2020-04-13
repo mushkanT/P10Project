@@ -158,7 +158,7 @@ class GANTrainer(object):
                 if isinstance(batch, np.ndarray):
                     batch = tf.convert_to_tensor(batch)
                 if batch[0].dtype == tf.float64:
-                    batch[0] = tf.dtypes.cast(batch[0], dtype=tf.float32)
+                    batch = tf.dtypes.cast(batch, dtype=tf.float32)
                 d_loss = self.train_discriminator(batch, args)
                 disc_iters_loss.append(d_loss)
 
@@ -178,7 +178,7 @@ class GANTrainer(object):
         return full_training_time
 
     def sample_images(self, epoch, seed, dir, channels):
-        r, c = 2, 2
+        r, c = 2, 4
         gen_batch1 = self.generator.predict(seed)
 
         # Rescale images 0 - 1

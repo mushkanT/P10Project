@@ -271,19 +271,19 @@ def cogan_generators_digit(args):
 
     model = (tf.keras.layers.Conv2DTranspose(1024, (4,4), strides=(1, 1), padding='same'))(model)
     model = (tf.keras.layers.BatchNormalization())(model)
-    model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
+    model = (tf.keras.layers.PReLU())(model)
 
     model = (tf.keras.layers.Conv2DTranspose(512, (3,3), strides=(2, 2), padding='same'))(model)
     model = (tf.keras.layers.BatchNormalization())(model)
-    model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
+    model = (tf.keras.layers.PReLU())(model)
 
     model = (tf.keras.layers.Conv2DTranspose(256, (3,3), strides=(2, 2), padding='same'))(model)
     model = (tf.keras.layers.BatchNormalization())(model)
-    model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
+    model = (tf.keras.layers.PReLU())(model)
 
     model = (tf.keras.layers.Conv2DTranspose(128, (3,3), strides=(2, 2), padding='same'))(model)
     model = (tf.keras.layers.BatchNormalization())(model)
-    model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
+    model = (tf.keras.layers.PReLU())(model)
 
     # Generator 1
     img1 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='sigmoid', padding='same')(model)
@@ -313,7 +313,7 @@ def cogan_discriminators_digit(args):
     model.add(tf.keras.layers.MaxPool2D())
     model.add(tf.keras.layers.Flatten())
     model.add(tf.keras.layers.Dense(500))
-    model.add(tf.keras.layers.LeakyReLU(alpha=0.2))
+    model.add(tf.keras.layers.PReLU())
     model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
 
     output1 = model(x1)
@@ -331,16 +331,16 @@ def cogan_generators_rotate(args):
     # Shared weights between generators
     model = keras.Sequential()
     model.add(tf.keras.layers.Dense(1024, input_dim=args.noise_dim))
-    model.add(tf.keras.layers.LeakyReLU(alpha=0.2))
+    model.add(tf.keras.layers.PReLU())
     model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.Dense(1024))
-    model.add(tf.keras.layers.LeakyReLU(alpha=0.2))
+    model.add(tf.keras.layers.PReLU())
     model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.Dense(1024))
-    model.add(tf.keras.layers.LeakyReLU(alpha=0.2))
+    model.add(tf.keras.layers.PReLU())
     model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.Dense(1024))
-    model.add(tf.keras.layers.LeakyReLU(alpha=0.2))
+    model.add(tf.keras.layers.PReLU())
     model.add(tf.keras.layers.BatchNormalization())
 
     feature_repr = model(noise)
