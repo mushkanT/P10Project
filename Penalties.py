@@ -28,6 +28,7 @@ class DiscriminatorPenalties:
         elif args.penalty == 'none':
             return 0
 
+
 class GeneratorPenalties:
     def weight_regularizer(self, generator):
         print("Til Markus")

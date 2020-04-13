@@ -19,6 +19,8 @@ class GANTrainer(object):
         self.X1 = domain1
         self.X2 = domain2
         self.full_training_time = 0
+        self.discPenal = p.DiscriminatorPenalties()
+        self.genPenal = p.GeneratorPenalties()
 
         self.d1, self.d2 = d1, d2
         self.g1, self.g2 = g1, g2
@@ -61,7 +63,7 @@ class GANTrainer(object):
 
                     # Calc loss and penalty
                     d1_loss = d_loss_fn(disc_fake1, disc_real1)
-                    gp1 = p.calc_penalty(gen_batch1, batch1, self.d1, args)  # if loss is not wgan-gp then gp=0
+                    gp1 = self.discPenal.calc_penalty(gen_batch1, batch1, self.d1, args)  # if loss is not wgan-gp then gp=0
                     d1_loss = d1_loss + (gp1 * args.gp_lambda)
 
                 gradients_of_discriminator = tape.gradient(d1_loss, self.d1.trainable_variables)
@@ -78,7 +80,7 @@ class GANTrainer(object):
 
                     # Calc loss and penalty
                     d2_loss = d_loss_fn(disc_fake2, disc_real2)
-                    gp2 = p.calc_penalty(gen_batch2, batch2, self.d2, args)  # if loss is not wgan-gp then gp=0
+                    gp2 = self.discPenal.calc_penalty(gen_batch2, batch2, self.d2, args)  # if loss is not wgan-gp then gp=0
                     d2_loss = d2_loss + (gp2 * args.gp_lambda)
                 gradients_of_discriminator = tape.gradient(d2_loss, self.d2.trainable_variables)
                 args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d2.trainable_variables))

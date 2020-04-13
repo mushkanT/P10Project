@@ -53,19 +53,19 @@ args = parser.parse_args()
 
 # Debugging
 #args.dataset = 'celeba'
-#args.gan_type = "cogan"
-#args.loss = 'wgan'
-#args.penalty = 'wgan-gp'
+args.gan_type = "cogan"
+args.loss = 'wgan'
+args.penalty = 'wgan-gp'
 #args.scale_data = 64
 #args.epochs = 2
 #args.disc_iters = 5
 #args.images_while_training = 1
 #args.limit_dataset = True
-#args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
+args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
 #args.g_arch = '256'
 #args.d_arch = '256'
 #args.cogan_data = 'apple2orange'
-#args.batch_size = 1
+args.batch_size = 1
 
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
 #o2i.test_trunc_trick(args)
