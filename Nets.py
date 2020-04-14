@@ -258,12 +258,35 @@ def toy_disc(args):
     return model
 
 
-# CoGAN
+# ---------------------------------------------------
+# ----------------------CoGAN------------------------
+# ---------------------------------------------------
+def gen_block(input, out_channels, kernel, stride, padding):
+    model = tf.keras.layers.Conv2DTranspose(out_channels, kernel, strides=stride, padding=padding)(input)
+    model = tf.keras.layers.BatchNormalization()(model)
+    model = tf.keras.layers.PReLU()(model)
+    return model
+
+def gen_init_block(input, out_channels):
+    model = tf.keras.layers.Dense(out_channels * 4 * 4)(input)
+    model = tf.keras.layers.Reshape((4,4,out_channels))(model)
+    model = tf.keras.layers.Conv2DTranspose(out_channels, (4,4), strides=(1,1), padding='same')(model)
+    model = tf.keras.layers.BatchNormalization()(model)
+    model = tf.keras.layers.PReLU()(model)
+    return model
+
+
+def cogan_builder(args):
+
+
+
+
 # Mnist negative + edge
 def cogan_generators_digit(args):
     channels = args.dataset_dim[3]
 
-    outputs = []
+    output1 = []
+    output2 = []
 
     # Shared weights between generators
     noise = tf.keras.layers.Input(shape=(args.noise_dim,))
@@ -273,22 +296,29 @@ def cogan_generators_digit(args):
 
     model = (tf.keras.layers.Conv2DTranspose(1024, (4,4), strides=(1, 1), padding='same'))(model)
     model = (tf.keras.layers.BatchNormalization())(model)
-    model = (tf.keras.layers.PReLU())(model)
+    features_4x4 = (tf.keras.layers.PReLU())(model)
+    output1.append(features_4x4)
+    output2.append(features_4x4)
 
-    model = (tf.keras.layers.Conv2DTranspose(512, (3,3), strides=(2, 2), padding='same'))(model)
+
+    model = (tf.keras.layers.Conv2DTranspose(512, (3,3), strides=(2, 2), padding='same'))(features_4x4)
     model = (tf.keras.layers.BatchNormalization())(model)
     features_8x8 = (tf.keras.layers.PReLU())(model)
-    outputs.append(features_8x8)
+    output1.append(features_8x8)
+    output2.append(features_8x8)
 
     model = (tf.keras.layers.Conv2DTranspose(256, (3,3), strides=(2, 2), padding='same'))(features_8x8)
     model = (tf.keras.layers.BatchNormalization())(model)
     features_16x16 = (tf.keras.layers.PReLU())(model)
-    outputs.append(features_16x16)
+    output1.append(features_16x16)
+    output2.append(features_16x16)
+
 
     model = (tf.keras.layers.Conv2DTranspose(128, (3,3), strides=(2, 2), padding='same'))(features_16x16)
     model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.PReLU())(model)
-    outputs.append(model)
+    output1.append(model)
+    output2.append(model)
 
     # Generator 1
     img1 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='sigmoid', padding='same')(model)
@@ -296,11 +326,11 @@ def cogan_generators_digit(args):
     # Generator 2
     img2 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='sigmoid', padding='same')(model)
 
-    outputs.append(img1)
-    outputs.append(img2)
+    output1.append(img1)
+    output2.append(img2)
 
 
-    return keras.Model(noise, outputs), keras.Model(noise, outputs)
+    return keras.Model(noise, output1), keras.Model(noise, output2)
 
 
 def cogan_discriminators_digit(args):

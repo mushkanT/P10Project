@@ -59,11 +59,11 @@ class GANTrainer(object):
 
                     # Disc response
                     disc_real1 = self.d1(batch1, training=True)
-                    disc_fake1 = self.d1(gen_batch1, training=True)
+                    disc_fake1 = self.d1(gen_batch1[-1], training=True)
 
                     # Calc loss and penalty
                     d1_loss = d_loss_fn(disc_fake1, disc_real1)
-                    gp1 = self.discPenal.calc_penalty(gen_batch1, batch1, self.d1, args)  # if loss is not wgan-gp then gp=0
+                    gp1 = self.discPenal.calc_penalty(gen_batch1[-1], batch1, self.d1, args)  # if loss is not wgan-gp then gp=0
                     d1_loss = d1_loss + (gp1 * args.penalty_weight_d)
                 gradients_of_discriminator = tape.gradient(d1_loss, self.d1.trainable_variables)
                 args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d1.trainable_variables))
@@ -75,11 +75,11 @@ class GANTrainer(object):
 
                     # Disc response
                     disc_real2 = self.d2(batch2, training=True)
-                    disc_fake2 = self.d2(gen_batch2, training=True)
+                    disc_fake2 = self.d2(gen_batch2[-1], training=True)
 
                     # Calc loss and penalty
                     d2_loss = d_loss_fn(disc_fake2, disc_real2)
-                    gp2 = self.discPenal.calc_penalty(gen_batch2, batch2, self.d2, args)  # if loss is not wgan-gp then gp=0
+                    gp2 = self.discPenal.calc_penalty(gen_batch2[-1], batch2, self.d2, args)  # if loss is not wgan-gp then gp=0
                     d2_loss = d2_loss + (gp2 * args.penalty_weight_d)
                 gradients_of_discriminator = tape.gradient(d2_loss, self.d2.trainable_variables)
                 args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d2.trainable_variables))
@@ -91,23 +91,31 @@ class GANTrainer(object):
             #  Train Generators
             # ------------------
             
-            with tf.GradientTape() as tape:
-                gen_fake = self.g1(noise, training=True)
-                disc_fake = self.d1(gen_fake, training=True)
-                g1_loss = g_loss_fn(disc_fake)
-                penalty = self.genPenal.calc_penalty(self.g1, self.g2, 4, args)
+            with tf.GradientTape() as g1_tape, tf.GradientTape() as g2_tape:
+                gen1_fake = self.g1(noise, training=True)
+                gen2_fake = self.g2(noise, training=True)
+                disc1_fake = self.d1(gen1_fake[-1], training=True)
+                disc2_fake = self.d2(gen2_fake[-1], training=True)
+                g1_loss = g_loss_fn(disc1_fake)
+                g2_loss = g_loss_fn(disc2_fake)
+                penalty = self.genPenal.calc_penalty(self.g1, self.g2, 4, args, gen1_fake, gen2_fake)
                 g1_loss = g1_loss + (penalty * args.penalty_weight_g)
-            gradients_of_generator1 = tape.gradient(g1_loss, self.g1.trainable_variables)
+                g2_loss = g2_loss + (penalty * args.penalty_weight_g)
+
+            gradients_of_generator1 = g1_tape.gradient(g1_loss, self.g1.trainable_variables)
             args.gen_optimizer.apply_gradients(zip(gradients_of_generator1, self.g1.trainable_variables))
 
-            with tf.GradientTape() as tape:
-                gen_fake = self.g2(noise, training=True)
-                disc_fake = self.d2(gen_fake, training=True)
-                g2_loss = g_loss_fn(disc_fake)
-                penalty = self.genPenal.calc_penalty(self.g1, self.g2, 4, args)
-                g2_loss = g2_loss + (penalty * args.penalty_weight_g)
-            gradients_of_generator2 = tape.gradient(g2_loss, self.g2.trainable_variables)
+            gradients_of_generator2 = g2_tape.gradient(g2_loss, self.g2.trainable_variables)
             args.gen_optimizer.apply_gradients(zip(gradients_of_generator2, self.g2.trainable_variables))
+
+            #with tf.GradientTape() as tape:
+            #    gen_fake = self.g2(noise, training=True)
+            #    disc_fake = self.d2(gen_fake, training=True)
+            #    g2_loss = g_loss_fn(disc_fake)
+            #    penalty = self.genPenal.calc_penalty(self.g1, self.g2, 4, args)
+            #    g2_loss = g2_loss + (penalty * args.penalty_weight_g)
+            #gradients_of_generator2 = tape.gradient(g2_loss, self.g2.trainable_variables)
+            #args.gen_optimizer.apply_gradients(zip(gradients_of_generator2, self.g2.trainable_variables))
 
             # Compute averages of generator gradients and use those for updates of shared weights
             '''
@@ -158,8 +166,8 @@ class GANTrainer(object):
 
     def sample_images(self, epoch, seed, dir, channels):
         r, c = 4, 4
-        gen_batch1 = self.g1.predict(seed)
-        gen_batch2 = self.g2.predict(seed)
+        gen_batch1 = self.g1.predict(seed)[-1]
+        gen_batch2 = self.g2.predict(seed)[-1]
 
         gen_imgs = np.concatenate([gen_batch1, gen_batch2])
 

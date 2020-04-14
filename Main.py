@@ -32,7 +32,7 @@ parser.add_argument('--optim_d',        type=str,           default='adam',     
 parser.add_argument('--optim_g',        type=str,           default='adam',     help='adam | rms')
 parser.add_argument('--num_samples_to_gen', type=int,       default=8)
 parser.add_argument('--images_while_training', type=int,    default=1,         help='Every x epoch to print images while training')
-parser.add_argument('--dir',            type=str,           default='/user/student.aau.dk/mjuuln15/output_data',     help='Directory to save images, models, weights etc')
+parser.add_argument('--dir',            type=str,           default='C:/Users/palmi/Desktop/samples',     help='Directory to save images, models, weights etc')
 parser.add_argument('--g_dim',          type=int,           default=256,        help='generator layer dimensions')
 parser.add_argument('--d_dim',          type=int,           default=64,         help='discriminator layer dimensions')
 parser.add_argument('--gan_type',       type=str,           default='cogan',    help='64 | 128 | cifargan | cogan')
@@ -49,7 +49,7 @@ parser.add_argument('--grayscale',      type=bool,		    default=False)
 # CoGAN
 parser.add_argument('--g_arch',         type=str,           default='digit',       help='digit | rotate | 256 | face | digit_noshare')
 parser.add_argument('--d_arch',         type=str,           default='digit',       help='digit | rotate | 256 | face | digit_noshare')
-parser.add_argument('--cogan_data',     type=str,           default='mnist2svhn',  help='mnist2edge | mnist2rotate | mnist2svhn | mnist2negative | celeb_a | apple2orange | horse2zebra | vangogh2photo')
+parser.add_argument('--cogan_data',     type=str,           default='mnist2edge',  help='mnist2edge | mnist2rotate | mnist2svhn | mnist2negative | celeb_a | apple2orange | horse2zebra | vangogh2photo')
 
 args = parser.parse_args()
 
@@ -58,7 +58,7 @@ args = parser.parse_args()
 #args.gan_type = "cogan"
 #args.loss = 'ce'
 #args.disc_penalty = 'wgan-gp'
-#args.gen_penalty = 'weight'
+args.gen_penalty = 'feature'
 #args.scale_data = 64
 #args.epochs = 2
 #args.disc_iters = 5

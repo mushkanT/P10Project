@@ -37,17 +37,16 @@ class GeneratorPenalties:
             distance = distance + tf.reduce_mean(tf.math.squared_difference(g1.trainable_variables[idx], g2.trainable_variables[idx]))
         return distance
 
-    def feature_regularizer(self, g1, g2, shared_layers):
+    def feature_regularizer(self, g1_batch, g2_batch, shared_layers):
         distance = 0
         for idx in range(shared_layers):
-            distance = distance + tf.reduce_mean(
-                tf.math.squared_difference(g1.outputs[], g2.trainable_variables[idx]))
-        print("Til ham som det er der er rigtig hyped på shadowlands")
+            distance = distance + tf.reduce_mean(tf.math.squared_difference(g1_batch[idx], g2_batch[idx]))
+        return distance
 
-    def calc_penalty(self, g1, g2, shared_layers, args):
+    def calc_penalty(self, g1, g2, shared_layers, args, g1_batch=None, g2_batch=None):
         if args.gen_penalty == 'weight':
             return self.weight_regularizer(g1, g2, shared_layers)
         if args.gen_penalty == 'feature':
-            return self.feature_regularizer(g1, g2)
+            return self.feature_regularizer(g1_batch, g2_batch, shared_layers)
         if args.gen_penalty == 'none':
             return 0
