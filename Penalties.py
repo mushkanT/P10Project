@@ -4,7 +4,6 @@ import math
 
 class DiscriminatorPenalties:
     def wasserstein_gp(self, fake_data, real_data, discriminator):
-
         # Interpolation constant
         alpha = tf.random.uniform(shape=[real_data.shape[0],1,1,1], minval=0., maxval=1.)
 

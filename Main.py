@@ -47,8 +47,8 @@ parser.add_argument('--purpose',        type=str,		    default='',		    help='pu
 parser.add_argument('--grayscale',      type=bool,		    default=False)
 
 # CoGAN
-parser.add_argument('--g_arch',         type=str,           default='digit',       help='digit | rotate | 256 | face | digit_noshare')
-parser.add_argument('--d_arch',         type=str,           default='digit',       help='digit | rotate | 256 | face | digit_noshare')
+parser.add_argument('--g_arch',         type=str,           default='digit_noshare',       help='digit | rotate | 256 | face | digit_noshare')
+parser.add_argument('--d_arch',         type=str,           default='digit_noshare',       help='digit | rotate | 256 | face | digit_noshare')
 parser.add_argument('--cogan_data',     type=str,           default='mnist2edge',  help='mnist2edge | mnist2rotate | mnist2svhn | mnist2negative | celeb_a | apple2orange | horse2zebra | vangogh2photo')
 
 args = parser.parse_args()
