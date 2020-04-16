@@ -370,7 +370,7 @@ def cogan_generators_digit_noshare(args):
     features1_32x32 = (tf.keras.layers.PReLU())(model1)
     output1.append(features1_32x32)
 
-    img1 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='sigmoid', padding='same')(features1_32x32)
+    img1 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='tanh', padding='same')(features1_32x32)
     output1.append(img1)
 
     # Generator 2
@@ -394,7 +394,7 @@ def cogan_generators_digit_noshare(args):
     features2_32x32 = (tf.keras.layers.PReLU())(model2)
     output2.append(features2_32x32)
 
-    img2 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='sigmoid', padding='same')(features2_32x32)
+    img2 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='tanh', padding='same')(features2_32x32)
     output2.append(img2)
 
     return keras.Model(noise, output1), keras.Model(noise, output2)
