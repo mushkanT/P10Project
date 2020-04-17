@@ -16,6 +16,7 @@ class GANTrainer(object):
         self.hist_g2 = []
         self.hist_d1 = []
         self.hist_d2 = []
+        self.hist_weight_similarity = []
         self.X1 = domain1
         self.X2 = domain2
         self.full_training_time = 0
@@ -108,6 +109,8 @@ class GANTrainer(object):
             gradients_of_generator2 = g2_tape.gradient(g2_loss, self.g2.trainable_variables)
             args.gen_optimizer.apply_gradients(zip(gradients_of_generator2, self.g2.trainable_variables))
 
+            weight_sim = self.genPenal.weight_regularizer(self.g1, self.g2, 21);
+
             #with tf.GradientTape() as tape:
             #    gen_fake = self.g2(noise, training=True)
             #    disc_fake = self.d2(gen_fake, training=True)
@@ -155,8 +158,9 @@ class GANTrainer(object):
             self.hist_d2.append(d2_loss)
             self.hist_g1.append(g1_loss)
             self.hist_g2.append(g2_loss)
+            self.hist_weight_similarity.append(weight_sim)
 
-            print("%d [D1 loss: %f] [D2 loss: %f] [G1 loss: %f] [G2 loss: %f]" % (epoch, d1_loss, d2_loss, g1_loss, g2_loss))
+            print("%d [D1 loss: %f] [D2 loss: %f] [G1 loss: %f] [G2 loss: %f] [WeightSim: %f]}" % (epoch, d1_loss, d2_loss, g1_loss, g2_loss, weight_sim))
 
             # If at save interval => save generated image samples
             if epoch % args.images_while_training == 0:
@@ -209,6 +213,13 @@ class GANTrainer(object):
         plt.ylabel('Loss')
         plt.legend()
         plt.savefig(os.path.join(dir, 'losses/disc_loss.png'))
+        plt.close()
+
+        plt.plot(self.hist_weight_similarity, label='weight differences')
+        plt.xlabel('Epochs')
+        plt.ylabel('Difference')
+        plt.legend()
+        plt.savefig(os.path.join(dir, 'losses/weight_diff.png'))
         plt.close()
 
     def clip_weights(self, clip):
