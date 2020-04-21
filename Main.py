@@ -49,13 +49,13 @@ parser.add_argument('--grayscale',      type=bool,		    default=False)
 # CoGAN
 parser.add_argument('--g_arch',         type=str,           default='digit',       help='digit | rotate | 256 | face | digit_noshare')
 parser.add_argument('--d_arch',         type=str,           default='digit',       help='digit | rotate | 256 | face | digit_noshare')
-parser.add_argument('--cogan_data',     type=str,           default='mnist2svhn',  help='mnist2edge | mnist2rotate | mnist2svhn | mnist2negative | celeb_a | apple2orange | horse2zebra | vangogh2photo')
+parser.add_argument('--cogan_data',     type=str,           default='mnist2edge',  help='mnist2edge | mnist2rotate | mnist2svhn | mnist2negative | celeb_a | apple2orange | horse2zebra | vangogh2photo')
 
 args = parser.parse_args()
 
 # Debugging
 #args.dataset = 'celeba'
-#args.gan_type = "cogan"
+#args.gan_type = "256"
 #args.loss = 'ce'
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'weight'
@@ -65,10 +65,10 @@ args = parser.parse_args()
 #args.images_while_training = 1
 #args.limit_dataset = True
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-#args.g_arch = 'digit_noshare'
-#args.d_arch = 'digit_noshare'
-#args.cogan_data = 'apple2orange'
-#args.batch_size = 1
+#args.g_arch = '256'
+#args.d_arch = '256'
+#args.cogan_data = 'mnist2rotate'
+#args.batch_size = 20
 
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
 #o2i.test_trunc_trick(args)
@@ -143,6 +143,7 @@ if args.gan_type == 'cogan':
 
 else:
     # Choose data
+
     start = time.time()
     train_dat, shape = dt.select_dataset_gan(args)
     if shape is None:

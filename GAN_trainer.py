@@ -150,7 +150,7 @@ class GANTrainer(object):
             disc_iters_loss = []
             # take x steps with critic before training generator
             for i in range(args.disc_iters):
-                if args.dataset in ['celeba']:
+                if args.dataset in ['celeba', 'lsun']:
                     batch = next(it)
                 else:
                     batch = next(it)[0]

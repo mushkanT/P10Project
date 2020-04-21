@@ -66,6 +66,9 @@ def select_gan_architecture(args):
     elif args.gan_type == '128':
         generator = nets.gan128_gen(args)
         discriminator = nets.gan128_disc(args)
+    elif args.gan_type == '256':
+        generator = nets.gan256_gen(args)
+        discriminator = nets.gan256_disc(args)
     elif args.gan_type == 'cifargan':
         generator = nets.cifargan_gen(args)
         discriminator = nets.cifargan_disc(args)

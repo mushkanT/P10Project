@@ -55,11 +55,16 @@ def select_dataset_gan(args):
         train = train.map(format_example_scale)
 
     elif args.dataset == 'lsun':
-        ImgDataGen = tf.keras.preprocessing.image.ImageDataGenerator(preprocessing_function=preprocess, dtype=tf.dtypes.float32)
-        train_dat = ImgDataGen.flow_from_directory('/user/student.aau.dk/mjuuln15/lsun_data/', target_size=(args.scale_data, args.scale_data), batch_size=args.batch_size, seed=2019, class_mode=None, interpolation="nearest")
-               
-        amount = 2554932
-        shape = (amount, train_dat.image_shape[0], train_dat.image_shape[1], train_dat.image_shape[2])
+        images = glob.glob('/user/student.aau.dk/mjuuln15/lsun_data/')
+        dataset=[]
+        for i in images:
+            image = plt.imread(i)
+            dataset.append(image)
+        X1 = np.array(dataset)
+        X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(len(X1)).batch(args.batch_size).repeat()
+        train = X1.map(format_example_to128)
+        shape = train.element_spec.shape
+
     elif args.dataset == 'frey':
         img_size = (28, 20, 1)
         # data = loadmat('/user/student.aau.dk/mjuuln15/frey_rawface.mat')
@@ -91,6 +96,7 @@ def select_dataset_cogan(args):
             shape = X1.element_spec.shape
         else:
             shape = X1.element_spec[0].shape
+
     elif args.cogan_data == 'mnist2svhn':
         # Domain 1
         data, info = tfds.load('mnist', with_info=True, as_supervised=True)
@@ -106,6 +112,7 @@ def select_dataset_cogan(args):
         num_examples = info.splits['train'].num_examples
         X2 = X2.shuffle(num_examples).batch(args.batch_size).repeat()
         shape = X1.element_spec[0].shape
+
     elif args.cogan_data in ['apple2orange', 'horse2zebra', 'vangogh2photo']:
         # Domains
         data, info = tfds.load('cycle_gan/'+args.cogan_data, with_info=True, as_supervised=True)
