@@ -1,6 +1,5 @@
 import tensorflow as tf
 from tensorflow import keras
-from SpectralNorm import SpectralNormalization
 import numpy as np
 layers = tf.keras.layers
 
@@ -121,7 +120,7 @@ def gan64_gen(args):
     model = (tf.keras.layers.LeakyReLU(alpha=0.2))(model)
 
     # Generator 1
-    img1 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='sigmoid', padding='same')(model)
+    img1 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='tanh', padding='same')(model)
 
     return keras.Model(noise, img1)
 
@@ -230,7 +229,7 @@ def gan128_disc(args):
     model.add(tf.keras.layers.Dense(2048))
     model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU())
-    model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+    model.add(tf.keras.layers.Dense(1))
 
     output1 = model(x1)
 
@@ -308,7 +307,7 @@ def gan256_disc(args):
     model.add(tf.keras.layers.Dense(2048))
     model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU())
-    model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+    model.add(tf.keras.layers.Dense(1))
 
     output1 = model(x1)
 

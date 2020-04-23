@@ -54,8 +54,8 @@ parser.add_argument('--cogan_data',     type=str,           default='mnist2edge'
 args = parser.parse_args()
 
 # Debugging
-#args.dataset = 'celeba'
-#args.gan_type = "128"
+#args.dataset = 'apple2orange'
+#args.gan_type = "256"
 #args.loss = 'ce'
 #args.label_smooth=True
 #args.disc_penalty = 'wgan-gp'
@@ -69,7 +69,7 @@ args = parser.parse_args()
 #args.g_arch = 'digit'
 #args.d_arch = 'digit'
 #args.cogan_data = 'mnist2rotate'
-#args.batch_size = 5
+#args.batch_size = 9
 
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
 #o2i.test_trunc_trick(args)
