@@ -32,16 +32,19 @@ class GANTrainer(object):
         else:
             disc_input_noise = 0
 
-        with tf.GradientTape() as disc_tape:
-            #noise = tf.random.normal(shape=[int(args.batch_size/2), args.noise_dim])
-            #noise = tf.random.uniform(shape=[args.batch_size, args.noise_dim])            
-            noise = tf.random.normal(shape=[args.batch_size, args.noise_dim])
+        noise = tf.random.normal(shape=[args.batch_size, args.noise_dim])
+        generated_images = self.generator(noise, training=True)
+        #comb = tf.concat([generated_images, real_data], axis=0)
 
-            generated_images = self.generator(noise, training=True)
+        real_labels = tf.ones((args.batch_size, 1))
+        fake_labels = tf.zeros((args.batch_size, 1))
+        #labels = tf.concat([real_labels, fake_labels], axis=0)
+
+        with tf.GradientTape() as disc_tape:
+
+            #disc_resp = self.discriminator(comb)
             fake_output = self.discriminator(generated_images+disc_input_noise, training=True)
             real_output = self.discriminator(real_data+disc_input_noise, training=True)
-            real_labels = np.ones_like(real_output)
-            fake_labels = np.zeros_like(fake_output)
 
             if args.label_flipping:
                 flip_noise = tf.random.normal(shape=[int(args.batch_size * 0.95), args.noise_dim])
@@ -91,11 +94,11 @@ class GANTrainer(object):
                     fake_labels = fake_labels + flip_mask_fake
 
                 if args.label_smooth:
-                    #label_smoothing = np.random.uniform(low=0.9, high=1., size=[1])
-                    label_smoothing = 0.9
-                    #real_labels = real_labels - 0.2 + (np.random.random(real_labels.shape) * 0.3)
-                    real_labels = real_labels * label_smoothing
+                    real_labels += 0.05 * tf.random.uniform(tf.shape(real_labels))
+                    fake_labels += 0.05 * tf.random.uniform(tf.shape(fake_labels))
+                    #labels = 0.05 * tf.random.uniform(tf.shape(labels))
 
+                #disc_loss = cross_entropy(labels, disc_resp)
                 real_loss = cross_entropy(tf.convert_to_tensor(real_labels, dtype=tf.float32), real_output)
                 fake_loss = cross_entropy(tf.convert_to_tensor(fake_labels, dtype=tf.float32), fake_output)
                 disc_loss = real_loss + fake_loss

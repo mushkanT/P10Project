@@ -2,8 +2,6 @@ import tensorflow as tf
 import numpy as np
 import os.path
 import Nets as nets
-import Losses as l
-import Penalties as p
 
 
 def draw_2d_samples(generator, n_dim, seed=2019):
@@ -47,13 +45,6 @@ def select_cogan_architecture(args):
         discriminator1, discriminator2 = nets.cogan_discriminators_digit_noshare(args)
 
     return generator1, generator2, discriminator1, discriminator2
-
-
-def set_losses(args):
-    if args.loss == 'ce':
-        return l.cross_entropy_disc, l.cross_entropy_gen
-    elif args.loss == 'wgan':
-        return l.wasserstein_disc, l.wasserstein_gen
 
 
 def select_gan_architecture(args):

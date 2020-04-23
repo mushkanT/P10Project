@@ -29,8 +29,10 @@ def select_dataset_gan(args):
         data, info = tfds.load('cycle_gan/'+args.dataset, with_info=True, as_supervised=True)
         trainA, trainB = data['trainA'], data['trainB']
         train = trainA.concatenate(trainB)
-        train = train.map(format_example_to128_2)
-        shape = (None,train.element_spec[0].shape[0],train.element_spec[0].shape[1],train.element_spec[0].shape[2])
+        train = train.map(format_example_scale)
+        shape = (None,256,256,3)
+        num_examples = info.splits['trainA'].num_examples+info.splits['trainB'].num_examples
+        train = train.shuffle(num_examples).batch(args.batch_size).repeat()
 
     elif args.dataset == "celeba":
         #images = glob.glob('C:/Users/marku/Desktop/img_align_celeba/*.jpg')
@@ -42,6 +44,7 @@ def select_dataset_gan(args):
         X1 = np.array(dataset)
         X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(len(X1)).batch(args.batch_size).repeat()
         train = X1.map(format_example_to128)
+        #train = train.shuffle(len(X1)).batch(args.batch_size).repeat()
         shape = train.element_spec.shape
 
     elif args.dataset == "mnist-f":
@@ -55,15 +58,15 @@ def select_dataset_gan(args):
         train = train.map(format_example_scale)
 
     elif args.dataset == 'lsun':
-        images = glob.glob('/user/student.aau.dk/mjuuln15/lsun_data/')
+        images = glob.glob('/user/student.aau.dk/mjuuln15/lsun_data/bedroom*.jpg')
         dataset=[]
         for i in images:
             image = plt.imread(i)
             dataset.append(image)
         X1 = np.array(dataset)
-        X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(len(X1)).batch(args.batch_size).repeat()
+        X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(50000).batch(args.batch_size).repeat()
         train = X1.map(format_example_to128)
-        shape = train.element_spec.shape
+        shape = (64,256,256,3)
 
     elif args.dataset == 'frey':
         img_size = (28, 20, 1)
@@ -79,7 +82,7 @@ def select_dataset_gan(args):
     else:
         raise NotImplementedError()
 
-    if args.dataset not in ['lsun', 'celeba']:
+    if args.dataset not in ['lsun', 'celeba', 'apple2orange']:
         if args.limit_dataset:
             train = train.filter(class_filter)
         num_examples = info.splits['train'].num_examples
@@ -210,6 +213,14 @@ def format_example_to128(image):
     image = (image - 127.5) / 127.5
     # Resize the image
     image = tf.image.resize(image, (128, 128))
+    return image
+
+
+def format_example_scale2(image):
+    image = tf.cast(image, tf.float32)
+    # Normalize the pixel values
+    image = (image - 127.5) / 127.5
+    # Resize the image
     return image
 
 

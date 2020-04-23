@@ -6,12 +6,12 @@ import numpy as np
 import os
 import Utils as u
 import Penalties as p
+import Losses as l
 
 
 class GANTrainer(object):
 
     def __init__(self, g1, g2, d1, d2, domain1, domain2):
-        self.domain2 = 1
         self.hist_g1 = []
         self.hist_g2 = []
         self.hist_d1 = []
@@ -31,7 +31,7 @@ class GANTrainer(object):
         it2 = iter(self.X2)
 
         # Set loss functions
-        d_loss_fn, g_loss_fn = u.set_losses(args)
+        d_loss_fn, g_loss_fn = l.set_losses(args)
 
         for epoch in range(args.epochs):
             start = time.time()
@@ -52,11 +52,11 @@ class GANTrainer(object):
                     batch1 = next(it1)[0]
                     batch2 = next(it2)[0]
 
+                # Generate a batch of new images
+                gen_batch1 = self.g1(noise, training=True)
+
                 # d1
                 with tf.GradientTape() as tape:
-                    # Generate a batch of new images
-                    gen_batch1 = self.g1(noise, training=True)
-
                     # Disc response
                     disc_real1 = self.d1(batch1, training=True)
                     disc_fake1 = self.d1(gen_batch1, training=True)
@@ -68,11 +68,11 @@ class GANTrainer(object):
                 gradients_of_discriminator = tape.gradient(d1_loss, self.d1.trainable_variables)
                 args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d1.trainable_variables))
 
+                # Generate a batch of new images
+                gen_batch2 = self.g2(noise, training=True)
+
                 # d2
                 with tf.GradientTape() as tape:
-                    # Generate a batch of new images
-                    gen_batch2 = self.g2(noise, training=True)
-
                     # Disc response
                     disc_real2 = self.d2(batch2, training=True)
                     disc_fake2 = self.d2(gen_batch2, training=True)

@@ -258,10 +258,6 @@ def gan256_gen(args):
     model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
     model = (tf.keras.layers.PReLU())(model)
 
-    model = (tf.keras.layers.Conv2DTranspose(256, (4,4), strides=(2, 2), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
-    model = (tf.keras.layers.PReLU())(model)
-
     model = (tf.keras.layers.Conv2DTranspose(128, (4,4), strides=(2, 2), padding='same'))(model)
     model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
     model = (tf.keras.layers.PReLU())(model)

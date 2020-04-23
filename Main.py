@@ -55,8 +55,9 @@ args = parser.parse_args()
 
 # Debugging
 #args.dataset = 'celeba'
-#args.gan_type = "256"
+#args.gan_type = "128"
 #args.loss = 'ce'
+#args.label_smooth=True
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'weight'
 #args.scale_data = 64
@@ -65,10 +66,10 @@ args = parser.parse_args()
 #args.images_while_training = 1
 #args.limit_dataset = True
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-#args.g_arch = '256'
-#args.d_arch = '256'
+#args.g_arch = 'digit'
+#args.d_arch = 'digit'
 #args.cogan_data = 'mnist2rotate'
-#args.batch_size = 20
+#args.batch_size = 5
 
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
 #o2i.test_trunc_trick(args)
