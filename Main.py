@@ -157,12 +157,14 @@ elif args.gan_type == 'classifier':
 
     x_train = tf.image.resize(x_train,(32,32))
     x_test = tf.image.resize(x_test,(32,32))
+    x_train = tf.image.grayscale_to_rgb(x_train)
+    x_test = tf.image.grayscale_to_rgb(x_test)
 
     y_train = tf.keras.utils.to_categorical(y_train, num_classes)
     y_test = tf.keras.utils.to_categorical(y_test, num_classes)
 
-    model = tf.keras.models.load_model('classifier')
-    res = model.predict(x_train[0:3])
+    #model = tf.keras.models.load_model('classifier')
+    #res = model.predict(x_train[0:3])
 
     model = nets.mnist_classifier(args, num_classes)
     model.compile(loss=tf.keras.losses.categorical_crossentropy, optimizer=tf.keras.optimizers.Adam(), metrics=['accuracy'])

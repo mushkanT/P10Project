@@ -664,7 +664,7 @@ def cogan_discriminators_256(args):
 
 
 def mnist_classifier(args, num_classes):
-    img_shape = (32, 32, 1)
+    img_shape = (32, 32, 3)
     input = tf.keras.layers.Input(shape=img_shape)
     model = tf.keras.layers.Conv2D(32, (3,3))(input)
     model = tf.keras.layers.LeakyReLU()(model)
