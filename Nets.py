@@ -663,5 +663,24 @@ def cogan_discriminators_256(args):
     return keras.Model(img1, output1), keras.Model(img2, output2)
 
 
+def mnist_classifier(args, num_classes):
+    img_shape = (32, 32, 1)
+    input = tf.keras.layers.Input(shape=img_shape)
+    model = tf.keras.layers.Conv2D(32, (3,3))(input)
+    model = tf.keras.layers.LeakyReLU()(model)
+    model = tf.keras.layers.Conv2D(64, (3,3))(model)
+    model = tf.keras.layers.LeakyReLU()(model)
+    model = tf.keras.layers.MaxPooling2D((2,2))(model)
+    model = tf.keras.layers.Dropout(0.25)(model)
+    model = tf.keras.layers.Flatten()(model)
+    model = tf.keras.layers.Dense(128)(model)
+    model = tf.keras.layers.LeakyReLU()(model)
+    model = tf.keras.layers.Dropout(0.5)(model)
+    output = tf.keras.layers.Dense(num_classes, activation='softmax')(model)
+
+    return tf.keras.Model(input, output)
+
+
+
 
 

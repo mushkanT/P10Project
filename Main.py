@@ -35,7 +35,7 @@ parser.add_argument('--images_while_training', type=int,    default=1,         h
 parser.add_argument('--dir',            type=str,           default='C:/Users/palmi/Desktop/samples',     help='Directory to save images, models, weights etc')
 parser.add_argument('--g_dim',          type=int,           default=256,        help='generator layer dimensions')
 parser.add_argument('--d_dim',          type=int,           default=64,         help='discriminator layer dimensions')
-parser.add_argument('--gan_type',       type=str,           default='cogan',    help='64 | 128 | cifargan | cogan')
+parser.add_argument('--gan_type',       type=str,           default='cogan',    help='64 | 128 | cifargan | cogan | classifier')
 parser.add_argument('--noise_dim',      type=int,           default=100,        help='size of the latent vector')
 parser.add_argument('--limit_dataset',  type=bool,          default=False,      help='limit dataset to one class')
 parser.add_argument('--scale_data',     type=int,           default=0,          help='Scale images in dataset to MxM')
@@ -50,7 +50,8 @@ parser.add_argument('--grayscale',      type=bool,		    default=False)
 parser.add_argument('--g_arch',         type=str,           default='digit_noshare',       help='digit | rotate | 256 | face | digit_noshare')
 parser.add_argument('--d_arch',         type=str,           default='digit_noshare',       help='digit | rotate | 256 | face | digit_noshare')
 parser.add_argument('--cogan_data',     type=str,           default='mnist2edge',  help='mnist2edge | mnist2rotate | mnist2svhn | mnist2negative | celeb_a | apple2orange | horse2zebra | vangogh2photo')
-
+parser.add_argument('--semantic_loss',  type=bool,          default=False, help='Determines whether semantic loss is used')
+parser.add_argument('--semantic_weight',type=int,           default=10, help='Weight of the semantic loss term')
 args = parser.parse_args()
 
 # Debugging
@@ -117,11 +118,11 @@ if args.gan_type == 'cogan':
     if len(tf.config.experimental.list_physical_devices('GPU')) > 0:
         with tf.device('/GPU:0'):
             print('Using GPU')
-            ganTrainer = cogan_t.GANTrainer(generator1, generator2, discriminator1, discriminator2, domain1, domain2)
+            ganTrainer = cogan_t.CoGANTrainer(generator1, generator2, discriminator1, discriminator2, domain1, domain2)
             full_training_time = ganTrainer.train(args)
     else:
         print('Using CPU')
-        ganTrainer = cogan_t.GANTrainer(generator1, generator2, discriminator1, discriminator2, domain1, domain2)
+        ganTrainer = cogan_t.CoGANTrainer(generator1, generator2, discriminator1, discriminator2, domain1, domain2)
         full_training_time = ganTrainer.train(args)
 
     generator1._name = 'gen1'
@@ -140,6 +141,37 @@ if args.gan_type == 'cogan':
     discriminator1.save(args.dir + '/discriminator1')
     generator2.save(args.dir + '/generator2')
     discriminator2.save(args.dir + '/discriminator2')
+
+
+elif args.gan_type == 'classifier':
+    num_classes = 10
+    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+    x_train = x_train.reshape(x_train.shape[0], x_train.shape[1], x_train.shape[2], 1)
+    x_test = x_test.reshape(x_test.shape[0], x_test.shape[1], x_test.shape[2], 1)
+
+    x_train = x_train.astype('float32')
+    x_test = x_test.astype('float32')
+
+    x_train = (x_train - 127.5) / 127.5
+    x_test = (x_test - 127.5) / 127.5
+
+    x_train = tf.image.resize(x_train,(32,32))
+    x_test = tf.image.resize(x_test,(32,32))
+
+    y_train = tf.keras.utils.to_categorical(y_train, num_classes)
+    y_test = tf.keras.utils.to_categorical(y_test, num_classes)
+
+    model = tf.keras.models.load_model('classifier')
+    res = model.predict(x_train[0:3])
+
+    model = nets.mnist_classifier(args, num_classes)
+    model.compile(loss=tf.keras.losses.categorical_crossentropy, optimizer=tf.keras.optimizers.Adam(), metrics=['accuracy'])
+
+    model.fit(x_train, y_train, batch_size=args.batch_size, epochs=args.epochs, verbose=1, validation_data=(x_test, y_test))
+    score = model.evaluate(x_test, y_test, verbose=0)
+    print('Test loss:', score[0])
+    print('Test accuracy:', score[1])
+    model.save('classifier')
 
 else:
     # Choose data

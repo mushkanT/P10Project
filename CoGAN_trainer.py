@@ -8,7 +8,7 @@ import Utils as u
 import Penalties as p
 
 
-class GANTrainer(object):
+class CoGANTrainer(object):
 
     def __init__(self, g1, g2, d1, d2, domain1, domain2):
         self.domain2 = 1
@@ -27,6 +27,8 @@ class GANTrainer(object):
         self.g1, self.g2 = g1, g2
 
     def train(self, args):
+        if args.semantic_loss:
+            self.classifier = tf.keras.models.load_model('classifier')
 
         it1 = iter(self.X1)
         it2 = iter(self.X2)
@@ -100,6 +102,13 @@ class GANTrainer(object):
                 g1_loss = g_loss_fn(disc1_fake)
                 g2_loss = g_loss_fn(disc2_fake)
                 penalty = self.genPenal.calc_penalty(self.g1, self.g2, 4, args, gen1_fake, gen2_fake)
+
+                if args.semantic_loss:
+                    domain1_pred = self.classifier(gen1_fake[-1])
+                    domain2_pred = self.classifier(gen2_fake[-1])
+                    diff = tf.reduce_mean(tf.math.squared_difference(domain1_pred, domain2_pred))
+                    g1_loss = g1_loss + diff * args.semantic_weight
+                    g2_loss = g2_loss + diff * args.semantic_weight
                 g1_loss = g1_loss + (penalty * args.penalty_weight_g)
                 g2_loss = g2_loss + (penalty * args.penalty_weight_g)
 
@@ -109,7 +118,7 @@ class GANTrainer(object):
             gradients_of_generator2 = g2_tape.gradient(g2_loss, self.g2.trainable_variables)
             args.gen_optimizer.apply_gradients(zip(gradients_of_generator2, self.g2.trainable_variables))
 
-            weight_sim = self.genPenal.weight_regularizer(self.g1, self.g2, 21);
+            weight_sim = self.genPenal.weight_regularizer(self.g1, self.g2, 21)
 
             #with tf.GradientTape() as tape:
             #    gen_fake = self.g2(noise, training=True)
