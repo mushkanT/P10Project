@@ -28,7 +28,7 @@ class CoGANTrainer(object):
 
     def train(self, args):
         if args.semantic_loss:
-            self.classifier = tf.keras.models.load_model('classifier')
+            self.classifier = tf.keras.models.load_model(args.classifier_path)
 
         it1 = iter(self.X1)
         it2 = iter(self.X2)

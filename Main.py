@@ -52,6 +52,7 @@ parser.add_argument('--d_arch',         type=str,           default='digit_nosha
 parser.add_argument('--cogan_data',     type=str,           default='mnist2edge',  help='mnist2edge | mnist2rotate | mnist2svhn | mnist2negative | celeb_a | apple2orange | horse2zebra | vangogh2photo')
 parser.add_argument('--semantic_loss',  type=bool,          default=False, help='Determines whether semantic loss is used')
 parser.add_argument('--semantic_weight',type=int,           default=10, help='Weight of the semantic loss term')
+parser.add_argument('--classifier_path', type=str,          default=None, help='Path to the classifier used for semantic loss')
 args = parser.parse_args()
 
 # Debugging
