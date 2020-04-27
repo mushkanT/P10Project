@@ -25,7 +25,7 @@ def select_dataset_gan(args):
         train, test = data['train'], data['test']
         train = train.map(format_example_to32)
 
-    elif args.dataset == "apple2orange":
+    elif args.dataset in ['apple2orange', 'horse2zebra', 'vangogh2photo']:
         data, info = tfds.load('cycle_gan/'+args.dataset, with_info=True, as_supervised=True)
         trainA, trainB = data['trainA'], data['trainB']
         train = trainA.concatenate(trainB)
@@ -83,7 +83,7 @@ def select_dataset_gan(args):
     else:
         raise NotImplementedError()
 
-    if args.dataset not in ['lsun', 'celeba', 'apple2orange']:
+    if args.dataset not in ['lsun', 'celeba', 'apple2orange', 'horse2zebra', 'vangogh2photo']:
         if args.limit_dataset:
             train = train.filter(class_filter)
         num_examples = info.splits['train'].num_examples
@@ -117,7 +117,7 @@ def select_dataset_cogan(args):
         X2 = X2.shuffle(num_examples).repeat().batch(args.batch_size)
         shape = X1.element_spec[0].shape
 
-    elif args.cogan_data in ['apple2orange', 'horse2zebra', 'vangogh2photo']:
+    elif args.cogan_data in ['apple2orange', 'horse2zebra', 'vangogh2photo', 'cityscapes']:
         # Domains
         data, info = tfds.load('cycle_gan/'+args.cogan_data, with_info=True, as_supervised=True)
         X1, X2 = data['trainA'], data['trainB']
@@ -141,7 +141,7 @@ def select_dataset_cogan(args):
             attr2idx[attr_name] = i
             idx2attr[i] = attr_name
         lines = lines[2:]
-        for i, line in enumerate(lines[:3700]):
+        for i, line in enumerate(lines):
             split = line.split()
             values = split[1:]
             for attr_name in ['Eyeglasses']:

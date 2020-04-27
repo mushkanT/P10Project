@@ -34,23 +34,17 @@ class GANTrainer(object):
 
         noise = tf.random.normal(shape=[args.batch_size, args.noise_dim])
         generated_images = self.generator(noise, training=True)
-        #comb = tf.concat([generated_images, real_data], axis=0)
+        # comb = tf.concat([generated_images, real_data], axis=0)
 
         real_labels = tf.ones((args.batch_size, 1))
         fake_labels = tf.zeros((args.batch_size, 1))
-        #labels = tf.concat([real_labels, fake_labels], axis=0)
+        # labels = tf.concat([real_labels, fake_labels], axis=0)
 
         with tf.GradientTape() as disc_tape:
 
             #disc_resp = self.discriminator(comb)
             fake_output = self.discriminator(generated_images+disc_input_noise, training=True)
             real_output = self.discriminator(real_data+disc_input_noise, training=True)
-
-            if args.label_flipping:
-                flip_noise = tf.random.normal(shape=[int(args.batch_size * 0.95), args.noise_dim])
-                flip_images = self.generator(flip_noise, training=True)
-                real_output = real_output[int(args.batch_size * 0.05):].append(self.discriminator(flip_images))
-                random.shuffle(real_output)
 
             # Losses
             if args.loss == "wgan-gp":

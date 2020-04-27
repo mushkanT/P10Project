@@ -39,7 +39,6 @@ parser.add_argument('--gan_type',       type=str,           default='cogan',    
 parser.add_argument('--noise_dim',      type=int,           default=100,        help='size of the latent vector')
 parser.add_argument('--limit_dataset',  type=bool,          default=False,      help='limit dataset to one class')
 parser.add_argument('--scale_data',     type=int,           default=0,          help='Scale images in dataset to MxM')
-parser.add_argument('--label_flipping', type=bool,          default=False,      help='Flip 5% of labels during training of disc')
 parser.add_argument('--label_smooth',   type=bool,          default=False,      help='Smooth the labels of the disc from 1 to 0 occasionally')
 parser.add_argument('--input_noise',    type=bool,          default=False,      help='Add gaussian noise to the discriminator inputs')
 parser.add_argument('--input_scale',    type=bool,          default=True,       help='True=-1,1 False=0,1')
@@ -54,10 +53,10 @@ parser.add_argument('--cogan_data',     type=str,           default='mnist2edge'
 args = parser.parse_args()
 
 # Debugging
-#args.dataset = 'apple2orange'
-#args.gan_type = "256"
-#args.loss = 'ce'
-#args.label_smooth=True
+args.dataset = 'mnist'
+args.gan_type = "cogan"
+args.loss = 'ce'
+args.label_smooth=True
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'weight'
 #args.scale_data = 64
@@ -65,11 +64,11 @@ args = parser.parse_args()
 #args.disc_iters = 5
 #args.images_while_training = 1
 #args.limit_dataset = True
-#args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-#args.g_arch = 'digit'
-#args.d_arch = 'digit'
-#args.cogan_data = 'mnist2rotate'
-#args.batch_size = 9
+args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
+args.g_arch = 'digit'
+args.d_arch = 'digit'
+args.cogan_data = 'cityscapes'
+args.batch_size = 64
 
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
 #o2i.test_trunc_trick(args)

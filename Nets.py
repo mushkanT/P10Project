@@ -158,7 +158,6 @@ def gan64_disc(args):
     return model
 
 
-# Faces
 def gan128_gen(args):
     channels = args.dataset_dim[3]
 
@@ -169,29 +168,30 @@ def gan128_gen(args):
     model = tf.keras.layers.Reshape((4, 4, 1024))(model)
 
     model = (tf.keras.layers.Conv2DTranspose(1024, (4,4), strides=(1, 1), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.PReLU())(model)
 
     model = (tf.keras.layers.Conv2DTranspose(512, (4,4), strides=(2, 2), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.PReLU())(model)
 
     model = (tf.keras.layers.Conv2DTranspose(256, (4,4), strides=(2, 2), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.PReLU())(model)
 
     model = (tf.keras.layers.Conv2DTranspose(128, (4,4), strides=(2, 2), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.PReLU())(model)
 
     model = (tf.keras.layers.Conv2DTranspose(64, (4,4), strides=(2, 2), padding='same'))(model)
-    model = (tf.keras.layers.BatchNormalization(momentum=0.8))(model)
+    model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.PReLU())(model)
 
     # Generator 1
     img1 = (tf.keras.layers.Conv2DTranspose(32, (4,4), strides=(2, 2), padding='same'))(model)
-    img1 = (tf.keras.layers.BatchNormalization(momentum=0.8))(img1)
+    img1 = (tf.keras.layers.BatchNormalization())(img1)
     img1 = (tf.keras.layers.PReLU())(img1)
+
     img1 = tf.keras.layers.Conv2DTranspose(channels, (3,3), strides=(1, 1), activation='tanh', padding='same')(img1)
 
     return keras.Model(noise, img1)
@@ -201,9 +201,11 @@ def gan128_disc(args):
     img_shape = (args.dataset_dim[1], args.dataset_dim[2], args.dataset_dim[3])
 
     img1 = tf.keras.layers.Input(shape=img_shape)
+
     x1 = tf.keras.layers.Conv2D(32, (5, 5), strides=(2, 2), padding='same')(img1)
     x1 = tf.keras.layers.BatchNormalization()(x1)
     x1 = tf.keras.layers.PReLU()(x1)
+
     x1 = tf.keras.layers.Conv2D(64, (5, 5), strides=(2, 2), padding='same')(x1)
     x1 = tf.keras.layers.BatchNormalization()(x1)
     x1 = tf.keras.layers.PReLU()(x1)
@@ -213,15 +215,15 @@ def gan128_disc(args):
     model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU())
 
-    model.add(tf.keras.layers.Conv2D(256, (5, 5), strides=(2, 2), padding='same'))
+    model.add(tf.keras.layers.Conv2D(256, (3, 3), strides=(2, 2), padding='same'))
     model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU())
 
-    model.add(tf.keras.layers.Conv2D(512, (5, 5), strides=(2, 2), padding='same'))
+    model.add(tf.keras.layers.Conv2D(512, (3, 3), strides=(2, 2), padding='same'))
     model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU())
 
-    model.add(tf.keras.layers.Conv2D(1024, (5, 5), strides=(2, 2), padding='same'))
+    model.add(tf.keras.layers.Conv2D(1024, (3, 3), strides=(2, 2), padding='same'))
     model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU())
 
