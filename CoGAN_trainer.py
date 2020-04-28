@@ -87,7 +87,7 @@ class CoGANTrainer(object):
                 gradients_of_discriminator = tape.gradient(d2_loss, self.d2.trainable_variables)
                 args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d2.trainable_variables))
 
-                if args.loss == 'wgan' and args.penalty == 'none':
+                if args.loss == 'wgan' and args.disc_penalty == 'none':
                     self.clip_weights(args.clip)
 
             # ------------------
