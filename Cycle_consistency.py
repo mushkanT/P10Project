@@ -59,7 +59,7 @@ class CCEncoder(tf.keras.Model):
                     filters=64, kernel_size=3, strides=(2, 2), activation='relu'),
                 tf.keras.layers.Flatten(),
                 # No activation
-                tf.keras.layers.Dense(latent_dim),
+                tf.keras.layers.Dense(latent_dim, activation='sigmoid'),
             ]
         )
 
@@ -76,29 +76,32 @@ class CCGenerator(tf.keras.Model):
         self.generator = tf.keras.Sequential(
             [
                 tf.keras.layers.InputLayer(input_shape=(latent_dim,)),
-                tf.keras.layers.Dense(units=4 * 4 * 32, activation=tf.nn.relu),
-                tf.keras.layers.Reshape(target_shape=(4, 4, 32)),
+                tf.keras.layers.Dense(units=4 * 4 * 1024, activation=tf.nn.relu),
+                tf.keras.layers.Reshape(target_shape=(4, 4, 1024)),
                 tf.keras.layers.Conv2DTranspose(
-                    filters=64,
+                    filters=512,
                     kernel_size=3,
                     strides=(2, 2),
-                    padding="SAME",
-                    activation='relu'),
+                    padding="SAME"),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.PReLU(),
                 tf.keras.layers.Conv2DTranspose(
-                    filters=64,
+                    filters=256,
                     kernel_size=3,
                     strides=(2, 2),
-                    padding="SAME",
-                    activation='relu'),
+                    padding="SAME"),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.PReLU(),
                 tf.keras.layers.Conv2DTranspose(
-                    filters=32,
+                    filters=128,
                     kernel_size=3,
                     strides=(2, 2),
-                    padding="SAME",
-                    activation='relu'),
+                    padding="SAME"),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.PReLU(),
                 # No activation
                 tf.keras.layers.Conv2DTranspose(
-                    filters=1, kernel_size=3, strides=(1, 1), activation='tanh', padding="SAME"),
+                    filters=1, kernel_size=6, strides=(1, 1), activation='tanh', padding="SAME"),
             ]
         )
 
@@ -115,9 +118,14 @@ class CCDiscriminator(tf.keras.Model):
             [
                 tf.keras.layers.InputLayer(input_shape=[32, 32, 1]),
                 tf.keras.layers.Conv2D(
-                    filters=32, kernel_size=3, strides=(2, 2), activation='relu'),
+                    filters=32, kernel_size=5, strides=(2, 2)),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.PReLU(),
                 tf.keras.layers.Conv2D(
-                    filters=64, kernel_size=3, strides=(2, 2), activation='relu'),
+                    filters=64, kernel_size=3, strides=(2, 2)),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.PReLU(),
+
                 tf.keras.layers.Flatten(),
                 # No activation
                 tf.keras.layers.Dense(1),
