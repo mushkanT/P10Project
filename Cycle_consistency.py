@@ -5,6 +5,7 @@ import os
 import matplotlib.pyplot as plt
 import cv2
 import argparse
+import Utils as u
 layers = tf.keras.layers
 
 tf.random.set_seed(2020)
@@ -13,10 +14,13 @@ np.random.seed(2020)
 parser = argparse.ArgumentParser()
 parser.add_argument('--dir',            type=str,           default='/user/student.aau.dk/mjuuln15/output_data',     help='Directory to save images, models, weights etc')
 parser.add_argument('--sample_itr',            type=int,           default=250)
+parser.add_argument('--purpose', type=str, default='')
 args = parser.parse_args()
 
-#args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-#args.sample_itr = 10
+args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
+args.sample_itr = 10
+
+u.write_config(args)
 
 (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
 # 28x28 -> 32x32
@@ -59,7 +63,7 @@ class CCEncoder(tf.keras.Model):
                     filters=64, kernel_size=3, strides=(2, 2), activation='relu'),
                 tf.keras.layers.Flatten(),
                 # No activation
-                tf.keras.layers.Dense(latent_dim, activation='sigmoid'),
+                tf.keras.layers.Dense(latent_dim),
             ]
         )
 
@@ -146,7 +150,22 @@ def recon_criterion(input, target):
 
 
 #@tf.function
-def compute_generator_loss(generator_a, generator_b, discriminator_a, discriminator_b, encoder_a, encoder_b, noise):
+def compute_generator_loss(generator_a, generator_b, discriminator_a, discriminator_b, noise):
+    # generate
+    x_a = generator_a.generate(noise)
+    x_b = generator_b.generate(noise)
+
+    # GAN loss
+    d_a = discriminator_a.discriminate(x_a)
+    loss_gen_adv_a = l.cross_entropy_gen(d_a)
+    d_b = discriminator_b.discriminate(x_b)
+    loss_gen_adv_b = l.cross_entropy_gen(d_b)
+
+    total_loss = loss_gen_adv_a + loss_gen_adv_b
+    return total_loss
+
+
+def compute_encoder_loss(generator_a, generator_b, encoder_a, encoder_b, noise):
     # generate
     x_a = generator_a.generate(noise)
     x_b = generator_b.generate(noise)
@@ -164,29 +183,21 @@ def compute_generator_loss(generator_a, generator_b, discriminator_a, discrimina
     latent_recon_x_bab = encoder_b.encode(x_ab)
 
     # reconstruction loss
-    loss_gen_recon_x_a = recon_criterion(x_a, x_ba)
-    loss_gen_recon_x_b = recon_criterion(x_b, x_ab)
+    loss_gen_recon_x_a = recon_criterion(x_ba, x_a)
+    loss_gen_recon_x_b = recon_criterion(x_ab, x_b)
     loss_gen_recon_latent_a = recon_criterion(latent_recon_x_a, noise)
     loss_gen_recon_latent_b = recon_criterion(latent_recon_x_b, noise)
-    loss_gen_cycrecon_x_ba = recon_criterion(x_ba, x_a)
-    loss_gen_cycrecon_x_ab = recon_criterion(x_ab, x_b)
+    loss_gen_recon_latent_a_cross = recon_criterion(latent_recon_x_ba, noise)
+    loss_gen_recon_latent_b_cross = recon_criterion(latent_recon_x_ab, noise)
     loss_gen_cycrecon_latent_aba = recon_criterion(latent_recon_x_aba, noise)
     loss_gen_cycrecon_latent_bab = recon_criterion(latent_recon_x_bab, noise)
 
-    # GAN loss
-    d_a = discriminator_a.discriminate(x_a)
-    loss_gen_adv_a = l.cross_entropy_gen(d_a)
-    d_b = discriminator_b.discriminate(x_b)
-    loss_gen_adv_b = l.cross_entropy_gen(d_b)
-
-    total_loss = loss_gen_adv_a + \
-                 loss_gen_adv_b + \
-                 loss_gen_recon_x_a + \
+    total_loss = loss_gen_recon_x_a + \
                  loss_gen_recon_x_b + \
                  loss_gen_recon_latent_a + \
                  loss_gen_recon_latent_b + \
-                 loss_gen_cycrecon_x_ba + \
-                 loss_gen_cycrecon_x_ab + \
+                 loss_gen_recon_latent_a_cross + \
+                 loss_gen_recon_latent_b_cross + \
                  loss_gen_cycrecon_latent_aba + \
                  loss_gen_cycrecon_latent_bab
 
@@ -231,22 +242,22 @@ def compute_discriminator_loss_single(generator, discriminator, x):
 def compute_apply_gradients(generator_a, generator_b, discriminator_a, discriminator_b, encoder_a, encoder_b, noise, x_a, x_b):
 
     with tf.GradientTape() as tape:
-        loss = compute_generator_loss(generator_a, generator_b, discriminator_a, discriminator_b, encoder_a, encoder_b, noise)
+        loss = compute_generator_loss(generator_a, generator_b, discriminator_a, discriminator_b, noise)
     gradients = tape.gradient(loss, generator_a.trainable_variables)
     optimizer_g.apply_gradients(zip(gradients, generator_a.trainable_variables))
 
     with tf.GradientTape() as tape:
-        loss = compute_generator_loss(generator_a, generator_b, discriminator_a, discriminator_b, encoder_a, encoder_b, noise)
+        loss = compute_encoder_loss(generator_a, generator_b, encoder_a, encoder_b, noise)
     gradients = tape.gradient(loss, encoder_a.trainable_variables)
     optimizer_g.apply_gradients(zip(gradients, encoder_a.trainable_variables))
 
     with tf.GradientTape() as tape:
-        loss = compute_generator_loss(generator_a, generator_b, discriminator_a, discriminator_b, encoder_a, encoder_b, noise)
+        loss = compute_generator_loss(generator_a, generator_b, discriminator_a, discriminator_b, noise)
     gradients = tape.gradient(loss, generator_b.trainable_variables)
     optimizer_g.apply_gradients(zip(gradients, generator_b.trainable_variables))
 
     with tf.GradientTape() as tape:
-        loss = compute_generator_loss(generator_a, generator_b, discriminator_a, discriminator_b, encoder_a, encoder_b, noise)
+        loss = compute_encoder_loss(generator_a, generator_b, encoder_a, encoder_b, noise)
     gradients = tape.gradient(loss, encoder_b.trainable_variables)
     optimizer_g.apply_gradients(zip(gradients, encoder_b.trainable_variables))
 

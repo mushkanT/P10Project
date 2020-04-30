@@ -2,7 +2,6 @@ import tensorflow as tf
 import numpy as np
 import tensorflow_datasets as tfds
 from scipy.io import loadmat
-import scipy
 import cv2
 import matplotlib.pyplot as plt
 import glob
@@ -169,10 +168,13 @@ def select_dataset_cogan(args):
         X1 = X1.map(format_example_to128)
         X2 = X2.map(format_example_to128)
         shape = X2.element_spec.shape
+    else:
+        raise NotImplementedError()
 
     return X1, X2, shape
 
 
+# Dataset augments
 def class_filter(image, label, allowed_labels=tf.constant([1.])):
     isallowed = tf.equal(allowed_labels, tf.cast(label, tf.float32))
     reduced = tf.reduce_sum(tf.cast(isallowed, tf.float32))

@@ -36,9 +36,6 @@ class GANTrainer(object):
         for epoch in range(args.epochs):
             start = time.time()
 
-            # Sample noise as generator input
-            noise = tf.random.normal([args.batch_size, args.noise_dim])
-
             # ----------------------
             #  Train Discriminators
             # ----------------------
@@ -51,6 +48,9 @@ class GANTrainer(object):
                 else:
                     batch1 = next(it1)[0]
                     batch2 = next(it2)[0]
+
+                # Sample noise as generator input
+                noise = tf.random.normal([args.batch_size, args.noise_dim])
 
                 # Generate a batch of new images
                 gen_batch1 = self.g1(noise, training=True)
@@ -90,7 +90,10 @@ class GANTrainer(object):
             # ------------------
             #  Train Generators
             # ------------------
-            
+
+            # Sample noise as generator input
+            noise = tf.random.normal([args.batch_size, args.noise_dim])
+
             with tf.GradientTape() as tape:
                 gen_fake = self.g1(noise, training=True)
                 disc_fake = self.d1(gen_fake, training=True)
