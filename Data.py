@@ -210,6 +210,15 @@ def format_example_to32(image, label):
     return (image, label)
 
 
+def format_example_to32_2(image):
+    image = tf.cast(image, tf.float32)
+    # Normalize the pixel values
+    image = (image - 127.5) / 127.5
+    # Resize the image
+    image = tf.image.resize(image, (32, 32))
+    return image
+
+
 def format_example_to128(image):
     image = tf.cast(image, tf.float32)
     # Normalize the pixel values
@@ -352,14 +361,12 @@ def mnist_cogan(batch_size, data):
         (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
         # 28x28 -> 32x32
         train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
-        padding = tf.constant([[0, 0], [2, 2], [2, 2], [0, 0]])
-        train_images = tf.pad(train_images, padding, "CONSTANT")
 
         # Split dataset
         X1 = train_images[:int(train_images.shape[0] / 2)]
         X2 = train_images[int(train_images.shape[0] / 2):]
 
-        edges = np.zeros((X2.shape[0], 32, 32, 1))
+        edges = np.zeros((X2.shape[0], 28, 28, 1))
         for idx, i in enumerate(X2):
             i = np.squeeze(i)
             dilation = cv2.dilate(i, np.ones((3, 3), np.uint8), iterations=1)
@@ -367,11 +374,11 @@ def mnist_cogan(batch_size, data):
             edges[idx - X2.shape[0], :, :, 0] = edge
         X2 = tf.convert_to_tensor(edges)
 
-        X1 = (X1 - 127.5) / 127.5  # Normalize the images to [-1, 1]
-        X2 = (X2 - 127.5) / 127.5  # Normalize the images to [-1, 1]
-
         X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(X1.shape[0]).repeat().batch(
             batch_size)
         X2 = tf.data.Dataset.from_tensor_slices(X2).shuffle(X2.shape[0]).repeat().batch(
             batch_size)
+        X1 = X1.map(format_example_to32_2)
+        X2 = X2.map(format_example_to32_2)
+
     return X1, X2

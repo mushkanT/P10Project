@@ -55,7 +55,7 @@ args = parser.parse_args()
 # Debugging
 #args.dataset = 'mnist'
 #args.gan_type = "cogan"
-#args.loss = 'wgan'
+#args.loss = 'ce'
 #args.label_smooth=True
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'weight'

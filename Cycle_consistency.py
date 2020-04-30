@@ -3,7 +3,7 @@ import numpy as np
 import Losses as l
 import os
 import matplotlib.pyplot as plt
-import cv2
+import Data as d
 import argparse
 import Utils as u
 layers = tf.keras.layers
@@ -19,34 +19,17 @@ args = parser.parse_args()
 
 args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
 args.sample_itr = 10
+args.cogan_data='mnist2edge'
+args.g_arch = 'digit'
+args.d_arch = 'digit'
+args.batch_size = 64
+args.noise_dim = 100
 
 u.write_config(args)
 
-(train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
-# 28x28 -> 32x32
-train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
-padding = tf.constant([[0, 0], [2, 2], [2, 2], [0, 0]])
-train_images = tf.pad(train_images, padding, "CONSTANT")
-
-# Split dataset
-X1 = train_images[:int(train_images.shape[0] / 2)]
-X2 = train_images[int(train_images.shape[0] / 2):]
-
-edges = np.zeros((X2.shape[0], 32, 32, 1))
-for idx, i in enumerate(X2):
-    i = np.squeeze(i)
-    dilation = cv2.dilate(i, np.ones((3, 3), np.uint8), iterations=1)
-    edge = dilation - i
-    edges[idx - X2.shape[0], :, :, 0] = edge
-X2 = tf.convert_to_tensor(edges)
-
-X1 = (X1 - 127.5) / 127.5  # Normalize the images to [-1, 1]
-X2 = (X2 - 127.5) / 127.5  # Normalize the images to [-1, 1]
-
-X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(X1.shape[0]).repeat().batch(
-    64)
-X2 = tf.data.Dataset.from_tensor_slices(X2).shuffle(X2.shape[0]).repeat().batch(
-    64)
+X1, X2, shape = d.select_dataset_cogan(args)
+args.dataset_dim = shape
+gen_a, gen_b, disc_a, disc_b = u.select_cogan_architecture(args)
 
 
 class CCEncoder(tf.keras.Model):
@@ -149,8 +132,8 @@ def recon_criterion(input, target):
     return tf.math.reduce_mean(tf.math.abs(input - target))
 
 
-#@tf.function
-def compute_generator_loss(generator_a, generator_b, discriminator_a, discriminator_b, noise):
+def compute_generator_loss(generator_a, generator_b, discriminator_a, discriminator_b):
+    noise = tf.random.normal([64, 100])
     # generate
     x_a = generator_a.generate(noise)
     x_b = generator_b.generate(noise)
@@ -165,6 +148,15 @@ def compute_generator_loss(generator_a, generator_b, discriminator_a, discrimina
     return total_loss
 
 
+def compute_generator_loss_single(generator, discriminator, noise):
+    # generate
+    x = generator(noise, training=True)
+    d = discriminator(x, training=True)
+    # GAN loss
+    loss_gen_adv = l.cross_entropy_gen(d)
+    return loss_gen_adv
+
+
 def compute_encoder_loss(generator_a, generator_b, encoder_a, encoder_b, noise):
     # generate
     x_a = generator_a.generate(noise)
@@ -176,35 +168,36 @@ def compute_encoder_loss(generator_a, generator_b, encoder_a, encoder_b, noise):
     latent_recon_x_ba = encoder_a.encode(x_b)
     latent_recon_x_ab = encoder_b.encode(x_a)
     # generate again
-    x_ba = generator_a.generate(latent_recon_x_ba)
-    x_ab = generator_b.generate(latent_recon_x_ab)
+    x_ba = generator_a.generate(latent_recon_x_a)
+    x_ab = generator_b.generate(latent_recon_x_b)
     # encode again
     latent_recon_x_aba = encoder_a.encode(x_ba)
     latent_recon_x_bab = encoder_b.encode(x_ab)
 
     # reconstruction loss
-    loss_gen_recon_x_a = recon_criterion(x_ba, x_a)
-    loss_gen_recon_x_b = recon_criterion(x_ab, x_b)
-    loss_gen_recon_latent_a = recon_criterion(latent_recon_x_a, noise)
-    loss_gen_recon_latent_b = recon_criterion(latent_recon_x_b, noise)
-    loss_gen_recon_latent_a_cross = recon_criterion(latent_recon_x_ba, noise)
-    loss_gen_recon_latent_b_cross = recon_criterion(latent_recon_x_ab, noise)
-    loss_gen_cycrecon_latent_aba = recon_criterion(latent_recon_x_aba, noise)
-    loss_gen_cycrecon_latent_bab = recon_criterion(latent_recon_x_bab, noise)
+    img_recon_a = recon_criterion(x_ba, x_a)
+    img_recon_b = recon_criterion(x_ab, x_b)
+    latent_recon_a = recon_criterion(latent_recon_x_a, noise)
+    latent_recon_b = recon_criterion(latent_recon_x_b, noise)
 
-    total_loss = loss_gen_recon_x_a + \
-                 loss_gen_recon_x_b + \
-                 loss_gen_recon_latent_a + \
-                 loss_gen_recon_latent_b + \
-                 loss_gen_recon_latent_a_cross + \
-                 loss_gen_recon_latent_b_cross + \
-                 loss_gen_cycrecon_latent_aba + \
-                 loss_gen_cycrecon_latent_bab
+    # questionable
+    latent_recon_a_cross = recon_criterion(latent_recon_x_ba, noise)
+    latent_recon_b_cross = recon_criterion(latent_recon_x_ab, noise)
+    latent_cycrecon_aba = recon_criterion(latent_recon_x_aba, noise)
+    latent_cycrecon_bab = recon_criterion(latent_recon_x_bab, noise)
+
+    total_loss = img_recon_a + \
+                 img_recon_b + \
+                 latent_recon_a + \
+                 latent_recon_b + \
+                 latent_recon_a_cross + \
+                 latent_recon_b_cross + \
+                 latent_cycrecon_aba + \
+                 latent_cycrecon_bab
 
     return total_loss
 
 
-#@tf.function
 def compute_discriminator_loss(generator_a, generator_b, discriminator_a, discriminator_b, x_a, x_b):
     noise = tf.random.normal([64, 100])
     x_a_fake = generator_a.generate(noise)
@@ -224,60 +217,64 @@ def compute_discriminator_loss(generator_a, generator_b, discriminator_a, discri
     return total_loss
 
 
-#@tf.function
-def compute_discriminator_loss_single(generator, discriminator, x):
-    noise = tf.random.normal([64, 100])
-    x_a_fake = generator.generate(noise)
-
-    x_a_fake = discriminator.discriminate(x_a_fake)
-    x_a = discriminator.discriminate(x)
-
+def compute_discriminator_loss_single(generator, discriminator, x, noise):
+    x_fake = generator(noise, training=True)
+    x_fake = discriminator(x_fake, training=True)
+    x_real = discriminator(x, training=True)
     # GAN loss
-    loss_disc_adv_a = l.cross_entropy_disc(x_a_fake, x_a)
+    loss_disc_adv = l.cross_entropy_disc(x_fake, x_real)
+    return loss_disc_adv
 
-    return loss_disc_adv_a
 
+def compute_apply_gradients(generator_a, generator_b, discriminator_a, discriminator_b, encoder_a, encoder_b, x_a, x_b):
 
-#@tf.function
-def compute_apply_gradients(generator_a, generator_b, discriminator_a, discriminator_b, encoder_a, encoder_b, noise, x_a, x_b):
-
-    with tf.GradientTape() as tape:
-        loss = compute_generator_loss(generator_a, generator_b, discriminator_a, discriminator_b, noise)
-    gradients = tape.gradient(loss, generator_a.trainable_variables)
-    optimizer_g.apply_gradients(zip(gradients, generator_a.trainable_variables))
+    # Train D1 and D2
+    noise = tf.random.normal([64, 100])
 
     with tf.GradientTape() as tape:
-        loss = compute_encoder_loss(generator_a, generator_b, encoder_a, encoder_b, noise)
-    gradients = tape.gradient(loss, encoder_a.trainable_variables)
-    optimizer_g.apply_gradients(zip(gradients, encoder_a.trainable_variables))
-
-    with tf.GradientTape() as tape:
-        loss = compute_generator_loss(generator_a, generator_b, discriminator_a, discriminator_b, noise)
-    gradients = tape.gradient(loss, generator_b.trainable_variables)
-    optimizer_g.apply_gradients(zip(gradients, generator_b.trainable_variables))
-
-    with tf.GradientTape() as tape:
-        loss = compute_encoder_loss(generator_a, generator_b, encoder_a, encoder_b, noise)
-    gradients = tape.gradient(loss, encoder_b.trainable_variables)
-    optimizer_g.apply_gradients(zip(gradients, encoder_b.trainable_variables))
-
-    with tf.GradientTape() as tape:
-        loss2 = compute_discriminator_loss_single(generator_a, discriminator_a, x_a)
+        loss2 = compute_discriminator_loss_single(generator_a, discriminator_a, x_a, noise)
     gradients = tape.gradient(loss2, discriminator_a.trainable_variables)
     optimizer_d.apply_gradients(zip(gradients, discriminator_a.trainable_variables))
 
     with tf.GradientTape() as tape:
-        loss1 = compute_discriminator_loss_single(generator_b, discriminator_b, x_b)
-    gradients = tape.gradient(loss1, discriminator_b.trainable_variables)
+        loss3 = compute_discriminator_loss_single(generator_b, discriminator_b, x_b, noise)
+    gradients = tape.gradient(loss3, discriminator_b.trainable_variables)
     optimizer_d.apply_gradients(zip(gradients, discriminator_b.trainable_variables))
 
-    return loss, loss2, loss1
+    # Train G1 and G2 + E1 and E2
+    noise = tf.random.normal([64, 100])
+
+    with tf.GradientTape() as tape:
+        loss = compute_generator_loss_single(generator_a, discriminator_a, noise)
+    gradients = tape.gradient(loss, generator_a.trainable_variables)
+    optimizer_g.apply_gradients(zip(gradients, generator_a.trainable_variables))
+
+    '''
+    with tf.GradientTape() as tape:
+        loss = compute_encoder_loss(generator_a, generator_b, encoder_a, encoder_b, noise)
+    gradients = tape.gradient(loss, encoder_a.trainable_variables)
+    optimizer_g.apply_gradients(zip(gradients, encoder_a.trainable_variables))
+    '''
+
+    with tf.GradientTape() as tape:
+        loss1 = compute_generator_loss_single(generator_b, discriminator_b, noise)
+    gradients = tape.gradient(loss1, generator_b.trainable_variables)
+    optimizer_g.apply_gradients(zip(gradients, generator_b.trainable_variables))
+
+    '''
+    with tf.GradientTape() as tape:
+        loss = compute_encoder_loss(generator_a, generator_b, encoder_a, encoder_b, noise)
+    gradients = tape.gradient(loss, encoder_b.trainable_variables)
+    optimizer_g.apply_gradients(zip(gradients, encoder_b.trainable_variables))
+    '''
+
+    return loss, loss1, loss2, loss3
 
 
 def sample_images(g1, g2, epoch, seed, dir):
     r, c = 4, 4
-    gen_batch1 = g1.generate(seed)
-    gen_batch2 = g2.generate(seed)
+    gen_batch1 = g1(seed)
+    gen_batch2 = g2(seed)
 
     gen_imgs = np.concatenate([gen_batch1, gen_batch2])
 
@@ -298,23 +295,16 @@ def sample_images(g1, g2, epoch, seed, dir):
 
 it = iter(X1)
 it1 = iter(X2)
-
-gen_a = CCGenerator(100)
-gen_b = CCGenerator(100)
 encoder_a = CCEncoder(100)
 encoder_b = CCEncoder(100)
-disc_a = CCDiscriminator()
-disc_b = CCDiscriminator()
 
 z = tf.random.normal([8, 100])
 
 for i in range(10000):
-    images = next(it)
-    images1 = next(it1)
-    images1 = tf.cast(images1, dtype=tf.float32)
-    noise = tf.random.normal([64, 100])
-    l_ge, l_d, l_d1 = compute_apply_gradients(gen_a, gen_b, disc_a, disc_b, encoder_a, encoder_b, noise, images, images1)
-    print("iteration: " + str(i) + " \t ga, gb, ea, eb loss: " + str(l_ge.numpy()) + " \t da: " + str (l_d.numpy()) + " db: " + str(l_d1.numpy()))
+    images1 = next(it)
+    images2 = next(it1)
+    l1, l2, l3, l4 = compute_apply_gradients(gen_a, gen_b, disc_a, disc_b, encoder_a, encoder_b, images1, images2)
+    print("iteration: " + str(i) + " \t g1: " + str(l1.numpy()) + " \t g2: " + str (l2.numpy()) + " d1: " + str(l3.numpy())+ " d2: " + str(l4.numpy()))
     if i % args.sample_itr == 0:
         sample_images(gen_a, gen_b, i, z, args.dir)
 

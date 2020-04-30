@@ -84,7 +84,7 @@ class GANTrainer(object):
                 gradients_of_discriminator = tape.gradient(d2_loss, self.d2.trainable_variables)
                 args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d2.trainable_variables))
 
-                if args.loss == 'wgan' and args.penalty == 'none':
+                if args.loss == 'wgan' and args.disc_penalty == 'none':
                     self.clip_weights(args.clip)
 
             # ------------------
@@ -209,9 +209,9 @@ class GANTrainer(object):
     def clip_weights(self, clip):
         for i, var in enumerate(self.d1.trainable_variables):
             self.d1.trainable_variables[i].assign(tf.clip_by_value(var, -clip, clip))
-            if not np.array_equiv(self.d1.trainable_variables[i].numpy(), self.d2.trainable_variables[i].numpy()):
-                print(i)
+            #if not np.array_equiv(self.d1.trainable_variables[i].numpy(), self.d2.trainable_variables[i].numpy()):
+                #print(i)
         for i, var in enumerate(self.d2.trainable_variables[6:]):
             self.d2.trainable_variables[i + 6].assign(tf.clip_by_value(var, -clip, clip))
-            if not np.array_equiv(self.d1.trainable_variables[i].numpy(), self.d2.trainable_variables[i].numpy()):
-                print(i)
+            #if not np.array_equiv(self.d1.trainable_variables[i].numpy(), self.d2.trainable_variables[i].numpy()):
+                #print(i)
