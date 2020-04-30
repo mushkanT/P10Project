@@ -25,12 +25,14 @@ def select_dataset_gan(args):
         train, test = data['train'], data['test']
         train = train.map(format_example_to32)
 
-    elif args.dataset == "apple2orange":
+    elif args.dataset in ['apple2orange', 'horse2zebra', 'vangogh2photo']:
         data, info = tfds.load('cycle_gan/'+args.dataset, with_info=True, as_supervised=True)
         trainA, trainB = data['trainA'], data['trainB']
         train = trainA.concatenate(trainB)
-        train = train.map(format_example_to128_2)
-        shape = (None,train.element_spec[0].shape[0],train.element_spec[0].shape[1],train.element_spec[0].shape[2])
+        train = train.map(format_example_scale)
+        shape = (None,256,256,3)
+        num_examples = info.splits['trainA'].num_examples+info.splits['trainB'].num_examples
+        train = train.shuffle(num_examples).repeat().batch(args.batch_size)
 
     elif args.dataset == "celeba":
         #images = glob.glob('C:/Users/marku/Desktop/img_align_celeba/*.jpg')
@@ -40,8 +42,10 @@ def select_dataset_gan(args):
             image = plt.imread(i)
             dataset.append(image)
         X1 = np.array(dataset)
-        X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(len(X1)).batch(args.batch_size).repeat()
+        num_examples = len(X1)
+        X1 = tf.data.Dataset.from_tensor_slices(X1)
         train = X1.map(format_example_to128)
+        train = train.shuffle(num_examples).repeat().batch(args.batch_size)
         shape = train.element_spec.shape
 
     elif args.dataset == "mnist-f":
@@ -55,11 +59,16 @@ def select_dataset_gan(args):
         train = train.map(format_example_scale)
 
     elif args.dataset == 'lsun':
-        ImgDataGen = tf.keras.preprocessing.image.ImageDataGenerator(preprocessing_function=preprocess, dtype=tf.dtypes.float32)
-        train_dat = ImgDataGen.flow_from_directory('/user/student.aau.dk/mjuuln15/lsun_data/', target_size=(args.scale_data, args.scale_data), batch_size=args.batch_size, seed=2019, class_mode=None, interpolation="nearest")
-               
-        amount = 2554932
-        shape = (amount, train_dat.image_shape[0], train_dat.image_shape[1], train_dat.image_shape[2])
+        images = glob.glob('/user/student.aau.dk/mjuuln15/lsun_data/bedroom*.jpg')
+        dataset=[]
+        for i in images:
+            image = plt.imread(i)
+            dataset.append(image)
+        X1 = np.array(dataset)
+        X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(50000).repeat().batch(args.batch_size)
+        train = X1.map(format_example_to128)
+        shape = (64,256,256,3)
+
     elif args.dataset == 'frey':
         img_size = (28, 20, 1)
         # data = loadmat('/user/student.aau.dk/mjuuln15/frey_rawface.mat')
@@ -74,11 +83,11 @@ def select_dataset_gan(args):
     else:
         raise NotImplementedError()
 
-    if args.dataset not in ['lsun', 'celeba']:
+    if args.dataset not in ['lsun', 'celeba', 'apple2orange', 'horse2zebra', 'vangogh2photo']:
         if args.limit_dataset:
             train = train.filter(class_filter)
         num_examples = info.splits['train'].num_examples
-        train = train.shuffle(num_examples).batch(args.batch_size).repeat()
+        train = train.shuffle(num_examples).repeat().batch(args.batch_size)
 
     return train, shape
 
@@ -91,22 +100,24 @@ def select_dataset_cogan(args):
             shape = X1.element_spec.shape
         else:
             shape = X1.element_spec[0].shape
+
     elif args.cogan_data == 'mnist2svhn':
         # Domain 1
         data, info = tfds.load('mnist', with_info=True, as_supervised=True)
         X1, test = data['train'], data['test']
         X1 = X1.map(format_example_g2rgb)
         num_examples = info.splits['train'].num_examples
-        X1 = X1.shuffle(num_examples).batch(args.batch_size).repeat()
+        X1 = X1.shuffle(num_examples).repeat().batch(args.batch_size)
 
         # Domain 2
         data, info = tfds.load('svhn_cropped', with_info=True, as_supervised=True)
         X2, test = data['train'], data['test']
         X2 = X2.map(format_example_to32)
         num_examples = info.splits['train'].num_examples
-        X2 = X2.shuffle(num_examples).batch(args.batch_size).repeat()
+        X2 = X2.shuffle(num_examples).repeat().batch(args.batch_size)
         shape = X1.element_spec[0].shape
-    elif args.cogan_data in ['apple2orange', 'horse2zebra', 'vangogh2photo']:
+
+    elif args.cogan_data in ['apple2orange', 'horse2zebra', 'vangogh2photo', 'cityscapes']:
         # Domains
         data, info = tfds.load('cycle_gan/'+args.cogan_data, with_info=True, as_supervised=True)
         X1, X2 = data['trainA'], data['trainB']
@@ -114,8 +125,8 @@ def select_dataset_cogan(args):
         X2 = X2.map(format_example_scale)
         num_examples = info.splits['trainA'].num_examples
 
-        X1 = X1.shuffle(num_examples).batch(args.batch_size).repeat()
-        X2 = X2.shuffle(num_examples).batch(args.batch_size).repeat()
+        X1 = X1.shuffle(num_examples).repeat().batch(args.batch_size)
+        X2 = X2.shuffle(num_examples).repeat().batch(args.batch_size)
         shape = (None, 256, 256, 3)
 
     elif args.cogan_data in ['Eyeglasses']:
@@ -130,7 +141,7 @@ def select_dataset_cogan(args):
             attr2idx[attr_name] = i
             idx2attr[i] = attr_name
         lines = lines[2:]
-        for i, line in enumerate(lines[:3700]):
+        for i, line in enumerate(lines):
             split = line.split()
             values = split[1:]
             for attr_name in ['Eyeglasses']:
@@ -152,8 +163,8 @@ def select_dataset_cogan(args):
         #X1 = X1.reshape(X1.shape[0], X1.shape[1], X1.shape[2], X1.shape[3]).astype('float32')
         #X2 = X2.reshape(X2.shape[0], X2.shape[1], X2.shape[2], X2.shape[3]).astype('float32')
 
-        X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(len(X1)).batch(args.batch_size).repeat()
-        X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(X2)).shuffle(len(X2)).batch(args.batch_size).repeat()
+        X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(len(X1)).repeat().batch(args.batch_size)
+        X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(X2)).repeat().shuffle(len(X2)).batch(args.batch_size)
 
         X1 = X1.map(format_example_to128)
         X2 = X2.map(format_example_to128)
@@ -203,6 +214,14 @@ def format_example_to128(image):
     image = (image - 127.5) / 127.5
     # Resize the image
     image = tf.image.resize(image, (128, 128))
+    return image
+
+
+def format_example_scale2(image):
+    image = tf.cast(image, tf.float32)
+    # Normalize the pixel values
+    image = (image - 127.5) / 127.5
+    # Resize the image
     return image
 
 
@@ -311,11 +330,6 @@ def cifar10(input_scale, restrict=False):
     return train_images
 
 
-def preprocess(img):
-    img = (img - 127.5) / 127.5
-    return img
-
-
 # CoGAN data loaders
 def mnist_cogan(batch_size, data):
     d2 = data.split('2')[1]
@@ -330,8 +344,8 @@ def mnist_cogan(batch_size, data):
             X2 = X2.map(format_example_negative)
         num_examples = info.splits['train'].num_examples
         num_examples2 = info2.splits['train'].num_examples
-        X1 = X1.shuffle(num_examples).batch(batch_size).repeat()
-        X2 = X2.shuffle(num_examples2).batch(batch_size).repeat()
+        X1 = X1.shuffle(num_examples).repeat().batch(batch_size)
+        X2 = X2.shuffle(num_examples2).repeat().batch(batch_size)
     elif d2 == 'edge':
         (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
         # 28x28 -> 32x32
@@ -354,8 +368,8 @@ def mnist_cogan(batch_size, data):
         X1 = (X1 - 127.5) / 127.5  # Normalize the images to [-1, 1]
         X2 = (X2 - 127.5) / 127.5  # Normalize the images to [-1, 1]
 
-        X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(X1.shape[0]).batch(
-            batch_size).repeat()
-        X2 = tf.data.Dataset.from_tensor_slices(X2).shuffle(X2.shape[0]).batch(
-            batch_size).repeat()
+        X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(X1.shape[0]).repeat().batch(
+            batch_size)
+        X2 = tf.data.Dataset.from_tensor_slices(X2).shuffle(X2.shape[0]).repeat().batch(
+            batch_size)
     return X1, X2
