@@ -39,14 +39,14 @@ class CoGANTrainer(object):
         for epoch in range(args.epochs):
             start = time.time()
 
-            # Sample noise as generator input
-            noise = tf.random.normal([args.batch_size, args.noise_dim])
+
 
             # ----------------------
             #  Train Discriminators
             # ----------------------
 
             for i in range(args.disc_iters):
+                noise = tf.random.normal([args.batch_size, args.noise_dim])
                 # Select a random batch of images
                 if args.cogan_data in ['mnist2edge', 'Eyeglasses']:
                     batch1 = next(it1)
@@ -93,7 +93,7 @@ class CoGANTrainer(object):
             # ------------------
             #  Train Generators
             # ------------------
-            
+            noise = tf.random.normal([args.batch_size, args.noise_dim])
             with tf.GradientTape() as g1_tape, tf.GradientTape() as g2_tape:
                 gen1_fake = self.g1(noise, training=True)
                 gen2_fake = self.g2(noise, training=True)
