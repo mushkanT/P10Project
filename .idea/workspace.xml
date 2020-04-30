@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="220b69cb-c454-4d63-b603-ea792d470aba" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Sampler.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -52,19 +51,19 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.Sampler">
+  <component name="RunManager" selected="Python.Main">
     <configuration name="Main" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="P9Project" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="C:\Program Files\Python36\python.exe" />
+      <option name="SDK_HOME" value="D:\Programming\P9Project\venv\Scripts\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Main.py" />
       <option name="PARAMETERS" value="--cogan_data=mnist2svhn --semantic_loss=True --semantic_weight=50 --classifier_path=classifier --loss=wgan --disc_penalty=wgan-gp" />
@@ -172,8 +171,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.Sampler" />
         <item itemvalue="Python.Main" />
+        <item itemvalue="Python.Sampler" />
         <item itemvalue="Python.cogan" />
         <item itemvalue="Python.Train" />
         <item itemvalue="Python.mlm_wgan_gp" />
@@ -202,6 +201,8 @@
       <workItem from="1588068000388" duration="8044000" />
       <workItem from="1588085301771" duration="4855000" />
       <workItem from="1588234782397" duration="1003000" />
+      <workItem from="1588236396073" duration="252000" />
+      <workItem from="1588236666693" duration="963000" />
     </task>
     <servers />
   </component>
@@ -283,11 +284,6 @@
           <line>164</line>
           <option name="timeStamp" value="653" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/CoGAN_trainer.py</url>
-          <line>69</line>
-          <option name="timeStamp" value="654" />
-        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -299,7 +295,7 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/P9Project$Main.coverage" NAME="Main Coverage Results" MODIFIED="1588085334713" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/P9Project$Main.coverage" NAME="Main Coverage Results" MODIFIED="1588237188165" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/P9Project$Sampler.coverage" NAME="Sampler Coverage Results" MODIFIED="1588235940747" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
