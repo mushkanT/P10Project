@@ -22,11 +22,8 @@ if __name__ == "__main__":
     samples1 = gen1.predict(noise)
     samples2 = gen2.predict(noise)
 
-    samples1 = samples1.numpy()
-    samples2 = samples2.numpy()
-
-    os.makedirs(os.path.join(args.out_dir, "samples1"))
-    os.makedirs(os.path.join(args.out_dir, "samples2"))
+    samples1 = samples1[-1]
+    samples2 = samples2[-1]
 
 
     np.save(os.path.join(args.out_dir, "samples1"), samples1)
