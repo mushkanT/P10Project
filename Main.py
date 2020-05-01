@@ -68,7 +68,7 @@ args = parser.parse_args()
 #args.g_arch = 'digit'
 #args.d_arch = 'digit'
 #args.cogan_data = 'mnist2edge'
-#args.batch_size = 64
+#args.batch_size = 32
 
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
 #o2i.test_trunc_trick(args)

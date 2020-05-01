@@ -60,16 +60,16 @@ class GANTrainer(object):
                 # Used in their impl -> Flips signs (large alpha = towards fake)
                 differences = generated_images - real_data
                 interpolated_images = real_data + (alpha * differences)
- 
+
                 with tf.GradientTape() as gTape:
                     gTape.watch(interpolated_images)
                     disc_interpolates = self.discriminator(interpolated_images, training=True)
 
                 gradients = gTape.gradient(disc_interpolates, interpolated_images)
                 gradients += 1e-8
-                gradient_l2_norm = tf.sqrt(tf.math.reduce_sum(tf.math.square(gradients), 1))
+                gradient_l2_norm = tf.sqrt(tf.reduce_sum(tf.math.square(gradients), axis=np.arange(1, len(gradients.shape))))
                 gradient_penalty = tf.reduce_mean((gradient_l2_norm - 1.) ** 2)
-                disc_loss += gradient_penalty * args.gp_lambda
+                disc_loss += gradient_penalty * args.penalty_weight_d
 
             elif args.loss == "wgan":
                 disc_loss = tf.reduce_mean(fake_output)-tf.reduce_mean(real_output)
