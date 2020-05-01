@@ -39,8 +39,6 @@ class CoGANTrainer(object):
         for epoch in range(args.epochs):
             start = time.time()
 
-
-
             # ----------------------
             #  Train Discriminators
             # ----------------------

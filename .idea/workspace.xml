@@ -3,7 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="220b69cb-c454-4d63-b603-ea792d470aba" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sampler.py" beforeDir="false" afterPath="$PROJECT_DIR$/Sampler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CoGAN_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/CoGAN_trainer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Penalties.py" beforeDir="false" afterPath="$PROJECT_DIR$/Penalties.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -28,7 +29,7 @@
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$USER_HOME$/Desktop/backup/cogan.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../PerceptualSimilarity" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
@@ -203,7 +204,8 @@
       <workItem from="1588085301771" duration="4855000" />
       <workItem from="1588234782397" duration="1003000" />
       <workItem from="1588236396073" duration="252000" />
-      <workItem from="1588236666693" duration="4461000" />
+      <workItem from="1588236666693" duration="5323000" />
+      <workItem from="1588318151247" duration="6559000" />
     </task>
     <servers />
   </component>
