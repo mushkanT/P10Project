@@ -24,6 +24,7 @@ class GANTrainer(object):
 
         self.d1, self.d2 = d1, d2
         self.g1, self.g2 = g1, g2
+        self.e1, self.e2 = n.encoder1, n.encoder2()
 
     def train(self, args):
 
@@ -32,6 +33,7 @@ class GANTrainer(object):
 
         # Set loss functions
         d_loss_fn, g_loss_fn = l.set_losses(args)
+        e_loss_fn = l.encoder_loss
 
         for epoch in range(args.epochs):
             start = time.time()
