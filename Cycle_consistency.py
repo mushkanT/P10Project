@@ -20,8 +20,8 @@ args = parser.parse_args()
 args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
 args.sample_itr = 10
 args.cogan_data='mnist2edge'
-args.g_arch = 'digit'
-args.d_arch = 'digit'
+args.g_arch = 'digit_noshare'
+args.d_arch = 'digit_noshare'
 args.batch_size = 64
 args.noise_dim = 100
 
@@ -159,8 +159,8 @@ def compute_generator_loss_single(generator, discriminator, noise):
 
 def compute_encoder_loss(generator_a, generator_b, encoder_a, encoder_b, noise):
     # generate
-    x_a = generator_a.generate(noise)
-    x_b = generator_b.generate(noise)
+    x_a = generator_a(noise)
+    x_b = generator_b(noise)
     # encode (within domain)
     latent_recon_x_a = encoder_a.encode(x_a)
     latent_recon_x_b = encoder_b.encode(x_b)
@@ -168,8 +168,8 @@ def compute_encoder_loss(generator_a, generator_b, encoder_a, encoder_b, noise):
     latent_recon_x_ba = encoder_a.encode(x_b)
     latent_recon_x_ab = encoder_b.encode(x_a)
     # generate again
-    x_ba = generator_a.generate(latent_recon_x_a)
-    x_ab = generator_b.generate(latent_recon_x_b)
+    x_ba = generator_a(latent_recon_x_a)
+    x_ab = generator_b(latent_recon_x_b)
     # encode again
     latent_recon_x_aba = encoder_a.encode(x_ba)
     latent_recon_x_bab = encoder_b.encode(x_ab)
@@ -232,43 +232,39 @@ def compute_apply_gradients(generator_a, generator_b, discriminator_a, discrimin
     noise = tf.random.normal([64, 100])
 
     with tf.GradientTape() as tape:
-        loss2 = compute_discriminator_loss_single(generator_a, discriminator_a, x_a, noise)
-    gradients = tape.gradient(loss2, discriminator_a.trainable_variables)
+        loss1 = compute_discriminator_loss_single(generator_a, discriminator_a, x_a, noise)
+    gradients = tape.gradient(loss1, discriminator_a.trainable_variables)
     optimizer_d.apply_gradients(zip(gradients, discriminator_a.trainable_variables))
 
     with tf.GradientTape() as tape:
-        loss3 = compute_discriminator_loss_single(generator_b, discriminator_b, x_b, noise)
-    gradients = tape.gradient(loss3, discriminator_b.trainable_variables)
+        loss2 = compute_discriminator_loss_single(generator_b, discriminator_b, x_b, noise)
+    gradients = tape.gradient(loss2, discriminator_b.trainable_variables)
     optimizer_d.apply_gradients(zip(gradients, discriminator_b.trainable_variables))
 
     # Train G1 and G2 + E1 and E2
     noise = tf.random.normal([64, 100])
 
     with tf.GradientTape() as tape:
-        loss = compute_generator_loss_single(generator_a, discriminator_a, noise)
-    gradients = tape.gradient(loss, generator_a.trainable_variables)
+        loss3 = compute_generator_loss_single(generator_a, discriminator_a, noise)
+    gradients = tape.gradient(loss3, generator_a.trainable_variables)
     optimizer_g.apply_gradients(zip(gradients, generator_a.trainable_variables))
 
-    '''
     with tf.GradientTape() as tape:
-        loss = compute_encoder_loss(generator_a, generator_b, encoder_a, encoder_b, noise)
-    gradients = tape.gradient(loss, encoder_a.trainable_variables)
+        loss4 = compute_encoder_loss(generator_a, generator_b, encoder_a, encoder_b, noise)
+    gradients = tape.gradient(loss4, encoder_a.trainable_variables)
     optimizer_g.apply_gradients(zip(gradients, encoder_a.trainable_variables))
-    '''
 
     with tf.GradientTape() as tape:
-        loss1 = compute_generator_loss_single(generator_b, discriminator_b, noise)
-    gradients = tape.gradient(loss1, generator_b.trainable_variables)
+        loss5 = compute_generator_loss_single(generator_b, discriminator_b, noise)
+    gradients = tape.gradient(loss5, generator_b.trainable_variables)
     optimizer_g.apply_gradients(zip(gradients, generator_b.trainable_variables))
 
-    '''
     with tf.GradientTape() as tape:
-        loss = compute_encoder_loss(generator_a, generator_b, encoder_a, encoder_b, noise)
-    gradients = tape.gradient(loss, encoder_b.trainable_variables)
+        loss6 = compute_encoder_loss(generator_a, generator_b, encoder_a, encoder_b, noise)
+    gradients = tape.gradient(loss6, encoder_b.trainable_variables)
     optimizer_g.apply_gradients(zip(gradients, encoder_b.trainable_variables))
-    '''
 
-    return loss, loss1, loss2, loss3
+    return loss1, loss2, loss3, loss4, loss5, loss6
 
 
 def sample_images(g1, g2, epoch, seed, dir):
@@ -303,8 +299,8 @@ z = tf.random.normal([8, 100])
 for i in range(10000):
     images1 = next(it)
     images2 = next(it1)
-    l1, l2, l3, l4 = compute_apply_gradients(gen_a, gen_b, disc_a, disc_b, encoder_a, encoder_b, images1, images2)
-    print("iteration: " + str(i) + " \t g1: " + str(l1.numpy()) + " \t g2: " + str (l2.numpy()) + " d1: " + str(l3.numpy())+ " d2: " + str(l4.numpy()))
+    l1, l2, l3, l4, l5, l6 = compute_apply_gradients(gen_a, gen_b, disc_a, disc_b, encoder_a, encoder_b, images1, images2)
+    print("iteration: " + str(i) + " \t D1: " + str(l1.numpy()) + " \t D2: " + str (l2.numpy()) + " G1: " + str(l3.numpy())+ " G2: " + str(l5.numpy()) + " E1: " + str(l5.numpy())+ " E2: " + str(l6.numpy()))
     if i % args.sample_itr == 0:
         sample_images(gen_a, gen_b, i, z, args.dir)
 

@@ -4,9 +4,9 @@ import tensorflow as tf
 import time
 import numpy as np
 import os
-import Utils as u
 import Penalties as p
 import Losses as l
+import Nets as n
 
 
 class GANTrainer(object):

@@ -19,10 +19,62 @@ class ClipConstraint(tf.keras.constraints.Constraint):
     def get_config(self):
         return {'clip_value': self.clip_value}
 
+
 init = tf.keras.initializers.RandomNormal(stddev=0.02)
 init = 'glorot_uniform'
 #dcgan without batchnorm in disc (wgan, wgan-gp)
 bn_mom = 0.99
+
+
+def encoder1(args):
+    input_dim = args.dataset_dim[1]
+    channels = args.dataset_dim[3]
+    model = keras.Sequential()
+
+    # normal
+    model.add(layers.Conv2D(64, (3, 3), padding='same', input_shape=[input_dim, input_dim, channels], kernel_initializer=init))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # downsample
+    model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same', kernel_initializer=init))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # downsample
+    model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same', kernel_initializer=init))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # downsample
+    model.add(layers.Conv2D(256, (3, 3), strides=(2, 2), padding='same', kernel_initializer=init))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # classifier
+    model.add(layers.Flatten())
+    model.add(layers.Dropout(0.4))
+    model.add(layers.Dense(args.noise_dim, kernel_initializer=init))
+    # compile model
+    return model
+
+
+def encoder2(args):
+    input_dim = args.dataset_dim[1]
+    channels = args.dataset_dim[3]
+    model = keras.Sequential()
+
+    # normal
+    model.add(layers.Conv2D(64, (3, 3), padding='same', input_shape=[input_dim, input_dim, channels], kernel_initializer=init))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # downsample
+    model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same', kernel_initializer=init))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # downsample
+    model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same', kernel_initializer=init))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # downsample
+    model.add(layers.Conv2D(256, (3, 3), strides=(2, 2), padding='same', kernel_initializer=init))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # classifier
+    model.add(layers.Flatten())
+    model.add(layers.Dropout(0.4))
+    model.add(layers.Dense(args.noise_dim, kernel_initializer=init))
+    # compile model
+    return model
+
 
 
 # 32x32
