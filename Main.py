@@ -54,21 +54,22 @@ args = parser.parse_args()
 
 # Debugging
 #args.dataset = 'mnist'
-#args.gan_type = "cogan"
-#args.loss = 'wgan'
-#args.label_smooth=True
+args.gan_type = "cogan"
+args.loss = 'ce'
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'weight'
-#args.scale_data = 64
+args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
+args.g_arch = 'digit'
+args.d_arch = 'digit'
+args.cogan_data = 'mnist2edge'
+# args.batch_size = 64
 #args.epochs = 2
-#args.disc_iters = 5
-#args.images_while_training = 10
-#args.limit_dataset = True
-#args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-#args.g_arch = 'digit'
-#args.d_arch = 'digit'
-#args.cogan_data = 'mnist2edge'
-#args.batch_size = 64
+# args.disc_iters = 5
+# args.images_while_training = 10
+# args.limit_dataset = True
+# #args.scale_data = 64
+#args.label_smooth=True
+
 
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
 #o2i.test_trunc_trick(args)

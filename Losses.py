@@ -33,43 +33,26 @@ def recon_criterion(input, target):
     return tf.math.reduce_mean(tf.math.abs(input - target))
 
 
-def encoder_loss(generator_a, generator_b, encoder_a, encoder_b, noise):
-    # generate
-    x_a = generator_a(noise)
-    x_b = generator_b(noise)
-    # encode (within domain)
-    latent_recon_x_a = encoder_a.encode(x_a)
-    latent_recon_x_b = encoder_b.encode(x_b)
-    # encode (cross domain)
-    latent_recon_x_ba = encoder_a.encode(x_b)
-    latent_recon_x_ab = encoder_b.encode(x_a)
-    # generate again
-    x_ba = generator_a(latent_recon_x_a)
-    x_ab = generator_b(latent_recon_x_b)
+def encoder_loss(generator, encoder, noise):
+    # generate image
+    x = generator(noise)
+
+    # encode image to latent code (within domain)
+    noise_recon = encoder(x)
+
+    # generate again (should be a copy of x)
+    x_recon = generator(noise_recon)
+
+    # encode image to latent code (cross domain)
+    #latent_recon_x_ab = encoder.encode(x)
+
     # encode again
-    latent_recon_x_aba = encoder_a.encode(x_ba)
-    latent_recon_x_bab = encoder_b.encode(x_ab)
+    #noise_recon_cyclic = encoder.encode(x_recon)
 
     # reconstruction loss
-    img_recon_a = recon_criterion(x_ba, x_a)
-    img_recon_b = recon_criterion(x_ab, x_b)
-    latent_recon_a = recon_criterion(latent_recon_x_a, noise)
-    latent_recon_b = recon_criterion(latent_recon_x_b, noise)
-
-    # questionable
-    latent_recon_a_cross = recon_criterion(latent_recon_x_ba, noise)
-    latent_recon_b_cross = recon_criterion(latent_recon_x_ab, noise)
-    latent_cycrecon_aba = recon_criterion(latent_recon_x_aba, noise)
-    latent_cycrecon_bab = recon_criterion(latent_recon_x_bab, noise)
-
-    total_loss = img_recon_a + \
-                 img_recon_b + \
-                 latent_recon_a + \
-                 latent_recon_b + \
-                 latent_recon_a_cross + \
-                 latent_recon_b_cross + \
-                 latent_cycrecon_aba + \
-                 latent_cycrecon_bab
+    img_recon_a = recon_criterion(x_recon, x)
+    latent_recon_a = recon_criterion(noise_recon, noise)
+    total_loss = img_recon_a + latent_recon_a
 
     return total_loss
 
