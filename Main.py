@@ -54,14 +54,14 @@ args = parser.parse_args()
 
 # Debugging
 #args.dataset = 'mnist'
-args.gan_type = "cogan"
-args.loss = 'ce'
+#args.gan_type = "cogan"
+#args.loss = 'ce'
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'weight'
-args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-args.g_arch = 'digit'
-args.d_arch = 'digit'
-args.cogan_data = 'mnist2edge'
+#args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
+#args.g_arch = 'face'
+#args.d_arch = 'face'
+#args.cogan_data = 'Eyeglasses'
 # args.batch_size = 64
 #args.epochs = 2
 # args.disc_iters = 5

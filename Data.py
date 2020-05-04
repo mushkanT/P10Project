@@ -158,16 +158,19 @@ def select_dataset_cogan(args):
         dataset = np.array(dataset)
         X1 = dataset[mask]
         X2 = dataset[np.invert(mask)]
+        X1_num_examples = len(X1)
+        X2_num_examples = len(X2)
 
         #X1 = X1.reshape(X1.shape[0], X1.shape[1], X1.shape[2], X1.shape[3]).astype('float32')
         #X2 = X2.reshape(X2.shape[0], X2.shape[1], X2.shape[2], X2.shape[3]).astype('float32')
 
-        X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(len(X1)).repeat().batch(args.batch_size)
-        X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(X2)).repeat().shuffle(len(X2)).batch(args.batch_size)
+        X1 = tf.data.Dataset.from_tensor_slices(X1)
+        X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(X2))
 
-        X1 = X1.map(format_example_to128)
-        X2 = X2.map(format_example_to128)
+        X1 = X1.map(format_example_to128).shuffle(X1_num_examples).repeat().batch(args.batch_size)
+        X2 = X2.map(format_example_to128).shuffle(X2_num_examples).repeat().batch(args.batch_size)
         shape = X2.element_spec.shape
+
     else:
         raise NotImplementedError()
 
@@ -224,7 +227,7 @@ def format_example_to128(image):
     # Normalize the pixel values
     image = (image - 127.5) / 127.5
     # Resize the image
-    image = tf.image.resize(image, (128, 128))
+    image = tf.image.resize(image, [128, 128])
     return image
 
 

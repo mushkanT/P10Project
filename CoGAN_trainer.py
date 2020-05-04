@@ -114,6 +114,20 @@ class GANTrainer(object):
             args.gen_optimizer.apply_gradients(zip(gradients_of_encoder1, self.e1.trainable_variables))
 
             with tf.GradientTape() as tape, tf.GradientTape() as tape1:
+                # Adv loss
+                gen_fake = self.g1(noise, training=True)
+                disc_fake = self.d1(gen_fake, training=True)
+                g1_loss = g_loss_fn(disc_fake)
+                penalty1 = self.genPenal.calc_penalty(self.g1, self.g2, 21, args)
+                g1_loss = g1_loss + (penalty1 * args.penalty_weight_g)
+
+                # Recon loss
+                e1_loss = e_loss_fn(self.g2, self.e1, noise)
+                total_loss = g1_loss + e1_loss
+            gradients_of_generator2 = tape.gradient(total_loss, self.g1.trainable_variables+self.e1.trainable_variables)
+
+
+            with tf.GradientTape() as tape, tf.GradientTape() as tape1:
                 gen_fake = self.g2(noise, training=True)
                 disc_fake = self.d2(gen_fake, training=True)
                 g2_loss = g_loss_fn(disc_fake)

@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 
 
 class DiscriminatorPenalties:
@@ -16,7 +17,7 @@ class DiscriminatorPenalties:
 
         gradients = gTape.gradient(disc_interpolates, interpolated_images)
         gradients += 1e-8
-        slopes = tf.sqrt(tf.math.reduce_sum(tf.math.square(gradients), 1))
+        slopes = tf.sqrt(tf.math.reduce_sum(tf.math.square(gradients), axis=np.arange(1, len(gradients.shape))))
         gradient_penalty = tf.reduce_mean((slopes - 1.) ** 2)
 
         return gradient_penalty

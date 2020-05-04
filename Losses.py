@@ -29,6 +29,7 @@ def wasserstein_disc(fake_output, real_output):
     return D_loss
 
 
+# Mean absolute error (element wise)
 def recon_criterion(input, target):
     return tf.math.reduce_mean(tf.math.abs(input - target))
 
@@ -42,9 +43,6 @@ def encoder_loss(generator, encoder, noise):
 
     # generate again (should be a copy of x)
     x_recon = generator(noise_recon)
-
-    # encode image to latent code (cross domain)
-    #latent_recon_x_ab = encoder.encode(x)
 
     # encode again
     #noise_recon_cyclic = encoder.encode(x_recon)
