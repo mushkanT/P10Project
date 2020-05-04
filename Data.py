@@ -129,8 +129,8 @@ def select_dataset_cogan(args):
         shape = (None, 256, 256, 3)
 
     elif args.cogan_data in ['Eyeglasses']:
-        #lines = [line.rstrip() for line in open('C:/Users/marku/Desktop/list_attr_celeba.txt', 'r')]
-        lines = [line.rstrip() for line in open('/user/student.aau.dk/mjuuln15/list_attr_celeba.txt', 'r')]
+        lines = [line.rstrip() for line in open('C:/Users/marku/Desktop/list_attr_celeba.txt', 'r')]
+        #lines = [line.rstrip() for line in open('/user/student.aau.dk/mjuuln15/list_attr_celeba.txt', 'r')]
         all_attr_names = lines[1].split()
         attr2idx = {}
         idx2attr = {}
@@ -140,7 +140,7 @@ def select_dataset_cogan(args):
             attr2idx[attr_name] = i
             idx2attr[i] = attr_name
         lines = lines[2:]
-        for i, line in enumerate(lines):
+        for i, line in enumerate(lines[:3700]):
             split = line.split()
             values = split[1:]
             for attr_name in ['Eyeglasses']:
@@ -148,8 +148,8 @@ def select_dataset_cogan(args):
                 label = (values[idx] == '1')
             mask.append(label)
 
-        #images = glob.glob('C:/Users/marku/Desktop/img_align_celeba/*.jpg')
-        images = glob.glob('/user/student.aau.dk/mjuuln15/img_align_celeba/*.jpg')
+        images = glob.glob('C:/Users/marku/Desktop/img_align_celeba/*.jpg')
+        #images = glob.glob('/user/student.aau.dk/mjuuln15/img_align_celeba/*.jpg')
         for i in images:
             image = plt.imread(i)
             dataset.append(image)
@@ -158,15 +158,14 @@ def select_dataset_cogan(args):
         dataset = np.array(dataset)
         X1 = dataset[mask]
         X2 = dataset[np.invert(mask)]
+        X1_num_examples = len(X1)
+        X2_num_examples = len(X2)
 
-        #X1 = X1.reshape(X1.shape[0], X1.shape[1], X1.shape[2], X1.shape[3]).astype('float32')
-        #X2 = X2.reshape(X2.shape[0], X2.shape[1], X2.shape[2], X2.shape[3]).astype('float32')
+        X1 = tf.data.Dataset.from_tensor_slices(X1)
+        X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(X2))
 
-        X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(len(X1)).repeat().batch(args.batch_size)
-        X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(X2)).repeat().shuffle(len(X2)).batch(args.batch_size)
-
-        X1 = X1.map(format_example_to128)
-        X2 = X2.map(format_example_to128)
+        X1 = X1.map(format_example_to128).shuffle(X1_num_examples).repeat().batch(args.batch_size)
+        X2 = X2.map(format_example_to128).shuffle(X2_num_examples).repeat().batch(args.batch_size)
         shape = X2.element_spec.shape
     else:
         raise NotImplementedError()
@@ -224,7 +223,8 @@ def format_example_to128(image):
     # Normalize the pixel values
     image = (image - 127.5) / 127.5
     # Resize the image
-    image = tf.image.resize(image, (128, 128))
+    image = tf.image.resize(image, [132,132])
+    image = tf.image.random_crop(image, [128,128,3])
     return image
 
 

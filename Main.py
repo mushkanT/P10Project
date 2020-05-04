@@ -53,22 +53,23 @@ parser.add_argument('--cogan_data',     type=str,           default='mnist2edge'
 args = parser.parse_args()
 
 # Debugging
-#args.dataset = 'mnist'
+
 #args.gan_type = "cogan"
-#args.loss = 'wgan'
-#args.label_smooth=True
+#args.loss = 'ce'
+#args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
+#args.g_arch = 'face'
+#args.d_arch = 'face'
+#args.batch_size = 32
+#args.cogan_data = 'Eyeglasses'
+#args.dataset = 'mnist'
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'weight'
-#args.scale_data = 64
+#args.label_smooth=True
 #args.epochs = 2
 #args.disc_iters = 5
 #args.images_while_training = 10
 #args.limit_dataset = True
-#args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-#args.g_arch = 'digit'
-#args.d_arch = 'digit'
-#args.cogan_data = 'mnist2edge'
-#args.batch_size = 32
+
 
 #o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
 #o2i.test_trunc_trick(args)
