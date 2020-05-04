@@ -394,7 +394,7 @@ def cogan_discriminators_digit(args):
     model.add(tf.keras.layers.Flatten())
     model.add(tf.keras.layers.Dense(500))
     model.add(tf.keras.layers.PReLU())
-    model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+    model.add(tf.keras.layers.Dense(1))
 
     output1 = model(x1)
     output2 = model(x2)
@@ -463,7 +463,7 @@ def cogan_discriminators_digit_noshare(args):
     model1 = tf.keras.layers.Flatten()(model1)
     model1 = tf.keras.layers.Dense(500)(model1)
     model1 = tf.keras.layers.PReLU()(model1)
-    model1 = tf.keras.layers.Dense(1, activation='sigmoid')(model1)
+    model1 = tf.keras.layers.Dense(1)(model1)
 
     # Discriminator 2
     img2 = tf.keras.layers.Input(shape=img_shape)
@@ -475,7 +475,7 @@ def cogan_discriminators_digit_noshare(args):
     model2 = tf.keras.layers.Flatten()(model2)
     model2 = tf.keras.layers.Dense(500)(model2)
     model2 = tf.keras.layers.PReLU()(model2)
-    model2 = tf.keras.layers.Dense(1, activation='sigmoid')(model2)
+    model2 = tf.keras.layers.Dense(1)(model2)
 
     return keras.Model(img1, model1), keras.Model(img2, model2)
 
@@ -538,7 +538,7 @@ def cogan_discriminators_rotate(args):
     # Shared discriminator layers
     model = keras.Sequential()
     model.add(tf.keras.layers.Flatten(input_shape=(8,8,500)))
-    model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+    model.add(tf.keras.layers.Dense(1))
 
     validity1 = model(model1)
     validity2 = model(model2)
@@ -634,7 +634,7 @@ def cogan_discriminators_faces(args):
     model.add(tf.keras.layers.Dense(2048))
     model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU())
-    model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+    model.add(tf.keras.layers.Dense(1))
 
     output1 = model(x1)
     output2 = model(x2)
@@ -724,7 +724,7 @@ def cogan_discriminators_256(args):
     model.add(tf.keras.layers.Dense(2048))
     model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU())
-    model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+    model.add(tf.keras.layers.Dense(1))
 
     output1 = model(x1)
     output2 = model(x2)

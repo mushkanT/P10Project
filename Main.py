@@ -1,6 +1,5 @@
 import tensorflow as tf
 import numpy as np
-import Nets as nets
 import Data as dt
 import GAN_trainer as gan_t
 import CoGAN_trainer as cogan_t
@@ -8,8 +7,7 @@ import time
 import Utils as u
 import argparse
 import os.path
-#import o2img as o2i
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser()
 
@@ -55,12 +53,12 @@ args = parser.parse_args()
 # Debugging
 
 #args.gan_type = "cogan"
-#args.loss = 'ce'
+#args.loss = 'wgan'
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-#args.g_arch = 'face'
-#args.d_arch = 'face'
+#args.g_arch = 'digit'
+#args.d_arch = 'digit'
 #args.batch_size = 32
-#args.cogan_data = 'Eyeglasses'
+#args.cogan_data = 'mnist2edge'
 #args.dataset = 'mnist'
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'weight'
@@ -71,9 +69,6 @@ args = parser.parse_args()
 #args.limit_dataset = True
 
 
-#o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
-#o2i.test_trunc_trick(args)
-
 # We will reuse this seed overtime for visualization
 args.seed = tf.random.normal([args.num_samples_to_gen, args.noise_dim])
 #args.seed = np.random.normal(0, 1, args.num_samples_to_gen, 100)
@@ -81,6 +76,16 @@ args.seed = tf.random.normal([args.num_samples_to_gen, args.noise_dim])
 # Set random seeds for reproducability
 tf.random.set_seed(2020)
 np.random.seed(2020)
+
+
+
+#u.latent_walk('C:/users/marku/Desktop/gan_training_output/relax_weight_sharing/26508/generator1','C:/Users/marku/Desktop/gan_training_output/relax_weight_sharing/26508/generator2',100,3)
+
+
+
+
+
+
 
 # GEN optimiser
 if args.optim_g == "adam":
