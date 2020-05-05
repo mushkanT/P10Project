@@ -52,14 +52,14 @@ args = parser.parse_args()
 
 # Debugging
 
-#args.gan_type = "cogan"
-#args.loss = 'wgan'
+#args.gan_type = "128"
+#args.loss = 'ce'
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
 #args.g_arch = 'digit'
 #args.d_arch = 'digit'
 #args.batch_size = 32
 #args.cogan_data = 'mnist2edge'
-#args.dataset = 'mnist'
+#args.dataset = 'celeba'
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'weight'
 #args.label_smooth=True
@@ -77,15 +77,7 @@ args.seed = tf.random.normal([args.num_samples_to_gen, args.noise_dim])
 tf.random.set_seed(2020)
 np.random.seed(2020)
 
-
-
 #u.latent_walk('C:/users/marku/Desktop/gan_training_output/relax_weight_sharing/26508/generator1','C:/Users/marku/Desktop/gan_training_output/relax_weight_sharing/26508/generator2',100,3)
-
-
-
-
-
-
 
 # GEN optimiser
 if args.optim_g == "adam":
