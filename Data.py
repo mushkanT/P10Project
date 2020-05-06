@@ -129,8 +129,8 @@ def select_dataset_cogan(args):
         shape = (None, 256, 256, 3)
 
     elif args.cogan_data in ['Eyeglasses']:
-        lines = [line.rstrip() for line in open('C:/Users/marku/Desktop/list_attr_celeba.txt', 'r')]
-        #lines = [line.rstrip() for line in open('/user/student.aau.dk/mjuuln15/list_attr_celeba.txt', 'r')]
+        #lines = [line.rstrip() for line in open('C:/Users/marku/Desktop/list_attr_celeba.txt', 'r')]
+        lines = [line.rstrip() for line in open('/user/student.aau.dk/mjuuln15/list_attr_celeba.txt', 'r')]
         all_attr_names = lines[1].split()
         attr2idx = {}
         idx2attr = {}
@@ -148,8 +148,8 @@ def select_dataset_cogan(args):
                 label = (values[idx] == '1')
             mask.append(label)
 
-        images = glob.glob('C:/Users/marku/Desktop/img_align_celeba/*.jpg')
-        #images = glob.glob('/user/student.aau.dk/mjuuln15/img_align_celeba/*.jpg')
+        #images = glob.glob('C:/Users/marku/Desktop/img_align_celeba/*.jpg')
+        images = glob.glob('/user/student.aau.dk/mjuuln15/img_align_celeba/*.jpg')
         for i in images:
             image = plt.imread(i)
             dataset.append(image)
@@ -223,8 +223,8 @@ def format_example_to128(image):
     # Normalize the pixel values
     image = (image - 127.5) / 127.5
     # Resize the image
-    image = tf.image.resize(image, [128,128])
-    #image = tf.image.random_crop(image, [128,128,3])
+    image = tf.image.resize(image, [132,132])
+    image = tf.image.random_crop(image, [132, 132, 3])
     return image
 
 
@@ -285,60 +285,6 @@ def createToyDataRing(n_mixtures=10, radius=3, Ntrain=5120, std=0.05): #50176
 
     dat = tf.convert_to_tensor(sample_points)
     return dat
-
-
-def mnist(input_scale, restrict=False):
-    (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
-    if restrict:
-        selected_ix = train_labels == 7
-        selected_ix_test = test_labels == 7
-        train_images = train_images[selected_ix]
-        test_images = test_images[selected_ix_test]
-        train_images = np.concatenate([train_images, test_images])
-    train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
-    # Transform from 28x28 to 32x32
-    padding = tf.constant([[0,0], [2,2], [2,2], [0,0]])
-    train_images = tf.pad(train_images, padding, "CONSTANT")
-    if input_scale:
-        train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
-    else:
-        train_images = train_images / 255 # Normalize the images to [0, 1]    
-    return train_images
-
-
-def mnist_f(input_scale, restrict=False):
-    (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.fashion_mnist.load_data()
-    if restrict:
-        selected_ix = train_labels == 7
-        selected_ix_test = test_labels == 7
-        train_images = train_images[selected_ix]
-        test_images = test_images[selected_ix_test]
-        train_images = np.concatenate([train_images, test_images])
-    train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
-    # Transform from 28x28 to 32x32
-    padding = tf.constant([[0,0], [2,2], [2,2], [0,0]])
-    train_images = tf.pad(train_images, padding, "CONSTANT")
-    if input_scale:
-        train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
-    else:
-        train_images = train_images / 255 # Normalize the images to [0, 1]
-    return train_images
-
-
-def cifar10(input_scale, restrict=False):
-    (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.cifar10.load_data()
-    if restrict:
-        train_mask = [y[0] == 8 for y in train_labels]
-        test_mask = [y[0] == 8 for y in test_labels]
-        train_images = train_images[train_mask]
-        test_images = test_images[test_mask]
-    train_images = np.concatenate([train_images, test_images])
-    train_images.astype('float32')
-    if input_scale:
-        train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
-    else:
-        train_images = train_images / 255 # Normalize the images to [0, 1]
-    return train_images
 
 
 # CoGAN data loaders

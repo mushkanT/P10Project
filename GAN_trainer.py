@@ -29,31 +29,32 @@ class GANTrainer(object):
         self.g_loss_fn = None
 
     def train_discriminator(self, real_data, args):
-
-        noise = tf.random.normal(shape=[args.batch_size, args.noise_dim])
+        noise = tf.random.normal(shape=(args.batch_size, args.noise_dim))
         generated_images = self.generator(noise, training=True)
-        # comb = tf.concat([generated_images, real_data], axis=0)
+        comb_lab = tf.concat([tf.zeros((32, 1)), tf.ones((32, 1))], 0)
+        comb_img = tf.concat([generated_images, real_data], 0)
 
         with tf.GradientTape() as disc_tape:
             fake_output = self.discriminator(generated_images, training=True)
             real_output = self.discriminator(real_data, training=True)
+            #comb_output = self.discriminator(comb_img)
 
             disc_loss = self.d_loss_fn(fake_output, real_output)
-            gp1 = self.discPenal.calc_penalty(generated_images, real_data, self.discriminator, args)  # if loss is not wgan-gp then gp=0
-            disc_loss = disc_loss + (gp1 * args.penalty_weight_d)
+            #disc_loss = l.k_cross_entropy(comb_lab, comb_output)
+            gp = self.discPenal.calc_penalty(generated_images, real_data, self.discriminator, args)  # if loss is not wgan-gp then gp=0
+            disc_loss = disc_loss + (gp * args.penalty_weight_d)
         # Apply gradients
         gradients_of_discriminator = disc_tape.gradient(disc_loss, self.discriminator.trainable_variables)
         args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.discriminator.trainable_variables))
 
         # Clip weights if wgan loss function
         if args.loss == "wgan":
-            for i, var in enumerate(self.discriminator.trainable_variables):
-                self.discriminator.trainable_variables[i].assign(tf.clip_by_value(var, -args.clip, args.clip))
-
+            for var in self.discriminator.trainable_variables:
+                var.assign(tf.clip_by_value(var, -args.clip, args.clip))
         return disc_loss
 
     def train_generator(self, args):
-        noise = tf.random.normal([args.batch_size, args.noise_dim])
+        noise = tf.random.normal(shape=(args.batch_size, args.noise_dim))
 
         with tf.GradientTape() as gen_tape:
             generated_images = self.generator(noise, training=True)
@@ -66,7 +67,6 @@ class GANTrainer(object):
         return gen_loss
 
     def train(self, args):
-
         if args.dataset != 'lsun':
             it = iter(self.dataset)
         else:
@@ -79,15 +79,12 @@ class GANTrainer(object):
             start = time.time()
             disc_iters_loss = []
 
-            # take x steps with critic before training generator
+            # take x steps with disc before training generator
             for i in range(args.disc_iters):
                 if args.dataset in ['celeba', 'lsun']:
                     batch = next(it)
                 else:
                     batch = next(it)[0]
-
-                if isinstance(batch, np.ndarray):
-                    batch = tf.convert_to_tensor(batch)
 
                 d_loss = self.train_discriminator(batch, args)
                 disc_iters_loss.append(d_loss)

@@ -64,7 +64,7 @@ args = parser.parse_args()
 #args.gen_penalty = 'weight'
 #args.label_smooth=True
 #args.epochs = 2
-#args.disc_iters = 5
+#args.disc_iters = 1
 #args.images_while_training = 10
 #args.limit_dataset = True
 
