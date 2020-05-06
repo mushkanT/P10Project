@@ -27,7 +27,7 @@ class GANTrainer(object):
 
 
     def train(self, args):
-        self.e1, self.e2 = n.encoder1(args), n.encoder2(args)
+        self.encoder = n.encoder(args)
         it1 = iter(self.X1)
         it2 = iter(self.X2)
 
@@ -96,52 +96,47 @@ class GANTrainer(object):
             # Sample noise as generator input
             noise = tf.random.normal([args.batch_size, args.noise_dim])
 
-            with tf.GradientTape() as tape, tf.GradientTape() as tape1:
+            with tf.GradientTape() as tape1, tf.GradientTape() as tape2, tf.GradientTape() as tape3:
                 # Adv loss
-                gen_fake = self.g1(noise, training=True)
-                disc_fake = self.d1(gen_fake, training=True)
-                g1_loss = g_loss_fn(disc_fake)
-                penalty1 = self.genPenal.calc_penalty(self.g1, self.g2, 21, args)
-                g1_loss = g1_loss + (penalty1 * args.penalty_weight_g)
+                gen1_fake = self.g1(noise, training=True)
+                disc1_fake = self.d1(gen1_fake, training=True)
+                g1_loss = g_loss_fn(disc1_fake)
+
+                gen2_fake = self.g2(noise, training=True)
+                disc2_fake = self.d2(gen2_fake, training=True)
+                g2_loss = g_loss_fn(disc2_fake)
+
+                penalty = self.genPenal.calc_penalty(self.g1, self.g2, 21, args)
+                g1_loss = g1_loss + (penalty * args.penalty_weight_g)
+                g2_loss = g2_loss + (penalty * args.penalty_weight_g)
 
                 # Recon loss
-                e1_loss = e_loss_fn(self.g2, self.e1, noise)
-                total_loss = g1_loss + e1_loss
+                noise_recon1 = self.encoder(gen1_fake)
+                noise_recon2 = self.encoder(gen2_fake)
 
-            gradients_of_generator1 = tape.gradient(total_loss, self.g1.trainable_variables)
+                fake_recon1 = self.g1(noise_recon1, training=False)
+                fake_recon2 = self.g2(noise_recon2, training=False)
+
+                noise_recon_loss1 = l.recon_criterion(noise_recon1, noise)
+                noise_recon_loss2 = l.recon_criterion(noise_recon2, noise)
+
+                fake_recon_loss1 = l.recon_criterion(fake_recon1, gen1_fake)
+                fake_recon_loss2 = l.recon_criterion(fake_recon2, gen2_fake)
+
+                total_recon_loss = noise_recon_loss1 + noise_recon_loss2
+
+                g1_loss = g1_loss + total_recon_loss
+                g2_loss = g2_loss + total_recon_loss
+
+            gradients_of_generator1 = tape1.gradient(g1_loss, self.g1.trainable_variables)
             args.gen_optimizer.apply_gradients(zip(gradients_of_generator1, self.g1.trainable_variables))
-            gradients_of_encoder1 = tape1.gradient(total_loss, self.e1.trainable_variables)
-            args.gen_optimizer.apply_gradients(zip(gradients_of_encoder1, self.e1.trainable_variables))
 
-            with tf.GradientTape() as tape, tf.GradientTape() as tape1:
-                # Adv loss
-                gen_fake = self.g1(noise, training=True)
-                disc_fake = self.d1(gen_fake, training=True)
-                g1_loss = g_loss_fn(disc_fake)
-                penalty1 = self.genPenal.calc_penalty(self.g1, self.g2, 21, args)
-                g1_loss = g1_loss + (penalty1 * args.penalty_weight_g)
-
-                # Recon loss
-                e1_loss = e_loss_fn(self.g2, self.e1, noise)
-                total_loss = g1_loss + e1_loss
-            gradients_of_generator2 = tape.gradient(total_loss, self.g1.trainable_variables+self.e1.trainable_variables)
-
-
-            with tf.GradientTape() as tape, tf.GradientTape() as tape1:
-                gen_fake = self.g2(noise, training=True)
-                disc_fake = self.d2(gen_fake, training=True)
-                g2_loss = g_loss_fn(disc_fake)
-                penalty2 = self.genPenal.calc_penalty(self.g1, self.g2, 21, args)
-                g2_loss = g2_loss + (penalty2 * args.penalty_weight_g)
-
-                # Recon loss
-                e1_loss = e_loss_fn(self.g2, self.e2, noise)
-                total_loss = g1_loss + e1_loss
-
-            gradients_of_generator2 = tape.gradient(total_loss, self.g2.trainable_variables)
+            gradients_of_generator2 = tape2.gradient(g2_loss, self.g2.trainable_variables)
             args.gen_optimizer.apply_gradients(zip(gradients_of_generator2, self.g2.trainable_variables))
-            gradients_of_encoder2 = tape1.gradient(total_loss, self.e2.trainable_variables)
-            args.gen_optimizer.apply_gradients(zip(gradients_of_encoder2, self.e2.trainable_variables))
+
+            gradients_of_encoder = tape3.gradient(total_recon_loss, self.encoder.trainable_variables)
+            args.gen_optimizer.apply_gradients(zip(gradients_of_encoder, self.encoder.trainable_variables))
+
             # Compute averages of generator gradients and use those for updates of shared weights
             '''
             GoGs = []

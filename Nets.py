@@ -26,32 +26,7 @@ init = 'glorot_uniform'
 bn_mom = 0.99
 
 
-def encoder1(args):
-    input_dim = args.dataset_dim[1]
-    channels = args.dataset_dim[3]
-    model = keras.Sequential()
-
-    # normal
-    model.add(layers.Conv2D(64, (3, 3), padding='same', input_shape=[input_dim, input_dim, channels], kernel_initializer=init))
-    model.add(layers.LeakyReLU(alpha=0.2))
-    # downsample
-    model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same', kernel_initializer=init))
-    model.add(layers.LeakyReLU(alpha=0.2))
-    # downsample
-    model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same', kernel_initializer=init))
-    model.add(layers.LeakyReLU(alpha=0.2))
-    # downsample
-    model.add(layers.Conv2D(256, (3, 3), strides=(2, 2), padding='same', kernel_initializer=init))
-    model.add(layers.LeakyReLU(alpha=0.2))
-    # classifier
-    model.add(layers.Flatten())
-    model.add(layers.Dropout(0.4))
-    model.add(layers.Dense(args.noise_dim, kernel_initializer=init))
-    # compile model
-    return model
-
-
-def encoder2(args):
+def encoder(args):
     input_dim = args.dataset_dim[1]
     channels = args.dataset_dim[3]
     model = keras.Sequential()
@@ -526,7 +501,7 @@ def cogan_discriminators_digit_noshare(args):
     model2 = tf.keras.layers.Flatten()(model2)
     model2 = tf.keras.layers.Dense(500)(model2)
     model2 = tf.keras.layers.PReLU()(model2)
-    model2 = tf.keras.layers.Dense(1, activation='sigmoid')(model2)
+    model2 = tf.keras.layers.Dense(1)(model2)
 
     return keras.Model(img1, model1), keras.Model(img2, model2)
 
