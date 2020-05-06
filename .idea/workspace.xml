@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="220b69cb-c454-4d63-b603-ea792d470aba" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CoGAN_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/CoGAN_trainer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Losses.py" beforeDir="false" afterPath="$PROJECT_DIR$/Losses.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Nets.py" beforeDir="false" afterPath="$PROJECT_DIR$/Nets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GAN_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/GAN_trainer.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -198,7 +195,7 @@
       <workItem from="1584435836214" duration="1701000" />
       <workItem from="1588601029480" duration="930000" />
       <workItem from="1588662864815" duration="14591000" />
-      <workItem from="1588751927234" duration="1825000" />
+      <workItem from="1588751927234" duration="2107000" />
     </task>
     <servers />
   </component>
@@ -252,12 +249,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/GAN_trainer.py</url>
-          <line>152</line>
+          <line>151</line>
           <option name="timeStamp" value="637" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/GAN_trainer.py</url>
-          <line>52</line>
+          <line>51</line>
           <option name="timeStamp" value="644" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -284,6 +281,10 @@
           <url>file://$PROJECT_DIR$/Data.py</url>
           <line>169</line>
           <option name="timeStamp" value="696" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/GAN_trainer.py</url>
+          <option name="timeStamp" value="697" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
