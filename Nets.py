@@ -489,7 +489,7 @@ def cogan_discriminators_digit_noshare(args):
     model1 = tf.keras.layers.Flatten()(model1)
     model1 = tf.keras.layers.Dense(500)(model1)
     model1 = tf.keras.layers.PReLU()(model1)
-    model1 = tf.keras.layers.Dense(1, activation='sigmoid')(model1)
+    model1 = tf.keras.layers.Dense(1)(model1)
 
     # Discriminator 2
     img2 = tf.keras.layers.Input(shape=img_shape)
