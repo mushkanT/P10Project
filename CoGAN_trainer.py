@@ -176,7 +176,7 @@ class GANTrainer(object):
             self.hist_g1.append(g1_loss)
             self.hist_g2.append(g2_loss)
 
-            print("%d [D1 loss: %f] [D2 loss: %f] [G1 loss: %f] [G2 loss: %f] [G1 penalty: %f] [G2 penalty: %f]" % (epoch, d1_loss, d2_loss, g1_loss, g2_loss, penalty1, penalty2))
+            print("%d [D1 loss: %f] [D2 loss: %f] [G1 loss: %f] [G2 loss: %f] [G penalty: %f]" % (epoch, d1_loss, d2_loss, g1_loss, g2_loss, penalty))
 
             # If at save interval => save generated image samples
             if epoch % args.images_while_training == 0:
