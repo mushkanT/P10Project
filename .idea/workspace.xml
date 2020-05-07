@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="220b69cb-c454-4d63-b603-ea792d470aba" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="220b69cb-c454-4d63-b603-ea792d470aba" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -164,11 +162,11 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Python.Cycle_consistency" />
       <item itemvalue="Python.Main" />
-      <item itemvalue="Python.mlm_wgan_gp" />
       <item itemvalue="Python.Train" />
       <item itemvalue="Python.cogan" />
-      <item itemvalue="Python.Cycle_consistency" />
+      <item itemvalue="Python.mlm_wgan_gp" />
     </list>
     <recent_temporary>
       <list>
@@ -196,7 +194,7 @@
       <workItem from="1588601029480" duration="930000" />
       <workItem from="1588662864815" duration="14591000" />
       <workItem from="1588751927234" duration="3660000" />
-      <workItem from="1588837272566" duration="1013000" />
+      <workItem from="1588837272566" duration="1645000" />
     </task>
     <servers />
   </component>
@@ -252,11 +250,6 @@
           <url>file://$PROJECT_DIR$/Data.py</url>
           <line>303</line>
           <option name="timeStamp" value="595" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/GAN_trainer.py</url>
-          <line>151</line>
-          <option name="timeStamp" value="637" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/GAN_trainer.py</url>
