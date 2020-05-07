@@ -39,7 +39,6 @@ parser.add_argument('--limit_dataset',  type=bool,          default=False,      
 parser.add_argument('--scale_data',     type=int,           default=0,          help='Scale images in dataset to MxM')
 parser.add_argument('--label_smooth',   type=bool,          default=False,      help='Smooth the labels of the disc from 1 to 0 occasionally')
 parser.add_argument('--input_noise',    type=bool,          default=False,      help='Add gaussian noise to the discriminator inputs')
-parser.add_argument('--input_scale',    type=bool,          default=True,       help='True=-1,1 False=0,1')
 parser.add_argument('--purpose',        type=str,		    default='',		    help='purpose of this experiment')
 parser.add_argument('--grayscale',      type=bool,		    default=False)
 
@@ -52,14 +51,14 @@ args = parser.parse_args()
 
 # Debugging
 
-#args.gan_type = "128"
+#args.gan_type = "cogan"
 #args.loss = 'ce'
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-#args.g_arch = 'digit'
-#args.d_arch = 'digit'
-#args.batch_size = 32
-#args.cogan_data = 'mnist2edge'
-#args.dataset = 'celeba'
+#args.g_arch = '256'
+#args.d_arch = '256'
+#args.batch_size = 16
+#args.cogan_data = 'apple2orange'
+#args.dataset = 'apple2orange'
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'weight'
 #args.label_smooth=True

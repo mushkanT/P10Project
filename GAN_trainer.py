@@ -31,19 +31,13 @@ class GANTrainer(object):
     def train_discriminator(self, real_data, args):
         noise = tf.random.normal(shape=(args.batch_size, args.noise_dim))
         generated_images = self.generator(noise, training=True)
-        comb_lab = tf.concat([tf.zeros((32, 1)), tf.ones((32, 1))], 0)
-        comb_img = tf.concat([generated_images, real_data], 0)
 
         with tf.GradientTape() as disc_tape:
             fake_output = self.discriminator(generated_images, training=True)
             real_output = self.discriminator(real_data, training=True)
-            #comb_output = self.discriminator(comb_img)
-
             disc_loss = self.d_loss_fn(fake_output, real_output)
-            #disc_loss = l.k_cross_entropy(comb_lab, comb_output)
             gp = self.discPenal.calc_penalty(generated_images, real_data, self.discriminator, args)  # if loss is not wgan-gp then gp=0
             disc_loss = disc_loss + (gp * args.penalty_weight_d)
-        # Apply gradients
         gradients_of_discriminator = disc_tape.gradient(disc_loss, self.discriminator.trainable_variables)
         args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.discriminator.trainable_variables))
 
@@ -59,9 +53,7 @@ class GANTrainer(object):
         with tf.GradientTape() as gen_tape:
             generated_images = self.generator(noise, training=True)
             fake_output = self.discriminator(generated_images, training=True)
-
             gen_loss = self.g_loss_fn(fake_output)
-        # Apply gradients
         gradients_of_generator = gen_tape.gradient(gen_loss, self.generator.trainable_variables)
         args.gen_optimizer.apply_gradients(zip(gradients_of_generator, self.generator.trainable_variables))
         return gen_loss

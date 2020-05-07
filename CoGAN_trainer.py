@@ -111,22 +111,6 @@ class GANTrainer(object):
             gradients_of_generator2 = tape.gradient(g2_loss, self.g2.trainable_variables)
             args.gen_optimizer.apply_gradients(zip(gradients_of_generator2, self.g2.trainable_variables))
 
-            # Compute averages of generator gradients and use those for updates of shared weights
-            '''
-            GoGs = []
-            gg1 = []
-            gg2 = []
-            for i in range(8):
-                GoGs.append((gradients_of_generator1[i]+gradients_of_generator2[i])/2)
-            gg1.extend(GoGs)
-            gg1.extend(gradients_of_generator1[8:])
-            gg2.extend(GoGs)
-            gg2.extend(gradients_of_generator2[8:])
-            args.gen_optimizer.apply_gradients(zip(gg1, self.g1.trainable_variables))
-            args.gen_optimizer.apply_gradients(zip(gg2, self.g2.trainable_variables))
-            '''
-
-            # Add time taken for this epoch to full training time (does not count sampling, weight checking as 'training time')
             self.full_training_time += time.time() - start
 
             '''
