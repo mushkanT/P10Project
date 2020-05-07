@@ -29,6 +29,8 @@ class DiscriminatorPenalties:
             return self.wasserstein_gp(fake_data, real_data, discriminator)
         elif args.disc_penalty == 'none':
             return 0
+        else:
+            raise NotImplementedError()
 
 
 class GeneratorPenalties:

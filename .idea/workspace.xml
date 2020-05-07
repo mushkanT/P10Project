@@ -11,7 +11,8 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/P9Project$Main.coverage" NAME="Main Coverage Results" MODIFIED="1587454655981" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/P9Project$Main.coverage" NAME="Main Coverage Results" MODIFIED="1588841596601" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/P9Project$Cycle_consistency.coverage" NAME="Cycle_consistency Coverage Results" MODIFIED="1588334891254" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -61,7 +62,7 @@
       </envs>
       <option name="SDK_HOME" value="D:\Programming\P9Project\venv\Scripts\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
+      <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
@@ -81,11 +82,12 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
+      <option name="SDK_HOME" value="C:\Program Files\Python36\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Sampler.py" />
       <option name="PARAMETERS" value="--model_dir=$USER_HOME$/desktop/experiments/32209/ --out_dir=$USER_HOME$/desktop/samples/ --num_samples=1000" />
@@ -173,6 +175,7 @@
       <list>
         <item itemvalue="Python.Sampler" />
         <item itemvalue="Python.Main" />
+        <item itemvalue="Python.Cycle_consistency" />
         <item itemvalue="Python.cogan" />
         <item itemvalue="Python.Train" />
         <item itemvalue="Python.mlm_wgan_gp" />
@@ -248,13 +251,18 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Data.py</url>
-          <line>272</line>
+          <line>282</line>
           <option name="timeStamp" value="594" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Cycle_consistency.py</url>
+          <line>233</line>
+          <option name="timeStamp" value="680" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Data.py</url>
-          <line>290</line>
-          <option name="timeStamp" value="595" />
+          <line>166</line>
+          <option name="timeStamp" value="696" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/GAN_trainer.py</url>
@@ -290,6 +298,11 @@
           <url>file://$PROJECT_DIR$/Sampler.py</url>
           <line>24</line>
           <option name="timeStamp" value="654" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/CoGAN_trainer.py</url>
+          <line>59</line>
+          <option name="timeStamp" value="723" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

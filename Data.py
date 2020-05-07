@@ -2,7 +2,6 @@ import tensorflow as tf
 import numpy as np
 import tensorflow_datasets as tfds
 from scipy.io import loadmat
-import scipy
 import cv2
 import matplotlib.pyplot as plt
 import glob
@@ -141,7 +140,7 @@ def select_dataset_cogan(args):
             attr2idx[attr_name] = i
             idx2attr[i] = attr_name
         lines = lines[2:]
-        for i, line in enumerate(lines):
+        for i, line in enumerate(lines[:3700]):
             split = line.split()
             values = split[1:]
             for attr_name in ['Eyeglasses']:
@@ -159,20 +158,22 @@ def select_dataset_cogan(args):
         dataset = np.array(dataset)
         X1 = dataset[mask]
         X2 = dataset[np.invert(mask)]
+        X1_num_examples = len(X1)
+        X2_num_examples = len(X2)
 
-        #X1 = X1.reshape(X1.shape[0], X1.shape[1], X1.shape[2], X1.shape[3]).astype('float32')
-        #X2 = X2.reshape(X2.shape[0], X2.shape[1], X2.shape[2], X2.shape[3]).astype('float32')
+        X1 = tf.data.Dataset.from_tensor_slices(X1)
+        X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(X2))
 
-        X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(len(X1)).repeat().batch(args.batch_size)
-        X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(X2)).repeat().shuffle(len(X2)).batch(args.batch_size)
-
-        X1 = X1.map(format_example_to128)
-        X2 = X2.map(format_example_to128)
+        X1 = X1.map(format_example_to128).shuffle(X1_num_examples).repeat().batch(args.batch_size)
+        X2 = X2.map(format_example_to128).shuffle(X2_num_examples).repeat().batch(args.batch_size)
         shape = X2.element_spec.shape
+    else:
+        raise NotImplementedError()
 
     return X1, X2, shape
 
 
+# Dataset augments
 def class_filter(image, label, allowed_labels=tf.constant([1.])):
     isallowed = tf.equal(allowed_labels, tf.cast(label, tf.float32))
     reduced = tf.reduce_sum(tf.cast(isallowed, tf.float32))
@@ -208,12 +209,24 @@ def format_example_to32(image, label):
     return (image, label)
 
 
+def format_example_to32_2(image):
+    image = tf.cast(image, tf.float32)
+    # Normalize the pixel values
+    image = (image - 127.5) / 127.5
+    # Resize the image
+    image = tf.image.resize(image, (32, 32))
+    return image
+
+
 def format_example_to128(image):
     image = tf.cast(image, tf.float32)
     # Normalize the pixel values
     image = (image - 127.5) / 127.5
     # Resize the image
-    image = tf.image.resize(image, (128, 128))
+    #image = tf.image.central_crop(image, 0.7)#[132, 132, 3])
+    #image = tf.image.resize(image, [128,128])
+    image = tf.image.resize(image, [132,132])
+    image = tf.image.random_crop(image, [128, 128, 3])
     return image
 
 
@@ -276,60 +289,6 @@ def createToyDataRing(n_mixtures=10, radius=3, Ntrain=5120, std=0.05): #50176
     return dat
 
 
-def mnist(input_scale, restrict=False):
-    (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
-    if restrict:
-        selected_ix = train_labels == 7
-        selected_ix_test = test_labels == 7
-        train_images = train_images[selected_ix]
-        test_images = test_images[selected_ix_test]
-        train_images = np.concatenate([train_images, test_images])
-    train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
-    # Transform from 28x28 to 32x32
-    padding = tf.constant([[0,0], [2,2], [2,2], [0,0]])
-    train_images = tf.pad(train_images, padding, "CONSTANT")
-    if input_scale:
-        train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
-    else:
-        train_images = train_images / 255 # Normalize the images to [0, 1]    
-    return train_images
-
-
-def mnist_f(input_scale, restrict=False):
-    (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.fashion_mnist.load_data()
-    if restrict:
-        selected_ix = train_labels == 7
-        selected_ix_test = test_labels == 7
-        train_images = train_images[selected_ix]
-        test_images = test_images[selected_ix_test]
-        train_images = np.concatenate([train_images, test_images])
-    train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
-    # Transform from 28x28 to 32x32
-    padding = tf.constant([[0,0], [2,2], [2,2], [0,0]])
-    train_images = tf.pad(train_images, padding, "CONSTANT")
-    if input_scale:
-        train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
-    else:
-        train_images = train_images / 255 # Normalize the images to [0, 1]
-    return train_images
-
-
-def cifar10(input_scale, restrict=False):
-    (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.cifar10.load_data()
-    if restrict:
-        train_mask = [y[0] == 8 for y in train_labels]
-        test_mask = [y[0] == 8 for y in test_labels]
-        train_images = train_images[train_mask]
-        test_images = test_images[test_mask]
-    train_images = np.concatenate([train_images, test_images])
-    train_images.astype('float32')
-    if input_scale:
-        train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
-    else:
-        train_images = train_images / 255 # Normalize the images to [0, 1]
-    return train_images
-
-
 # CoGAN data loaders
 def mnist_cogan(batch_size, data):
     d2 = data.split('2')[1]
@@ -350,14 +309,12 @@ def mnist_cogan(batch_size, data):
         (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
         # 28x28 -> 32x32
         train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
-        padding = tf.constant([[0, 0], [2, 2], [2, 2], [0, 0]])
-        train_images = tf.pad(train_images, padding, "CONSTANT")
 
         # Split dataset
         X1 = train_images[:int(train_images.shape[0] / 2)]
         X2 = train_images[int(train_images.shape[0] / 2):]
 
-        edges = np.zeros((X2.shape[0], 32, 32, 1))
+        edges = np.zeros((X2.shape[0], 28, 28, 1))
         for idx, i in enumerate(X2):
             i = np.squeeze(i)
             dilation = cv2.dilate(i, np.ones((3, 3), np.uint8), iterations=1)
@@ -365,11 +322,11 @@ def mnist_cogan(batch_size, data):
             edges[idx - X2.shape[0], :, :, 0] = edge
         X2 = tf.convert_to_tensor(edges)
 
-        X1 = (X1 - 127.5) / 127.5  # Normalize the images to [-1, 1]
-        X2 = (X2 - 127.5) / 127.5  # Normalize the images to [-1, 1]
-
         X1 = tf.data.Dataset.from_tensor_slices(X1).shuffle(X1.shape[0]).repeat().batch(
             batch_size)
         X2 = tf.data.Dataset.from_tensor_slices(X2).shuffle(X2.shape[0]).repeat().batch(
             batch_size)
+        X1 = X1.map(format_example_to32_2)
+        X2 = X2.map(format_example_to32_2)
+
     return X1, X2

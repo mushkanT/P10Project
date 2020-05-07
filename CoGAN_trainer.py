@@ -4,7 +4,6 @@ import tensorflow as tf
 import time
 import numpy as np
 import os
-import Utils as u
 import Penalties as p
 import Losses as l
 
@@ -52,6 +51,9 @@ class CoGANTrainer(object):
                 else:
                     batch1 = next(it1)[0]
                     batch2 = next(it2)[0]
+
+                # Sample noise as generator input
+                noise = tf.random.normal([args.batch_size, args.noise_dim])
 
                 # Generate a batch of new images
                 gen_batch1 = self.g1(noise, training=True)
@@ -232,9 +234,9 @@ class CoGANTrainer(object):
     def clip_weights(self, clip):
         for i, var in enumerate(self.d1.trainable_variables):
             self.d1.trainable_variables[i].assign(tf.clip_by_value(var, -clip, clip))
-            if not np.array_equiv(self.d1.trainable_variables[i].numpy(), self.d2.trainable_variables[i].numpy()):
-                print(i)
+            #if not np.array_equiv(self.d1.trainable_variables[i].numpy(), self.d2.trainable_variables[i].numpy()):
+                #print(i)
         for i, var in enumerate(self.d2.trainable_variables[6:]):
             self.d2.trainable_variables[i + 6].assign(tf.clip_by_value(var, -clip, clip))
-            if not np.array_equiv(self.d1.trainable_variables[i].numpy(), self.d2.trainable_variables[i].numpy()):
-                print(i)
+            #if not np.array_equiv(self.d1.trainable_variables[i].numpy(), self.d2.trainable_variables[i].numpy()):
+                #print(i)
