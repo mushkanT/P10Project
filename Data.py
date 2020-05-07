@@ -140,7 +140,7 @@ def select_dataset_cogan(args):
             attr2idx[attr_name] = i
             idx2attr[i] = attr_name
         lines = lines[2:]
-        for i, line in enumerate(lines):
+        for i, line in enumerate(lines[:3700]):
             split = line.split()
             values = split[1:]
             for attr_name in ['Eyeglasses']:
@@ -161,8 +161,8 @@ def select_dataset_cogan(args):
         X1_num_examples = len(X1)
         X2_num_examples = len(X2)
 
-        #X1 = X1.reshape(X1.shape[0], X1.shape[1], X1.shape[2], X1.shape[3]).astype('float32')
-        #X2 = X2.reshape(X2.shape[0], X2.shape[1], X2.shape[2], X2.shape[3]).astype('float32')
+        X1 = tf.data.Dataset.from_tensor_slices(X1)
+        X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(X2))
 
         X1 = tf.data.Dataset.from_tensor_slices(X1)
         X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(X2))
@@ -288,60 +288,6 @@ def createToyDataRing(n_mixtures=10, radius=3, Ntrain=5120, std=0.05): #50176
 
     dat = tf.convert_to_tensor(sample_points)
     return dat
-
-
-def mnist(input_scale, restrict=False):
-    (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
-    if restrict:
-        selected_ix = train_labels == 7
-        selected_ix_test = test_labels == 7
-        train_images = train_images[selected_ix]
-        test_images = test_images[selected_ix_test]
-        train_images = np.concatenate([train_images, test_images])
-    train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
-    # Transform from 28x28 to 32x32
-    padding = tf.constant([[0,0], [2,2], [2,2], [0,0]])
-    train_images = tf.pad(train_images, padding, "CONSTANT")
-    if input_scale:
-        train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
-    else:
-        train_images = train_images / 255 # Normalize the images to [0, 1]    
-    return train_images
-
-
-def mnist_f(input_scale, restrict=False):
-    (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.fashion_mnist.load_data()
-    if restrict:
-        selected_ix = train_labels == 7
-        selected_ix_test = test_labels == 7
-        train_images = train_images[selected_ix]
-        test_images = test_images[selected_ix_test]
-        train_images = np.concatenate([train_images, test_images])
-    train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
-    # Transform from 28x28 to 32x32
-    padding = tf.constant([[0,0], [2,2], [2,2], [0,0]])
-    train_images = tf.pad(train_images, padding, "CONSTANT")
-    if input_scale:
-        train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
-    else:
-        train_images = train_images / 255 # Normalize the images to [0, 1]
-    return train_images
-
-
-def cifar10(input_scale, restrict=False):
-    (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.cifar10.load_data()
-    if restrict:
-        train_mask = [y[0] == 8 for y in train_labels]
-        test_mask = [y[0] == 8 for y in test_labels]
-        train_images = train_images[train_mask]
-        test_images = test_images[test_mask]
-    train_images = np.concatenate([train_images, test_images])
-    train_images.astype('float32')
-    if input_scale:
-        train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
-    else:
-        train_images = train_images / 255 # Normalize the images to [0, 1]
-    return train_images
 
 
 # CoGAN data loaders

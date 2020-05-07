@@ -244,6 +244,11 @@
           <option name="timeStamp" value="594" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Cycle_consistency.py</url>
+          <line>233</line>
+          <option name="timeStamp" value="680" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Data.py</url>
           <line>303</line>
           <option name="timeStamp" value="595" />
@@ -264,9 +269,9 @@
           <option name="timeStamp" value="673" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Cycle_consistency.py</url>
-          <line>233</line>
-          <option name="timeStamp" value="680" />
+          <url>file://$PROJECT_DIR$/GAN_trainer.py</url>
+          <line>32</line>
+          <option name="timeStamp" value="721" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Main.py</url>

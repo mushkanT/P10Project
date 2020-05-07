@@ -1,6 +1,5 @@
 import tensorflow as tf
 import numpy as np
-import Nets as nets
 import Data as dt
 import GAN_trainer as gan_t
 import CoGAN_trainer as cogan_t
@@ -8,8 +7,7 @@ import time
 import Utils as u
 import argparse
 import os.path
-#import o2img as o2i
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser()
 
@@ -41,7 +39,6 @@ parser.add_argument('--limit_dataset',  type=bool,          default=False,      
 parser.add_argument('--scale_data',     type=int,           default=0,          help='Scale images in dataset to MxM')
 parser.add_argument('--label_smooth',   type=bool,          default=False,      help='Smooth the labels of the disc from 1 to 0 occasionally')
 parser.add_argument('--input_noise',    type=bool,          default=False,      help='Add gaussian noise to the discriminator inputs')
-parser.add_argument('--input_scale',    type=bool,          default=True,       help='True=-1,1 False=0,1')
 parser.add_argument('--purpose',        type=str,		    default='',		    help='purpose of this experiment')
 parser.add_argument('--grayscale',      type=bool,		    default=False)
 
@@ -53,7 +50,7 @@ parser.add_argument('--cogan_data',     type=str,           default='mnist2edge'
 args = parser.parse_args()
 
 # Debugging
-#args.dataset = 'mnist'
+
 #args.gan_type = "cogan"
 #args.loss = 'ce'
 #args.disc_penalty = 'wgan-gp'
@@ -81,6 +78,8 @@ args.seed = tf.random.normal([args.num_samples_to_gen, args.noise_dim])
 # Set random seeds for reproducability
 tf.random.set_seed(2020)
 np.random.seed(2020)
+
+#u.latent_walk('C:/users/marku/Desktop/gan_training_output/relax_weight_sharing/26508/generator1','C:/Users/marku/Desktop/gan_training_output/relax_weight_sharing/26508/generator2',100,3)
 
 # GEN optimiser
 if args.optim_g == "adam":
