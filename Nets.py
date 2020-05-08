@@ -448,22 +448,21 @@ def cogan_generators_digit_noshare(args):
     features1_4x4 = (tf.keras.layers.PReLU())(model1)
     output1.append(features1_4x4)
 
-    model1 = (tf.keras.layers.Conv2DTranspose(512, (3,3), strides=(2, 2), padding='same', kernel_regularizer=l2_reg))(model1)
+    model1 = (tf.keras.layers.Conv2DTranspose(512, (3,3), strides=(2, 2), padding='same', kernel_regularizer=l2_reg))(features1_4x4)
     model1 = (tf.keras.layers.BatchNormalization())(model1)
     features1_8x8 = (tf.keras.layers.PReLU())(model1)
     output1.append(features1_8x8)
 
-    model1 = (tf.keras.layers.Conv2DTranspose(256, (3,3), strides=(2, 2), padding='same', kernel_regularizer=l2_reg))(model1)
+    model1 = (tf.keras.layers.Conv2DTranspose(256, (3,3), strides=(2, 2), padding='same', kernel_regularizer=l2_reg))(features1_8x8)
     model1 = (tf.keras.layers.BatchNormalization())(model1)
     features1_16x16 = (tf.keras.layers.PReLU())(model1)
     output1.append(features1_16x16)
 
-    model1 = (tf.keras.layers.Conv2DTranspose(128, (3,3), strides=(2, 2), padding='same', kernel_regularizer=l2_reg))(model1)
+    model1 = (tf.keras.layers.Conv2DTranspose(128, (3,3), strides=(2, 2), padding='same', kernel_regularizer=l2_reg))(features1_16x16)
     model1 = (tf.keras.layers.BatchNormalization())(model1)
     model1 = (tf.keras.layers.PReLU())(model1)
     img1 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='tanh', padding='same', kernel_regularizer=l2_reg)(model1)
 
-    img1 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='tanh', padding='same')(features1_32x32)
     output1.append(img1)
 
     # Generator 2
@@ -472,22 +471,20 @@ def cogan_generators_digit_noshare(args):
     features2_4x4 = (tf.keras.layers.PReLU())(model2)
     output2.append(features2_4x4)
 
-    model2 = (tf.keras.layers.Conv2DTranspose(512, (3,3), strides=(2, 2), padding='same', kernel_regularizer=l2_reg))(model2)
+    model2 = (tf.keras.layers.Conv2DTranspose(512, (3,3), strides=(2, 2), padding='same', kernel_regularizer=l2_reg))(features2_4x4)
     model2 = (tf.keras.layers.BatchNormalization())(model2)
     features2_8x8 = (tf.keras.layers.PReLU())(model2)
     output2.append(features2_8x8)
 
-    model2 = (tf.keras.layers.Conv2DTranspose(256, (3,3), strides=(2, 2), padding='same', kernel_regularizer=l2_reg))(model2)
+    model2 = (tf.keras.layers.Conv2DTranspose(256, (3,3), strides=(2, 2), padding='same', kernel_regularizer=l2_reg))(features2_8x8)
     model2 = (tf.keras.layers.BatchNormalization())(model2)
     features2_16x16 = (tf.keras.layers.PReLU())(model2)
     output2.append(features2_16x16)
 
-    model2 = (tf.keras.layers.Conv2DTranspose(128, (3,3), strides=(2, 2), padding='same', kernel_regularizer=l2_reg))(model2)
+    model2 = (tf.keras.layers.Conv2DTranspose(128, (3,3), strides=(2, 2), padding='same', kernel_regularizer=l2_reg))(features2_16x16)
     model2 = (tf.keras.layers.BatchNormalization())(model2)
     model2 = (tf.keras.layers.PReLU())(model2)
     img2 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='tanh', padding='same', kernel_regularizer=l2_reg)(model2)
-
-    img2 = tf.keras.layers.Conv2DTranspose(channels, (6,6), strides=(1, 1), activation='tanh', padding='same')(features2_32x32)
     output2.append(img2)
 
     return keras.Model(noise, output1), keras.Model(noise, output2)
