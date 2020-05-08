@@ -3,8 +3,6 @@ import os.path
 import Nets as nets
 from numpy import asarray
 from numpy import vstack
-from numpy.random import randn
-from numpy.random import randint
 from numpy import arccos
 from numpy import clip
 from numpy import dot
@@ -78,6 +76,15 @@ def select_gan_architecture(args):
         raise NotImplementedError()
 
     return generator, discriminator
+
+
+def add_weight_decay(models, alpha):
+    for model in models:
+        for layer in model:
+            if isinstance(layer, tf.keras.layers.Conv2D) or isinstance(layer, tf.keras.layers.Dense):
+                layer.add_loss(tf.keras.regularizers.l2(alpha)(layer.kernel))
+            if hasattr(layer, 'bias_regularizer') and layer.use_bias:
+                layer.add_loss(tf.keras.regularizers.l2(alpha)(layer.bias))
 
 
 # spherical linear interpolation (slerp)

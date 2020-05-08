@@ -41,6 +41,7 @@ parser.add_argument('--label_smooth',   type=bool,          default=False,      
 parser.add_argument('--input_noise',    type=bool,          default=False,      help='Add gaussian noise to the discriminator inputs')
 parser.add_argument('--purpose',        type=str,		    default='',		    help='purpose of this experiment')
 parser.add_argument('--grayscale',      type=bool,		    default=False)
+parser.add_argument('--weight_decay', type=int, default=0)
 
 # CoGAN
 parser.add_argument('--g_arch',         type=str,           default='digit',       help='digit | rotate | 256 | face | digit_noshare')
@@ -54,11 +55,11 @@ args = parser.parse_args()
 #args.gan_type = "cogan"
 #args.loss = 'ce'
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-#args.g_arch = '256'
-#args.d_arch = '256'
+#args.g_arch = 'face'
+#args.d_arch = 'face'
 #args.batch_size = 16
-#args.cogan_data = 'apple2orange'
-#args.dataset = 'apple2orange'
+#args.cogan_data = 'Eyeglasses'
+#args.dataset = 'Eyeglasses'
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'weight'
 #args.label_smooth=True
@@ -106,6 +107,8 @@ if args.gan_type == 'cogan':
 
     # Select architectures
     generator1, generator2, discriminator1, discriminator2 = u.select_cogan_architecture(args)
+    if args.weight_decay != 0:
+        u.add_weight_decay([generator1,generator2,discriminator1,discriminator2],args.weight_decay)
 
     # Write config
     u.write_config(args)
