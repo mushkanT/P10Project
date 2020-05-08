@@ -6,6 +6,7 @@ import numpy as np
 import os
 import Penalties as p
 import Losses as l
+import Nets as n
 
 
 class GANTrainer(object):
