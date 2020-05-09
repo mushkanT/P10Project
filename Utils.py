@@ -71,20 +71,10 @@ def select_gan_architecture(args):
     elif args.gan_type == '32':
         generator = nets.cifargan_gen(args)
         discriminator = nets.cifargan_disc(args)
-
     else:
         raise NotImplementedError()
 
     return generator, discriminator
-
-
-def add_weight_decay(models, alpha):
-    for model in models:
-        for layer in model:
-            if isinstance(layer, tf.keras.layers.Conv2D) or isinstance(layer, tf.keras.layers.Dense):
-                layer.add_loss(tf.keras.regularizers.l2(alpha)(layer.kernel))
-            if hasattr(layer, 'bias_regularizer') and layer.use_bias:
-                layer.add_loss(tf.keras.regularizers.l2(alpha)(layer.bias))
 
 
 # spherical linear interpolation (slerp)

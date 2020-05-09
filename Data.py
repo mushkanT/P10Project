@@ -140,7 +140,7 @@ def select_dataset_cogan(args):
             attr2idx[attr_name] = i
             idx2attr[i] = attr_name
         lines = lines[2:]
-        for i, line in enumerate(lines[:3700]):
+        for i, line in enumerate(lines):
             split = line.split()
             values = split[1:]
             for attr_name in ['Eyeglasses']:

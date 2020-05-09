@@ -41,7 +41,7 @@ parser.add_argument('--label_smooth',   type=bool,          default=False,      
 parser.add_argument('--input_noise',    type=bool,          default=False,      help='Add gaussian noise to the discriminator inputs')
 parser.add_argument('--purpose',        type=str,		    default='',		    help='purpose of this experiment')
 parser.add_argument('--grayscale',      type=bool,		    default=False)
-parser.add_argument('--weight_decay', type=int, default=0)
+parser.add_argument('--weight_decay', type=float, default=0)
 
 # CoGAN
 parser.add_argument('--g_arch',         type=str,           default='digit',       help='digit | rotate | 256 | face | digit_noshare')
@@ -97,6 +97,8 @@ elif args.optim_d == "sgd":
 else:
     raise NotImplementedError()
 
+args.wd = tf.keras.regularizers.l2(args.weight_decay)
+
 # Choose gan type
 if args.gan_type == 'cogan':
     # Choose data
@@ -107,8 +109,6 @@ if args.gan_type == 'cogan':
 
     # Select architectures
     generator1, generator2, discriminator1, discriminator2 = u.select_cogan_architecture(args)
-    if args.weight_decay != 0:
-        u.add_weight_decay([generator1,generator2,discriminator1,discriminator2],args.weight_decay)
 
     # Write config
     u.write_config(args)
