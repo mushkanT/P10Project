@@ -105,17 +105,17 @@ def select_dataset_cogan(args):
         data, info = tfds.load('mnist', with_info=True, as_supervised=True)
         X1, test1 = data['train'], data['test']
         X1 = X1.map(format_example_g2rgb)
-        test1 = test1.map(format_example_g2rgb)
+        #test1 = test1.map(format_example_g2rgb)
         num_examples = info.splits['train'].num_examples
-        #X1 = X1.shuffle(num_examples).repeat().batch(args.batch_size)
+        X1 = X1.shuffle(num_examples).repeat().batch(args.batch_size)
 
         # Domain 2
         data, info = tfds.load('svhn_cropped', with_info=True, as_supervised=True)
         X2, test2 = data['train'], data['test']
         X2 = X2.map(format_example_to32)
-        test2 = test2.map(format_example_to32)
+        #test2 = test2.map(format_example_to32)
         num_examples = info.splits['train'].num_examples
-        #X2 = X2.shuffle(num_examples).repeat().batch(args.batch_size)
+        X2 = X2.shuffle(num_examples).repeat().batch(args.batch_size)
         shape = X1.element_spec[0].shape
 
     elif args.cogan_data in ['apple2orange', 'horse2zebra', 'vangogh2photo', 'cityscapes']:
@@ -172,7 +172,7 @@ def select_dataset_cogan(args):
     else:
         raise NotImplementedError()
 
-    return X1, X2, shape, test1, test2
+    return X1, X2, shape
 
 
 # Dataset augments
