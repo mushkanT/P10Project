@@ -33,7 +33,6 @@ class GANTrainer(object):
 
         # Set loss functions
         d_loss_fn, g_loss_fn = l.set_losses(args)
-        e_loss_fn = l.encoder_loss
 
         for epoch in range(args.epochs):
             start = time.time()
