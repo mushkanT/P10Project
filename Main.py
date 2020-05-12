@@ -8,6 +8,8 @@ import Utils as u
 import argparse
 import os.path
 import matplotlib.pyplot as plt
+import Data as data
+import Nets as nets
 
 parser = argparse.ArgumentParser()
 
@@ -143,35 +145,24 @@ if args.gan_type == 'cogan':
 
 elif args.gan_type == 'classifier':
     num_classes = 10
-    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
-    x_train = x_train.reshape(x_train.shape[0], x_train.shape[1], x_train.shape[2], 1)
-    x_test = x_test.reshape(x_test.shape[0], x_test.shape[1], x_test.shape[2], 1)
+    x1, x2, shape, t1, t2 = data.select_dataset_cogan(args)
 
-    x_train = x_train.astype('float32')
-    x_test = x_test.astype('float32')
+    newDataset = x1.concatenate(x2)
+    newTestSet = t1.concatenate(t2).batch(10000)
+    newDataset = newDataset.shuffle(120000).repeat().batch(batch_size=args.batch_size)
+    #it2 = iter(newDataset)
+    #it_test = iter(newTestSet)
 
-    x_train = (x_train - 127.5) / 127.5
-    x_test = (x_test - 127.5) / 127.5
-
-    x_train = tf.image.resize(x_train,(32,32))
-    x_test = tf.image.resize(x_test,(32,32))
-    x_train = tf.image.grayscale_to_rgb(x_train)
-    x_test = tf.image.grayscale_to_rgb(x_test)
-
-    y_train = tf.keras.utils.to_categorical(y_train, num_classes)
-    y_test = tf.keras.utils.to_categorical(y_test, num_classes)
-
-    #model = tf.keras.models.load_model('classifier')
-    #res = model.predict(x_train[0:3])
+    #newTestSet = next(it_test)
 
     model = nets.mnist_classifier(args, num_classes)
-    model.compile(loss=tf.keras.losses.categorical_crossentropy, optimizer=tf.keras.optimizers.Adam(), metrics=['accuracy'])
+    model.compile(loss='sparse_categorical_crossentropy', optimizer=tf.keras.optimizers.Adam(), metrics=['accuracy'])
 
-    model.fit(x_train, y_train, batch_size=args.batch_size, epochs=args.epochs, verbose=1, validation_data=(x_test, y_test))
-    score = model.evaluate(x_test, y_test, verbose=0)
+    model.fit(newDataset,steps_per_epoch=1000, epochs=args.epochs, verbose=1, validation_data=(newTestSet), validation_steps=1)
+    score = model.evaluate(newTestSet[0], newTestSet[1], verbose=0)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
-    model.save('classifier')
+    #model.save('classifier')
 
 else:
     # Choose data
