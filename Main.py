@@ -145,23 +145,28 @@ if args.gan_type == 'cogan':
 
 elif args.gan_type == 'classifier':
     num_classes = 10
-    x1, x2, shape, t1, t2 = data.select_dataset_cogan(args)
+    x1, x2, shape = data.select_dataset_cogan(args)
 
-    newDataset = x1.concatenate(x2)
-    newTestSet = t1.concatenate(t2).batch(10000)
-    newDataset = newDataset.shuffle(120000).repeat().batch(batch_size=args.batch_size)
+    #newDataset = x1.concatenate(x2)
+    #newTestSet = t1.concatenate(t2).batch(10000)
+    #newDataset = newDataset.shuffle(120000).repeat().batch(batch_size=args.batch_size)
     #it2 = iter(newDataset)
     #it_test = iter(newTestSet)
-
+    it1 = iter(x2)
+    batch = next(it1)
+    labels = batch[1]
+    batch = batch[0]
+    batch = 0.5 * batch + 0.5
     #newTestSet = next(it_test)
-
-    model = nets.mnist_classifier(args, num_classes)
-    model.compile(loss='sparse_categorical_crossentropy', optimizer=tf.keras.optimizers.Adam(), metrics=['accuracy'])
-
-    model.fit(newDataset,steps_per_epoch=1000, epochs=args.epochs, verbose=1, validation_data=(newTestSet), validation_steps=1)
-    score = model.evaluate(newTestSet[0], newTestSet[1], verbose=0)
-    print('Test loss:', score[0])
-    print('Test accuracy:', score[1])
+    model = tf.keras.models.load_model('classifier2')
+    results = model.evaluate(batch, labels)
+    #model = nets.mnist_classifier(args, num_classes)
+    #model.compile(loss='sparse_categorical_crossentropy', optimizer=tf.keras.optimizers.Adam(), metrics=['accuracy'])
+    print('nice')
+    #model.fit(newDataset,steps_per_epoch=1000, epochs=args.epochs, verbose=1, validation_data=(newTestSet), validation_steps=1)
+    #score = model.evaluate(newTestSet[0], newTestSet[1], verbose=0)
+    #print('Test loss:', score[0])
+    #print('Test accuracy:', score[1])
     #model.save('classifier')
 
 else:
