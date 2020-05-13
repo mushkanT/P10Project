@@ -29,6 +29,32 @@ def wasserstein_disc(fake_output, real_output):
     return D_loss
 
 
+# Mean absolute error (element wise)
+def recon_criterion(input, target):
+    return tf.math.reduce_mean(tf.math.abs(input - target))
+
+
+def encoder_loss(generator, encoder, noise):
+    # generate image
+    x = generator(noise)
+
+    # encode image to latent code (within domain)
+    noise_recon = encoder(x)
+
+    # generate again (should be a copy of x)
+    x_recon = generator(noise_recon)
+
+    # encode again
+    #noise_recon_cyclic = encoder.encode(x_recon)
+
+    # reconstruction loss
+    img_recon_a = recon_criterion(x_recon, x)
+    latent_recon_a = recon_criterion(noise_recon, noise)
+    total_loss = img_recon_a + latent_recon_a
+
+    return total_loss
+
+
 def set_losses(args):
     if args.loss == 'ce':
         return cross_entropy_disc, cross_entropy_gen

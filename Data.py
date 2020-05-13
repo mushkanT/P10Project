@@ -166,9 +166,13 @@ def select_dataset_cogan(args):
         X1 = tf.data.Dataset.from_tensor_slices(X1)
         X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(X2))
 
+        X1 = tf.data.Dataset.from_tensor_slices(X1)
+        X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(X2))
+
         X1 = X1.map(format_example_to128).shuffle(X1_num_examples).repeat().batch(args.batch_size)
         X2 = X2.map(format_example_to128).shuffle(X2_num_examples).repeat().batch(args.batch_size)
         shape = X2.element_spec.shape
+
     else:
         raise NotImplementedError()
 
@@ -225,10 +229,7 @@ def format_example_to128(image):
     # Normalize the pixel values
     image = (image - 127.5) / 127.5
     # Resize the image
-    #image = tf.image.central_crop(image, 0.7)#[132, 132, 3])
-    #image = tf.image.resize(image, [128,128])
-    image = tf.image.resize(image, [132,132])
-    image = tf.image.random_crop(image, [128, 128, 3])
+    image = tf.image.resize(image, [128, 128])
     return image
 
 

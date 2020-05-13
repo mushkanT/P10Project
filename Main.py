@@ -57,12 +57,6 @@ args = parser.parse_args()
 
 #args.gan_type = "cogan"
 #args.loss = 'ce'
-#args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-#args.g_arch = '256'
-#args.d_arch = '256'
-#args.batch_size = 16
-#args.cogan_data = 'apple2orange'
-#args.dataset = 'apple2orange'
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'feature'
 #args.scale_data = 64
@@ -71,6 +65,9 @@ args = parser.parse_args()
 #args.images_while_training = 10
 #args.limit_dataset = True
 
+
+#o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
+#o2i.test_trunc_trick(args)
 
 # We will reuse this seed overtime for visualization
 args.seed = tf.random.normal([args.num_samples_to_gen, args.noise_dim])
