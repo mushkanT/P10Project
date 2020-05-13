@@ -49,7 +49,10 @@ class GANTrainer(object):
                     batch2 = next(it2)[0]
 
                 # Sample noise as generator input
-                noise = tf.random.normal([args.batch_size, args.noise_dim])
+                if args.noise_type == 'random':
+                    noise = tf.random.normal(shape=(args.batch_size, args.noise_dim))
+                elif args.noise_type == 'uniform':
+                    noise = tf.random.uniform(shape=(args.batch_size, args.noise_dim), minval=-1, maxval=1)
 
                 # Generate a batch of new images
                 gen_batch1 = self.g1(noise, training=True)
@@ -140,6 +143,7 @@ class GANTrainer(object):
             if epoch % args.images_while_training == 0:
                 self.sample_images(epoch, args.seed, args.dir, args.dataset_dim[3])
         self.plot_losses(args.dir)
+        self.sample_images(epoch, args.seed, args.dir, args.dataset_dim[3])
         return self.full_training_time
 
     def sample_images(self, epoch, seed, dir, channels):

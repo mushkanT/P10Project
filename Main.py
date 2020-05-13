@@ -42,6 +42,9 @@ parser.add_argument('--input_noise',    type=bool,          default=False,      
 parser.add_argument('--purpose',        type=str,		    default='',		    help='purpose of this experiment')
 parser.add_argument('--grayscale',      type=bool,		    default=False)
 parser.add_argument('--weight_decay', type=float, default=0)
+parser.add_argument('--bias_init', type=float, default=0)
+parser.add_argument('--noise_type', type=str, default='normal', help='normal | uniform')
+
 
 # CoGAN
 parser.add_argument('--g_arch',         type=str,           default='digit',       help='digit | rotate | 256 | face | digit_noshare')
@@ -52,14 +55,14 @@ args = parser.parse_args()
 
 # Debugging
 
-#args.gan_type = "cogan"
+#args.gan_type = "128"
 #args.loss = 'ce'
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-#args.g_arch = 'face'
-#args.d_arch = 'face'
+#args.g_arch = 'digit'
+#args.d_arch = 'digit'
 #args.batch_size = 16
-#args.cogan_data = 'Eyeglasses'
-#args.dataset = 'Eyeglasses'
+#args.cogan_data = 'mnist2edge'
+#args.dataset = 'celeba'
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'weight'
 #args.label_smooth=True
@@ -69,9 +72,14 @@ args = parser.parse_args()
 #args.limit_dataset = True
 
 
+args.wd = tf.keras.regularizers.l2(args.weight_decay)
+args.bi = tf.keras.initializers.Constant(args.bias_init)
+
 # We will reuse this seed overtime for visualization
-args.seed = tf.random.normal([args.num_samples_to_gen, args.noise_dim])
-#args.seed = np.random.normal(0, 1, args.num_samples_to_gen, 100)
+if args.noise_type == 'random':
+    args.seed = tf.random.normal([args.num_samples_to_gen, args.noise_dim])
+elif args.noise_type == 'uniform':
+    args.seed = tf.random.uniform(shape=(args.batch_size, args.noise_dim), minval=-1, maxval=1)
 
 # Set random seeds for reproducability
 tf.random.set_seed(2020)
@@ -97,7 +105,7 @@ elif args.optim_d == "sgd":
 else:
     raise NotImplementedError()
 
-args.wd = tf.keras.regularizers.l2(args.weight_decay)
+
 
 # Choose gan type
 if args.gan_type == 'cogan':

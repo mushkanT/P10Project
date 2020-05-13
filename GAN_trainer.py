@@ -29,7 +29,11 @@ class GANTrainer(object):
         self.g_loss_fn = None
 
     def train_discriminator(self, real_data, args):
-        noise = tf.random.normal(shape=(args.batch_size, args.noise_dim))
+        if args.noise_type == 'random':
+            noise = tf.random.normal(shape=(args.batch_size, args.noise_dim))
+        elif args.noise_type == 'uniform':
+            noise = tf.random.uniform(shape=(args.batch_size, args.noise_dim), minval=-1, maxval=1)
+
         generated_images = self.generator(noise, training=True)
 
         with tf.GradientTape() as disc_tape:
@@ -49,6 +53,7 @@ class GANTrainer(object):
 
     def train_generator(self, args):
         noise = tf.random.normal(shape=(args.batch_size, args.noise_dim))
+        noise = tf.random.uniform(shape=(args.batch_size, args.noise_dim), minval=-1, maxval=1)
 
         with tf.GradientTape() as gen_tape:
             generated_images = self.generator(noise, training=True)
@@ -97,6 +102,7 @@ class GANTrainer(object):
                         self.sample_images(epoch, args.seed, args.dir, args.dataset_dim[3])
 
         self.plot_losses(args.dir, self.disc_loss, self.gen_loss)
+        self.sample_images(epoch, args.seed, args.dir, args.dataset_dim[3])
         return self.full_training_time
 
     def sample_images(self, epoch, seed, dir, channels):
