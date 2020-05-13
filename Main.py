@@ -44,6 +44,7 @@ parser.add_argument('--grayscale',      type=bool,		    default=False)
 parser.add_argument('--weight_decay', type=float, default=0)
 parser.add_argument('--bias_init', type=float, default=0)
 parser.add_argument('--noise_type', type=str, default='normal', help='normal | uniform')
+parser.add_argument('--weight_init', type=str, default='normal', help='normal (0.02 mean)| xavier | he')
 
 
 # CoGAN
@@ -55,13 +56,13 @@ args = parser.parse_args()
 
 # Debugging
 
-#args.gan_type = "128"
+#args.gan_type = "cogan"
 #args.loss = 'ce'
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-#args.g_arch = 'digit'
-#args.d_arch = 'digit'
+#args.g_arch = 'face'
+#args.d_arch = 'face'
 #args.batch_size = 16
-#args.cogan_data = 'mnist2edge'
+#args.cogan_data = 'Eyeglasses'
 #args.dataset = 'celeba'
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'weight'
@@ -74,9 +75,10 @@ args = parser.parse_args()
 
 args.wd = tf.keras.regularizers.l2(args.weight_decay)
 args.bi = tf.keras.initializers.Constant(args.bias_init)
+args.w_init = u.select_weight_init(args.weight_init)
 
 # We will reuse this seed overtime for visualization
-if args.noise_type == 'random':
+if args.noise_type == 'normal':
     args.seed = tf.random.normal([args.num_samples_to_gen, args.noise_dim])
 elif args.noise_type == 'uniform':
     args.seed = tf.random.uniform(shape=(args.batch_size, args.noise_dim), minval=-1, maxval=1)

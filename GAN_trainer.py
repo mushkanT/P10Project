@@ -29,7 +29,7 @@ class GANTrainer(object):
         self.g_loss_fn = None
 
     def train_discriminator(self, real_data, args):
-        if args.noise_type == 'random':
+        if args.noise_type == 'normal':
             noise = tf.random.normal(shape=(args.batch_size, args.noise_dim))
         elif args.noise_type == 'uniform':
             noise = tf.random.uniform(shape=(args.batch_size, args.noise_dim), minval=-1, maxval=1)

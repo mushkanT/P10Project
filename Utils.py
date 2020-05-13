@@ -77,6 +77,18 @@ def select_gan_architecture(args):
     return generator, discriminator
 
 
+def select_weight_init(init_arg):
+    if init_arg == 'normal':
+        init = tf.keras.initializers.RandomNormal(0.02)
+    elif init_arg == 'he':
+        init = tf.keras.initializers.he_normal()
+    elif init_arg == 'xavier':
+        init = tf.keras.initializers.glorot_normal()
+    else:
+        raise NotImplementedError()
+    return init
+
+
 # spherical linear interpolation (slerp)
 def slerp(val, low, high):
     omega = arccos(clip(dot(low/norm(low), high/norm(high)), -1, 1))

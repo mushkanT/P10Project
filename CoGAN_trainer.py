@@ -49,7 +49,7 @@ class GANTrainer(object):
                     batch2 = next(it2)[0]
 
                 # Sample noise as generator input
-                if args.noise_type == 'random':
+                if args.noise_type == 'normal':
                     noise = tf.random.normal(shape=(args.batch_size, args.noise_dim))
                 elif args.noise_type == 'uniform':
                     noise = tf.random.uniform(shape=(args.batch_size, args.noise_dim), minval=-1, maxval=1)
