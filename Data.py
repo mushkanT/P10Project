@@ -131,13 +131,14 @@ def select_dataset_cogan(args):
         shape = (None, 256, 256, 3)
 
     elif args.cogan_data in ['Eyeglasses']:
-        #lines = [line.rstrip() for line in open('C:/Users/marku/Desktop/list_attr_celeba.txt', 'r')]
-        lines = [line.rstrip() for line in open('/user/student.aau.dk/mjuuln15/list_attr_celeba.txt', 'r')]
+        lines = [line.rstrip() for line in open('C:/Users/marku/Desktop/list_attr_celeba.txt', 'r')]
+        #lines = [line.rstrip() for line in open('/user/student.aau.dk/mjuuln15/list_attr_celeba.txt', 'r')]
         all_attr_names = lines[1].split()
         attr2idx = {}
         idx2attr = {}
         mask = []
         dataset = []
+
         for i, attr_name in enumerate(all_attr_names):
             attr2idx[attr_name] = i
             idx2attr[i] = attr_name
@@ -145,13 +146,14 @@ def select_dataset_cogan(args):
         for i, line in enumerate(lines[:3700]):
             split = line.split()
             values = split[1:]
+
             for attr_name in ['Eyeglasses']:
                 idx = attr2idx[attr_name]
-                label = (values[idx] == '1')
-            mask.append(label)
+                has_attribute = (values[idx] == '1')
+            mask.append(has_attribute)
 
-        #images = glob.glob('C:/Users/marku/Desktop/img_align_celeba/*.jpg')
-        images = glob.glob('/user/student.aau.dk/mjuuln15/img_align_celeba/*.jpg')
+        images = glob.glob('C:/Users/marku/Desktop/img_align_celeba/*.jpg')
+        #images = glob.glob('/user/student.aau.dk/mjuuln15/img_align_celeba/*.jpg')
         for i in images:
             image = plt.imread(i)
             dataset.append(image)
@@ -174,6 +176,67 @@ def select_dataset_cogan(args):
 
     return X1, X2, shape
 
+
+def load_celeba_data_classifier():
+    #lines = [line.rstrip() for line in open('C:/Users/marku/Desktop/list_attr_celeba.txt', 'r')]
+    lines = [line.rstrip() for line in open('/user/student.aau.dk/mjuuln15/list_attr_celeba.txt', 'r')]
+    all_attr_names = lines[1].split()
+    attr2idx = {}
+    idx2attr = {}
+    mask = []
+    dataset = []
+    labels = []
+
+    for i, attr_name in enumerate(all_attr_names):
+        attr2idx[attr_name] = i
+        idx2attr[i] = attr_name
+    lines = lines[2:]
+    for i, line in enumerate(lines[:3700]):
+        split = line.split()
+        values = split[1:]
+
+        temp_label = []
+        has_attribute = False
+        for attr_name in ['Arched_Eyebrows', 'Attractive', 'Heavy_Makeup', 'High_Cheekbones', 'Male',
+                          'Mouth_Slightly_Open', 'No_Beard', 'Oval_Face', 'Pointy_Nose', 'Smiling', 'Wavy_Hair',
+                          'Wearing_Lipstick', 'Young']:
+            idx = attr2idx[attr_name]
+            if not has_attribute:
+                has_attribute = (values[idx] == '1')
+            temp_label.append(int(values[attr2idx[attr_name]]))
+
+        if has_attribute:
+            labels.append(temp_label)
+        mask.append(has_attribute)
+
+    #images = glob.glob('C:/Users/marku/Desktop/img_align_celeba/*.jpg')
+    images = glob.glob('/user/student.aau.dk/mjuuln15/img_align_celeba/*.jpg')
+    for i in images:
+        image = plt.imread(i)
+        dataset.append(image)
+
+    mask = np.array(mask)
+    dataset = np.array(dataset)
+    X1 = dataset[mask]
+    cast = lambda image: tf.cast(image, tf.float32)
+    scale = lambda image: (image - 127.5) / 127.5
+    crop = lambda image: tf.image.central_crop(image, 0.7)
+    resize = lambda image: tf.image.resize(image, [128, 128], antialias=True)
+    X1 = cast(X1)
+    X1 = scale(X1)
+    X1 = crop(X1)
+    X1 = resize(X1)
+
+    X1 = X1[5000:]
+    X2 = X1[:5000]
+    L1 = np.asarray(labels[5000:])
+    L2 = np.asarray(labels[:5000])
+    L1[L1 == -1] = 0
+    L2[L2 == -1] = 0
+    X1 = [X1, L1]
+    X2 = [X2, L2]
+
+    return X1, X2
 
 # Dataset augments
 def class_filter(image, label, allowed_labels=tf.constant([1.])):
