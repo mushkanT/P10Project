@@ -25,6 +25,32 @@ init = 'glorot_uniform'
 l2_reg = tf.keras.regularizers.l2(0.0001)
 
 
+def encoder(args):
+    input_dim = args.dataset_dim[1]
+    channels = args.dataset_dim[3]
+    model = keras.Sequential()
+
+    # normal
+    model.add(layers.Conv2D(64, (3, 3), padding='same', input_shape=[input_dim, input_dim, channels], kernel_initializer=init))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # downsample
+    model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same', kernel_initializer=init))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # downsample
+    model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same', kernel_initializer=init))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # downsample
+    model.add(layers.Conv2D(256, (3, 3), strides=(2, 2), padding='same', kernel_initializer=init))
+    model.add(layers.LeakyReLU(alpha=0.2))
+    # classifier
+    model.add(layers.Flatten())
+    model.add(layers.Dropout(0.4))
+    model.add(layers.Dense(args.noise_dim, kernel_initializer=init))
+    # compile model
+    return model
+
+
+
 # 32x32
 def cifargan_gen(args):
     g_dim = args.g_dim
@@ -503,8 +529,7 @@ def cogan_discriminators_digit_noshare(args):
     model1 = tf.keras.layers.Flatten()(model1)
     model1 = tf.keras.layers.Dense(500, kernel_regularizer=l2_reg)(model1)
     model1 = tf.keras.layers.PReLU()(model1)
-    model1 = tf.keras.layers.Dropout(0.5)(model1)
-    model1 = tf.keras.layers.Dense(1, kernel_regularizer=l2_reg)(model1)
+    model1 = tf.keras.layers.Dense(1)(model1)
 
     # Discriminator 2
     img2 = tf.keras.layers.Input(shape=img_shape)
@@ -516,8 +541,7 @@ def cogan_discriminators_digit_noshare(args):
     model2 = tf.keras.layers.Flatten()(model2)
     model2 = tf.keras.layers.Dense(500, kernel_regularizer=l2_reg)(model2)
     model2 = tf.keras.layers.PReLU()(model2)
-    model2 = tf.keras.layers.Dropout(0.5)(model2)
-    model2 = tf.keras.layers.Dense(1, kernel_regularizer=l2_reg)(model2)
+    model2 = tf.keras.layers.Dense(1)(model2)
 
     return keras.Model(img1, model1), keras.Model(img2, model2)
 

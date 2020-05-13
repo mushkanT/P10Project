@@ -72,6 +72,9 @@ args = parser.parse_args()
 #args.limit_dataset = True
 
 
+#o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
+#o2i.test_trunc_trick(args)
+
 # We will reuse this seed overtime for visualization
 args.seed = tf.random.normal([args.num_samples_to_gen, args.noise_dim])
 #args.seed = np.random.normal(0, 1, args.num_samples_to_gen, 100)
