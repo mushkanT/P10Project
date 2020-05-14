@@ -135,8 +135,8 @@ class CoGANTrainer(object):
 
                     total_recon_loss = noise_recon_loss1 + noise_recon_loss2
 
-                    g1_loss = g1_loss + total_recon_loss
-                    g2_loss = g2_loss + total_recon_loss
+                    g1_loss = g1_loss + (total_recon_loss * args.cycle_weight)
+                    g2_loss = g2_loss + (total_recon_loss * args.cycle_weight)
 
             gradients_of_generator1 = tape1.gradient(g1_loss, self.g1.trainable_variables)
             args.gen_optimizer.apply_gradients(zip(gradients_of_generator1, self.g1.trainable_variables))
