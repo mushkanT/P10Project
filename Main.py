@@ -56,7 +56,7 @@ args = parser.parse_args()
 
 # Debugging
 
-#args.gan_type = "cogan"
+#args.gan_type = "128"
 #args.loss = 'ce'
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
 #args.g_arch = 'face'
@@ -64,6 +64,7 @@ args = parser.parse_args()
 #args.batch_size = 16
 #args.cogan_data = 'Eyeglasses'
 #args.dataset = 'celeba'
+#args.weight_init='xavier'
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'weight'
 #args.label_smooth=True
