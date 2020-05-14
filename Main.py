@@ -58,8 +58,14 @@ args = parser.parse_args()
 tf.image.resize
 # Debugging
 
-#args.gan_type = "cogan"
+#args.gan_type = "classifier"
 #args.loss = 'ce'
+#args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
+#args.g_arch = '128'
+#args.d_arch = '128'
+#args.batch_size = 16
+#args.cogan_data = 'Eyeglasses'
+#args.dataset = 'apple2orange'
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'feature'
 #args.scale_data = 64
@@ -147,30 +153,43 @@ if args.gan_type == 'cogan':
 
 
 elif args.gan_type == 'classifier':
-    num_classes = 10
-    x1, x2, shape = data.select_dataset_cogan(args)
+    num_classes = 13
 
+    #x1, x2, shape = data.select_dataset_cogan(args)
     #newDataset = x1.concatenate(x2)
     #newTestSet = t1.concatenate(t2).batch(10000)
     #newDataset = newDataset.shuffle(120000).repeat().batch(batch_size=args.batch_size)
     #it2 = iter(newDataset)
     #it_test = iter(newTestSet)
-    it1 = iter(x2)
-    batch = next(it1)
-    labels = batch[1]
-    batch = batch[0]
-    batch = 0.5 * batch + 0.5
+
+    #celeba a
+    x1, x2 = data.load_celeba_data_classifier()
+    newDataset = x1[0]
+    newTestSet = x2[0]
+    labels_train = x1[1]
+    labels_eval = x2[1]
+
+    #it1 = iter(x2)
+    #batch = next(it1)
+    #labels = batch[1]
+    #batch = batch[0]
+    #batch = 0.5 * batch + 0.5
+
     #newTestSet = next(it_test)
-    model = tf.keras.models.load_model('classifier2')
-    results = model.evaluate(batch, labels)
+    #model = tf.keras.models.load_model('classifier2')
+    #results = model.evaluate(batch, labels)
+
     #model = nets.mnist_classifier(args, num_classes)
     #model.compile(loss='sparse_categorical_crossentropy', optimizer=tf.keras.optimizers.Adam(), metrics=['accuracy'])
-    print('nice')
-    #model.fit(newDataset,steps_per_epoch=1000, epochs=args.epochs, verbose=1, validation_data=(newTestSet), validation_steps=1)
-    #score = model.evaluate(newTestSet[0], newTestSet[1], verbose=0)
-    #print('Test loss:', score[0])
-    #print('Test accuracy:', score[1])
-    #model.save('classifier')
+
+    model = nets.celeba_classifier(args, num_classes)
+    model.compile(loss='binary_crossentropy', optimizer=tf.keras.optimizers.Adam(), metrics=['accuracy'])
+
+    model.fit(newDataset[:2000],labels_train[:2000],batch_size=16, epochs=args.epochs, verbose=1, validation_data=(newTestSet, labels_eval))
+    score = model.evaluate(newTestSet[0], newTestSet[1], verbose=0)
+    print('Test loss:', score[0])
+    print('Test accuracy:', score[1])
+    model.save('classifier')
 
 else:
     # Choose data
