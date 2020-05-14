@@ -51,8 +51,11 @@ parser.add_argument('--cogan_data',     type=str,           default='mnist2edge'
 parser.add_argument('--semantic_loss',  type=bool,          default=False, help='Determines whether semantic loss is used')
 parser.add_argument('--semantic_weight',type=int,           default=10, help='Weight of the semantic loss term')
 parser.add_argument('--classifier_path', type=str,          default=None, help='Path to the classifier used for semantic loss')
+parser.add_argument('--use_cycle',      type=bool,          default=False, help='Turn on the cycle consistency loss')
 args = parser.parse_args()
 
+
+tf.image.resize
 # Debugging
 
 #args.gan_type = "cogan"
@@ -138,6 +141,9 @@ if args.gan_type == 'cogan':
     discriminator1.save(args.dir + '/discriminator1')
     generator2.save(args.dir + '/generator2')
     discriminator2.save(args.dir + '/discriminator2')
+    if args.use_cycle:
+        ganTrainer.encoder.save(args.dir + '/encoder')
+
 
 
 elif args.gan_type == 'classifier':

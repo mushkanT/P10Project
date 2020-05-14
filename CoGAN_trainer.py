@@ -107,10 +107,6 @@ class CoGANTrainer(object):
                 gen2_fake = self.g2(noise, training=True)
                 disc2_fake = self.d2(gen2_fake[-1], training=True)
                 g2_loss = g_loss_fn(disc2_fake)
-
-                penalty = self.genPenal.calc_penalty(self.g1, self.g2, 4, args, gen1_fake, gen2_fake)
-                g1_loss = g1_loss + (penalty * args.penalty_weight_g)
-                g2_loss = g2_loss + (penalty * args.penalty_weight_g)
                 
                 if args.semantic_loss:
                     domain1_pred = self.classifier(gen1_fake[-1])
@@ -118,33 +114,37 @@ class CoGANTrainer(object):
                     diff = tf.reduce_mean(tf.math.squared_difference(domain1_pred, domain2_pred))
                     g1_loss = g1_loss + diff * args.semantic_weight
                     g2_loss = g2_loss + diff * args.semantic_weight
+
+                penalty = self.genPenal.calc_penalty(self.g1, self.g2, 4, args, gen1_fake, gen2_fake)
                 g1_loss = g1_loss + (penalty * args.penalty_weight_g)
                 g2_loss = g2_loss + (penalty * args.penalty_weight_g)
 
-                # Recon loss
-                noise_recon1 = self.encoder(gen1_fake)
-                noise_recon2 = self.encoder(gen2_fake)
+                if args.use_cycle:
+                    # Recon loss
+                    noise_recon1 = self.encoder(gen1_fake[-1])
+                    noise_recon2 = self.encoder(gen2_fake[-1])
 
-                fake_recon1 = self.g1(noise_recon1, training=False)
-                fake_recon2 = self.g2(noise_recon2, training=False)
+                    fake_recon1 = self.g1(noise_recon1, training=False)
+                    fake_recon2 = self.g2(noise_recon2, training=False)
 
-                noise_recon_loss1 = l.recon_criterion(noise_recon1, noise)
-                noise_recon_loss2 = l.recon_criterion(noise_recon2, noise)
+                    noise_recon_loss1 = l.recon_criterion(noise_recon1, noise)
+                    noise_recon_loss2 = l.recon_criterion(noise_recon2, noise)
 
-                fake_recon_loss1 = l.recon_criterion(fake_recon1, gen1_fake)
-                fake_recon_loss2 = l.recon_criterion(fake_recon2, gen2_fake)
+                    fake_recon_loss1 = l.recon_criterion(fake_recon1[-1], gen1_fake[-1])
+                    fake_recon_loss2 = l.recon_criterion(fake_recon2[-1], gen2_fake[-1])
 
-                total_recon_loss = noise_recon_loss1 + noise_recon_loss2
+                    total_recon_loss = noise_recon_loss1 + noise_recon_loss2
 
-                g1_loss = g1_loss + total_recon_loss
-                g2_loss = g2_loss + total_recon_loss
+                    g1_loss = g1_loss + total_recon_loss
+                    g2_loss = g2_loss + total_recon_loss
 
             gradients_of_generator1 = tape1.gradient(g1_loss, self.g1.trainable_variables)
             args.gen_optimizer.apply_gradients(zip(gradients_of_generator1, self.g1.trainable_variables))
             gradients_of_generator2 = tape2.gradient(g2_loss, self.g2.trainable_variables)
             args.gen_optimizer.apply_gradients(zip(gradients_of_generator2, self.g2.trainable_variables))
-            gradients_of_encoder = tape3.gradient(total_recon_loss, self.encoder.trainable_variables)
-            args.gen_optimizer.apply_gradients(zip(gradients_of_encoder, self.encoder.trainable_variables))
+            if args.use_cycle:
+                gradients_of_encoder = tape3.gradient(total_recon_loss, self.encoder.trainable_variables)
+                args.gen_optimizer.apply_gradients(zip(gradients_of_encoder, self.encoder.trainable_variables))
             weight_sim = self.genPenal.weight_regularizer(self.g1, self.g2, 21)
             self.full_training_time += time.time() - start
 
