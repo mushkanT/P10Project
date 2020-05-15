@@ -16,6 +16,8 @@ class CoGANTrainer(object):
         self.hist_g2 = []
         self.hist_d1 = []
         self.hist_d2 = []
+        self.hist_semantic_loss = []
+        self.hist_cycle_loss = []
         self.hist_weight_similarity = []
         self.X1 = domain1
         self.X2 = domain2
@@ -112,6 +114,8 @@ class CoGANTrainer(object):
                     domain1_pred = self.classifier(gen1_fake[-1])
                     domain2_pred = self.classifier(gen2_fake[-1])
                     diff = tf.reduce_mean(tf.math.squared_difference(domain1_pred, domain2_pred))
+                    # log semantic loss
+                    self.hist_semantic_loss.append(diff)
                     g1_loss = g1_loss + diff * args.semantic_weight
                     g2_loss = g2_loss + diff * args.semantic_weight
 
@@ -134,6 +138,9 @@ class CoGANTrainer(object):
                     fake_recon_loss2 = l.recon_criterion(fake_recon2[-1], gen2_fake[-1])
 
                     total_recon_loss = noise_recon_loss1 + noise_recon_loss2
+
+                    # log cycle loss
+                    self.hist_cycle_loss.append(total_recon_loss)
 
                     g1_loss = g1_loss + (total_recon_loss * args.cycle_weight)
                     g2_loss = g2_loss + (total_recon_loss * args.cycle_weight)
@@ -215,6 +222,8 @@ class CoGANTrainer(object):
         plt.ylabel('Loss')
         plt.legend()
         plt.savefig(os.path.join(dir, 'losses/gen_loss.png'))
+        np.save(os.path.join(dir, 'losses/g1_loss.npy'),self.hist_g1)
+        np.save(os.path.join(dir, 'losses/g2_loss.npy'),self.hist_g2)
         plt.close()
 
         plt.plot(self.hist_d1, label='Discriminator 1 loss')
@@ -223,6 +232,8 @@ class CoGANTrainer(object):
         plt.ylabel('Loss')
         plt.legend()
         plt.savefig(os.path.join(dir, 'losses/disc_loss.png'))
+        np.save(os.path.join(dir, 'losses/d1_loss.npy'),self.hist_d1)
+        np.save(os.path.join(dir, 'losses/d2_loss.npy'),self.hist_d2)
         plt.close()
 
         plt.plot(self.hist_weight_similarity, label='weight differences')
@@ -230,6 +241,22 @@ class CoGANTrainer(object):
         plt.ylabel('Difference')
         plt.legend()
         plt.savefig(os.path.join(dir, 'losses/weight_diff.png'))
+        plt.close()
+
+        plt.plot(self.hist_semantic_loss, label='semantic loss')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.savefig(os.path.join(dir, 'losses/semantic_loss.png'))
+        np.save(os.path.join(dir, 'losses/semantic_loss.npy'),self.hist_semantic_loss)
+        plt.close()
+
+        plt.plot(self.hist_cycle_loss, label='Cycle loss')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.savefig(os.path.join(dir, 'losses/cycle_loss.png'))
+        np.save(os.path.join(dir, 'losses/cycle_loss.npy'),self.hist_cycle_loss)
         plt.close()
 
     def clip_weights(self, clip):
