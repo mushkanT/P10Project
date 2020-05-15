@@ -6,6 +6,7 @@ import numpy as np
 import os
 import Penalties as p
 import Losses as l
+import Utils as u
 
 
 class GANTrainer(object):
@@ -49,10 +50,7 @@ class GANTrainer(object):
                     batch2 = next(it2)[0]
 
                 # Sample noise as generator input
-                if args.noise_type == 'normal':
-                    noise = tf.random.normal(shape=(args.batch_size, args.noise_dim))
-                elif args.noise_type == 'uniform':
-                    noise = tf.random.uniform(shape=(args.batch_size, args.noise_dim), minval=-1, maxval=1)
+                noise = u.gen_noise(args)
 
                 # Generate a batch of new images
                 gen_batch1 = self.g1(noise, training=True)
@@ -94,7 +92,7 @@ class GANTrainer(object):
             # ------------------
 
             # Sample noise as generator input
-            noise = tf.random.normal([args.batch_size, args.noise_dim])
+            noise = u.gen_noise(args)
 
             with tf.GradientTape() as tape:
                 gen_fake = self.g1(noise, training=True)

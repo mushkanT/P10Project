@@ -83,10 +83,20 @@ def select_weight_init(init_arg):
     elif init_arg == 'he':
         init = tf.keras.initializers.he_normal()
     elif init_arg == 'xavier':
-        init = tf.keras.initializers.glorot_normal()
+        init = tf.keras.initializers.glorot_uniform()
     else:
         raise NotImplementedError()
     return init
+
+
+def gen_noise(args):
+    if args.noise_type == 'normal':
+        noise = tf.random.normal([args.num_samples_to_gen, args.noise_dim])
+    elif args.noise_type == 'uniform':
+        noise = tf.random.uniform(shape=(args.batch_size, args.noise_dim), minval=-1, maxval=1)
+    else:
+        raise NotImplementedError()
+    return noise
 
 
 # spherical linear interpolation (slerp)

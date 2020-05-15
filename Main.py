@@ -41,10 +41,11 @@ parser.add_argument('--label_smooth',   type=bool,          default=False,      
 parser.add_argument('--input_noise',    type=bool,          default=False,      help='Add gaussian noise to the discriminator inputs')
 parser.add_argument('--purpose',        type=str,		    default='',		    help='purpose of this experiment')
 parser.add_argument('--grayscale',      type=bool,		    default=False)
-parser.add_argument('--weight_decay', type=float, default=0)
-parser.add_argument('--bias_init', type=float, default=0)
-parser.add_argument('--noise_type', type=str, default='normal', help='normal | uniform')
-parser.add_argument('--weight_init', type=str, default='normal', help='normal (0.02 mean)| xavier | he')
+parser.add_argument('--weight_decay',   type=float,         default=0.0001)
+parser.add_argument('--bias_init',      type=float,         default=0.1)
+parser.add_argument('--prelu_init',     type=float,         default=0.25)
+parser.add_argument('--noise_type',     type=str,           default='normal',   help='normal | uniform')
+parser.add_argument('--weight_init',    type=str,           default='normal',   help='normal (0.02 mean)| xavier | he')
 
 
 # CoGAN
@@ -56,13 +57,13 @@ args = parser.parse_args()
 
 # Debugging
 
-#args.gan_type = "128"
+#args.gan_type = "cogan"
 #args.loss = 'ce'
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-#args.g_arch = 'face'
-#args.d_arch = 'face'
+#args.g_arch = 'digit'
+#args.d_arch = 'digit'
 #args.batch_size = 16
-#args.cogan_data = 'Eyeglasses'
+#args.cogan_data = 'mnist2edge'
 #args.dataset = 'celeba'
 #args.weight_init='xavier'
 #args.disc_penalty = 'wgan-gp'
@@ -79,10 +80,7 @@ args.bi = tf.keras.initializers.Constant(args.bias_init)
 args.w_init = u.select_weight_init(args.weight_init)
 
 # We will reuse this seed overtime for visualization
-if args.noise_type == 'normal':
-    args.seed = tf.random.normal([args.num_samples_to_gen, args.noise_dim])
-elif args.noise_type == 'uniform':
-    args.seed = tf.random.uniform(shape=(args.batch_size, args.noise_dim), minval=-1, maxval=1)
+args.seed = u.gen_noise(args)
 
 # Set random seeds for reproducability
 tf.random.set_seed(2020)
