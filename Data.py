@@ -220,10 +220,13 @@ def load_celeba_data_classifier(batch_size):
     dataset = np.array(dataset)
     X1 = dataset[mask]
 
-    X1 = X1[7000:]
-    X2 = X1[:7000]
-    L1 = np.asarray(labels[7000:])
-    L2 = np.asarray(labels[:7000])
+    X1 = X1[:200000]
+    labels = labels[:200000]
+
+    X1 = X1[8000:]
+    X2 = X1[:8000]
+    L1 = np.asarray(labels[8000:])
+    L2 = np.asarray(labels[:8000])
     L1[L1 == -1] = 0
     L2[L2 == -1] = 0
     X1_num_examples = len(X1)
