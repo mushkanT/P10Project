@@ -395,4 +395,8 @@ def mnist_cogan(batch_size, data):
         X1 = X1.map(format_example_to32_2)
         X2 = X2.map(format_example_to32_2)
 
+        X1 = X1.map(lambda img: tf.image.grayscale_to_rgb(img))
+        X2 = X2.map(lambda img: tf.image.grayscale_to_rgb(img))
+
+
     return X1, X2
