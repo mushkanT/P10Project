@@ -164,7 +164,7 @@ elif args.gan_type == 'classifier':
     #it_test = iter(newTestSet)
 
     #celeba a
-    x1, x2 = data.load_celeba_data_classifier()
+    x1, x2 = data.load_celeba_data_classifier(args.batch_size)
     newDataset = x1[0]
     newTestSet = x2[0]
     labels_train = x1[1]

@@ -168,9 +168,6 @@ def select_dataset_cogan(args):
         X1 = tf.data.Dataset.from_tensor_slices(X1)
         X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(X2))
 
-        X1 = tf.data.Dataset.from_tensor_slices(X1)
-        X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(X2))
-
         X1 = X1.map(format_example_to128).shuffle(X1_num_examples).repeat().batch(args.batch_size)
         X2 = X2.map(format_example_to128).shuffle(X2_num_examples).repeat().batch(args.batch_size)
         shape = X2.element_spec.shape
@@ -181,7 +178,7 @@ def select_dataset_cogan(args):
     return X1, X2, shape
 
 
-def load_celeba_data_classifier():
+def load_celeba_data_classifier(batch_size):
     #lines = [line.rstrip() for line in open('C:/Users/marku/Desktop/list_attr_celeba.txt', 'r')]
     lines = [line.rstrip() for line in open('/user/student.aau.dk/mjuuln15/list_attr_celeba.txt', 'r')]
     all_attr_names = lines[1].split()
@@ -195,7 +192,7 @@ def load_celeba_data_classifier():
         attr2idx[attr_name] = i
         idx2attr[i] = attr_name
     lines = lines[2:]
-    for i, line in enumerate(lines[:3700]):
+    for i, line in enumerate(lines):
         split = line.split()
         values = split[1:]
 
@@ -222,21 +219,37 @@ def load_celeba_data_classifier():
     mask = np.array(mask)
     dataset = np.array(dataset)
     X1 = dataset[mask]
-    cast = lambda image: tf.cast(image, tf.float32)
-    scale = lambda image: (image - 127.5) / 127.5
-    crop = lambda image: tf.image.central_crop(image, 0.7)
-    resize = lambda image: tf.image.resize(image, [128, 128], antialias=True)
-    X1 = cast(X1)
-    X1 = scale(X1)
-    X1 = crop(X1)
-    X1 = resize(X1)
 
-    X1 = X1[5000:]
-    X2 = X1[:5000]
-    L1 = np.asarray(labels[5000:])
-    L2 = np.asarray(labels[:5000])
+    X1 = X1[7000:]
+    X2 = X1[:7000]
+    L1 = np.asarray(labels[7000:])
+    L2 = np.asarray(labels[:7000])
     L1[L1 == -1] = 0
     L2[L2 == -1] = 0
+    X1_num_examples = len(X1)
+    X2_num_examples = len(X2)
+
+    X1 = tf.data.Dataset.from_tensor_slices(X1)
+    X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(X2))
+
+    X1 = X1.map(format_example_to128)
+    X2 = X2.map(format_example_to128)
+
+    X1 = tfds.as_numpy(X1)
+    X2 = tfds.as_numpy(X2)
+
+    test=[]
+    for i in X1:
+        test.extend(i)
+    test = np.asarray(test)
+    X1 = np.reshape(test,(X1_num_examples,128,128,3))
+
+    test=[]
+    for i in X2:
+        test.extend(i)
+    test = np.asarray(test)
+    X2 = np.reshape(test,(X2_num_examples,128,128,3))
+
     X1 = [X1, L1]
     X2 = [X2, L2]
 
