@@ -128,7 +128,7 @@ def select_dataset_cogan(args):
         X1 = X1.shuffle(num_examples).repeat().batch(args.batch_size)
 
         # Domain 2
-        svhn_np = np.load('/user/student.aau.dk/palmin15/P9Project/40_svhn.npy')
+        svhn_np = np.load('/user/student.aau.dk/palmin15/40_svhn.npy')
         X2_num_examples = len(svhn_np)
         X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(svhn_np))
         X2 = X2.shuffle(X2_num_examples).repeat().batch(args.batch_size)
