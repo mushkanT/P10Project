@@ -164,7 +164,7 @@ elif args.gan_type == 'classifier':
     #it_test = iter(newTestSet)
 
     #celeba a
-    x1, x2 = data.load_celeba_data_classifier()
+    x1, x2 = data.load_celeba_data_classifier(args.batch_size)
     newDataset = x1[0]
     newTestSet = x2[0]
     labels_train = x1[1]
@@ -186,7 +186,7 @@ elif args.gan_type == 'classifier':
     model = nets.celeba_classifier(args, num_classes)
     model.compile(loss='binary_crossentropy', optimizer=tf.keras.optimizers.Adam(), metrics=['accuracy'])
 
-    model.fit(newDataset[:2000],labels_train[:2000],batch_size=16, epochs=args.epochs, verbose=1, validation_data=(newTestSet, labels_eval))
+    model.fit(newDataset, labels_train, batch_size=16, epochs=args.epochs, verbose=1, validation_data=(newTestSet, labels_eval))
     score = model.evaluate(newTestSet[0], newTestSet[1], verbose=0)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
