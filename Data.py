@@ -115,8 +115,26 @@ def select_dataset_cogan(args):
         X2 = X2.map(format_example_to32)
         #test2 = test2.map(format_example_to32)
         num_examples = info.splits['train'].num_examples
-        X2 = X2.shuffle(num_examples).repeat().batch(args.batch_size)
+        X2 = X2.batch(args.batch_size)
         shape = X1.element_spec[0].shape
+
+    elif args.cogan_data == 'mnist2svhn_prune':
+        # Domain 1
+        data, info = tfds.load('mnist', with_info=True, as_supervised=True)
+        X1, test1 = data['train'], data['test']
+        X1 = X1.map(format_example_g2rgb)
+        # test1 = test1.map(format_example_g2rgb)
+        num_examples = info.splits['train'].num_examples
+        X1 = X1.shuffle(num_examples).repeat().batch(args.batch_size)
+
+        # Domain 2
+        svhn_np = np.load('/user/student.aau.dk/palmin15/P9Project/40_svhn.npy')
+        X2_num_examples = len(svhn_np)
+        X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(svhn_np))
+        X2 = X2.shuffle(X2_num_examples).repeat().batch(args.batch_size)
+        shape = X1.element_spec[0].shape
+
+
 
     elif args.cogan_data in ['apple2orange', 'horse2zebra', 'vangogh2photo', 'cityscapes']:
         # Domains

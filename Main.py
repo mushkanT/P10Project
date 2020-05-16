@@ -192,6 +192,43 @@ elif args.gan_type == 'classifier':
     print('Test accuracy:', score[1])
     model.save('classifier')
 
+elif args.gan_type == 'svhn_prune':
+    model = tf.keras.models.load_model('classifier2')
+    x1,x2,shape = data.select_dataset_cogan(args)
+    img_index = []
+
+    it1 = iter(x2)
+    batch = next(it1)
+    labels = batch[1]
+    batch = batch[0]
+    results = model.predict(batch)
+
+    for i in range(0,len(results)):
+        max_value = np.max(results[i])
+        if max_value < 0.4:
+            img_index.append(i)
+    remaining = len(img_index)
+    """
+    batch = 0.5 * batch + 0.5
+    fig, axs = plt.subplots(4, 4)
+    cnt = 0
+    for i in range(4):
+        for j in range(4):
+            axs[i, j].imshow(batch[img_index[cnt], :, :, :])
+            axs[i, j].axis('off')
+            cnt += 1
+    fig.show()
+    """
+    img_index = frozenset(img_index)
+    batch = [i for j, i in enumerate(batch) if j not in img_index]
+    newBatch = []
+    for index, ele in enumerate(batch):
+        newBatch.append(ele.numpy())
+    newBatch = np.asarray(newBatch)
+    newlen = len(newBatch)
+    np.save('c:/users/palmi/desktop/40_svhn.npy',newBatch)
+
+
 else:
     # Choose data
 

@@ -53,6 +53,9 @@ class CoGANTrainer(object):
                 if args.cogan_data in ['mnist2edge', 'Eyeglasses']:
                     batch1 = next(it1)
                     batch2 = next(it2)
+                elif args.cogan_data == 'mnist2svhn_prune':
+                    batch1 = next(it1)[0]
+                    batch2 = next(it2)
                 else:
                     batch1 = next(it1)[0]
                     batch2 = next(it2)[0]
