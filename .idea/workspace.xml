@@ -228,18 +228,10 @@
       <workItem from="1589360238970" duration="11903000" />
       <workItem from="1589443487733" duration="5657000" />
       <workItem from="1589533055352" duration="16947000" />
-      <workItem from="1589615108799" duration="2911000" />
+      <workItem from="1589615108799" duration="3510000" />
+      <workItem from="1589702976043" duration="1246000" />
     </task>
     <servers />
-  </component>
-  <component name="TodoView" selected-index="1">
-    <todo-panel id="selected-file">
-      <is-autoscroll-to-source value="true" />
-    </todo-panel>
-    <todo-panel id="all">
-      <are-packages-shown value="true" />
-      <is-autoscroll-to-source value="true" />
-    </todo-panel>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />

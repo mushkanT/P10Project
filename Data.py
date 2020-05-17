@@ -115,7 +115,7 @@ def select_dataset_cogan(args):
         X2 = X2.map(format_example_to32)
         #test2 = test2.map(format_example_to32)
         num_examples = info.splits['train'].num_examples
-        X2 = X2.batch(args.batch_size)
+        X2 = X2.shuffle(num_examples).repeat().batch(args.batch_size)
         shape = X1.element_spec[0].shape
 
     elif args.cogan_data == 'mnist2svhn_prune':
