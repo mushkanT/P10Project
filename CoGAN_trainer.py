@@ -7,6 +7,7 @@ import os
 import Penalties as p
 import Losses as l
 import Nets as n
+import Utils as u
 
 
 class CoGANTrainer(object):
@@ -63,7 +64,7 @@ class CoGANTrainer(object):
                     batch2 = next(it2)[0]
 
                 # Sample noise as generator input
-                noise = tf.random.normal([args.batch_size, args.noise_dim])
+                noise = u.gen_noise(args)
 
                 # Generate a batch of new images
                 gen_batch1 = self.g1(noise, training=True)
@@ -105,8 +106,9 @@ class CoGANTrainer(object):
             # ------------------
             #  Train Generators
             # ------------------
-            noise = tf.random.normal([args.batch_size, args.noise_dim])
-            
+
+            # Sample noise as generator input
+            noise = u.gen_noise(args)
             with tf.GradientTape() as tape1, tf.GradientTape() as tape2, tf.GradientTape() as tape3:
                 # Adv loss
                 gen1_fake = self.g1(noise, training=True)
@@ -190,6 +192,7 @@ class CoGANTrainer(object):
             if epoch % args.images_while_training == 0:
                 self.sample_images(epoch, args.seed, args.dir, args.dataset_dim[3])
         self.plot_losses(args.dir)
+        self.sample_images(epoch, args.seed, args.dir, args.dataset_dim[3])
         return self.full_training_time
 
     def sample_images(self, epoch, seed, dir, channels):

@@ -43,6 +43,12 @@ parser.add_argument('--label_smooth',   type=bool,          default=False,      
 parser.add_argument('--input_noise',    type=bool,          default=False,      help='Add gaussian noise to the discriminator inputs')
 parser.add_argument('--purpose',        type=str,		    default='',		    help='purpose of this experiment')
 parser.add_argument('--grayscale',      type=bool,		    default=False)
+parser.add_argument('--weight_decay',   type=float,         default=0.0001)
+parser.add_argument('--bias_init',      type=float,         default=0.1)
+parser.add_argument('--prelu_init',     type=float,         default=0.25)
+parser.add_argument('--noise_type',     type=str,           default='normal',   help='normal | uniform')
+parser.add_argument('--weight_init',    type=str,           default='normal',   help='normal (0.02 mean)| xavier | he')
+
 
 # CoGAN
 parser.add_argument('--g_arch',         type=str,           default='digit_noshare',       help='digit | rotate | 256 | face | digit_noshare')
@@ -62,11 +68,12 @@ tf.image.resize
 #args.gan_type = "classifier"
 #args.loss = 'ce'
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-#args.g_arch = '128'
-#args.d_arch = '128'
+#args.g_arch = 'digit'
+#args.d_arch = 'digit'
 #args.batch_size = 16
-#args.cogan_data = 'Eyeglasses'
-#args.dataset = 'apple2orange'
+#args.cogan_data = 'mnist2edge'
+#args.dataset = 'celeba'
+#args.weight_init='xavier'
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'feature'
 #args.scale_data = 64
@@ -76,12 +83,12 @@ tf.image.resize
 #args.limit_dataset = True
 
 
-#o2i.load_images('C:/Users/marku/Desktop/GAN_training_output')
-#o2i.test_trunc_trick(args)
+args.wd = tf.keras.regularizers.l2(args.weight_decay)
+args.bi = tf.keras.initializers.Constant(args.bias_init)
+args.w_init = u.select_weight_init(args.weight_init)
 
 # We will reuse this seed overtime for visualization
-args.seed = tf.random.normal([args.num_samples_to_gen, args.noise_dim])
-#args.seed = np.random.normal(0, 1, args.num_samples_to_gen, 100)
+args.seed = u.gen_noise(args)
 
 # Set random seeds for reproducability
 tf.random.set_seed(2020)
@@ -106,6 +113,8 @@ elif args.optim_d == "sgd":
     args.disc_optimizer = tf.keras.optimizers.SGD(learning_rate=1e-3)
 else:
     raise NotImplementedError()
+
+
 
 # Choose gan type
 if args.gan_type == 'cogan':
