@@ -59,6 +59,8 @@ parser.add_argument('--semantic_weight',type=int,           default=10, help='We
 parser.add_argument('--classifier_path',type=str,           default=None, help='Path to the classifier used for semantic loss')
 parser.add_argument('--use_cycle',      type=bool,          default=False, help='Turn on the cycle consistency loss')
 parser.add_argument('--cycle_weight',   type=int,           default=10, help='Weight for the cycle gan loss')
+parser.add_argument('--use_firstlayer', type=bool,          default=False, help='If using firstlayer corresponds with Torch, else with caffe')
+parser.add_argument('--shared_layers', type=int,            default=2, help='Number of layers to calculate feature/weight regularizer from')
 args = parser.parse_args()
 
 

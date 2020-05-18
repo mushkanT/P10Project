@@ -128,7 +128,7 @@ class CoGANTrainer(object):
                     g1_loss = g1_loss + diff * args.semantic_weight
                     g2_loss = g2_loss + diff * args.semantic_weight
 
-                penalty = self.genPenal.calc_penalty(self.g1, self.g2, 4, args, gen1_fake, gen2_fake)
+                penalty = self.genPenal.calc_penalty(self.g1, self.g2, args.shared_layers, args, gen1_fake, gen2_fake)
                 g1_loss = g1_loss + (penalty * args.penalty_weight_g)
                 g2_loss = g2_loss + (penalty * args.penalty_weight_g)
 
