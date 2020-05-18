@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="220b69cb-c454-4d63-b603-ea792d470aba" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Data.py" beforeDir="false" afterPath="$PROJECT_DIR$/Data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CoGAN_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/CoGAN_trainer.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -229,7 +229,8 @@
       <workItem from="1589443487733" duration="5657000" />
       <workItem from="1589533055352" duration="16947000" />
       <workItem from="1589615108799" duration="3510000" />
-      <workItem from="1589702976043" duration="1246000" />
+      <workItem from="1589702976043" duration="1920000" />
+      <workItem from="1589789491232" duration="2603000" />
     </task>
     <servers />
   </component>
@@ -279,7 +280,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/CoGAN_trainer.py</url>
-          <line>227</line>
+          <line>231</line>
           <option name="timeStamp" value="684" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

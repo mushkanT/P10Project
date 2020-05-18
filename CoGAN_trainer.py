@@ -19,6 +19,8 @@ class CoGANTrainer(object):
         self.hist_semantic_loss = []
         self.hist_cycle_loss = []
         self.hist_weight_similarity = []
+        self.hist_discpenalty1 = []
+        self.hist_discpenalty2 = []
         self.X1 = domain1
         self.X2 = domain2
         self.full_training_time = 0
@@ -75,6 +77,7 @@ class CoGANTrainer(object):
                     # Calc loss and penalty
                     d1_loss = d_loss_fn(disc_fake1, disc_real1)
                     gp1 = self.discPenal.calc_penalty(gen_batch1[-1], batch1, self.d1, args)  # if loss is not wgan-gp then gp=0
+                    self.hist_discpenalty1.append(gp1)
                     d1_loss = d1_loss + (gp1 * args.penalty_weight_d)
                 gradients_of_discriminator = tape.gradient(d1_loss, self.d1.trainable_variables)
                 args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d1.trainable_variables))
@@ -91,6 +94,7 @@ class CoGANTrainer(object):
                     # Calc loss and penalty
                     d2_loss = d_loss_fn(disc_fake2, disc_real2)
                     gp2 = self.discPenal.calc_penalty(gen_batch2[-1], batch2, self.d2, args)  # if loss is not wgan-gp then gp=0
+                    self.hist_discpenalty2.append(gp2)
                     d2_loss = d2_loss + (gp2 * args.penalty_weight_d)
                 gradients_of_discriminator = tape.gradient(d2_loss, self.d2.trainable_variables)
                 args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.d2.trainable_variables))
@@ -221,7 +225,7 @@ class CoGANTrainer(object):
     def plot_losses(self, dir):
         plt.plot(self.hist_g1, label='Generator 1 loss')
         plt.plot(self.hist_g2, label='Generator 2 loss')
-        plt.xlabel('Epochs')
+        plt.xlabel('Iterations')
         plt.ylabel('Loss')
         plt.legend()
         plt.savefig(os.path.join(dir, 'losses/gen_loss.png'))
@@ -231,7 +235,7 @@ class CoGANTrainer(object):
 
         plt.plot(self.hist_d1, label='Discriminator 1 loss')
         plt.plot(self.hist_d2, label='Discriminator 2 loss')
-        plt.xlabel('Epochs')
+        plt.xlabel('Iterations')
         plt.ylabel('Loss')
         plt.legend()
         plt.savefig(os.path.join(dir, 'losses/disc_loss.png'))
@@ -239,15 +243,25 @@ class CoGANTrainer(object):
         np.save(os.path.join(dir, 'losses/d2_loss.npy'),self.hist_d2)
         plt.close()
 
+        plt.plot(self.hist_discpenalty1, label='DiscPenalty 1')
+        plt.plot(self.hist_discpenalty2, label='DiscPenalty 2')
+        plt.xlabel('Iterations')
+        plt.ylabel('Penalty Value')
+        plt.legend()
+        plt.savefig(os.path.join(dir, 'losses/disc_penalty.png'))
+        np.save(os.path.join(dir, 'losses/d1_penalty.npy'),self.hist_discpenalty1)
+        np.save(os.path.join(dir, 'losses/d2_penalty.npy'),self.hist_discpenalty2)
+
+
         plt.plot(self.hist_weight_similarity, label='weight differences')
-        plt.xlabel('Epochs')
+        plt.xlabel('Iterations')
         plt.ylabel('Difference')
         plt.legend()
         plt.savefig(os.path.join(dir, 'losses/weight_diff.png'))
         plt.close()
 
         plt.plot(self.hist_semantic_loss, label='semantic loss')
-        plt.xlabel('Epochs')
+        plt.xlabel('Iterations')
         plt.ylabel('Loss')
         plt.legend()
         plt.savefig(os.path.join(dir, 'losses/semantic_loss.png'))
@@ -255,7 +269,7 @@ class CoGANTrainer(object):
         plt.close()
 
         plt.plot(self.hist_cycle_loss, label='Cycle loss')
-        plt.xlabel('Epochs')
+        plt.xlabel('Iterations')
         plt.ylabel('Loss')
         plt.legend()
         plt.savefig(os.path.join(dir, 'losses/cycle_loss.png'))
