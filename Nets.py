@@ -29,21 +29,21 @@ def encoder(args):
     model = keras.Sequential()
 
     # normal
-    model.add(layers.Conv2D(64, (3, 3), padding='same', input_shape=[input_dim, input_dim, channels], kernel_initializer=args.w_init))
+    model.add(layers.Conv2D(64, (3, 3), padding='same', input_shape=[input_dim, input_dim, channels]))
     model.add(layers.LeakyReLU(alpha=0.2))
     # downsample
-    model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same', kernel_initializer=args.w_init))
+    model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same'))
     model.add(layers.LeakyReLU(alpha=0.2))
     # downsample
-    model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same', kernel_initializer=args.w_init))
+    model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same'))
     model.add(layers.LeakyReLU(alpha=0.2))
     # downsample
-    model.add(layers.Conv2D(256, (3, 3), strides=(2, 2), padding='same', kernel_initializer=args.w_init))
+    model.add(layers.Conv2D(256, (3, 3), strides=(2, 2), padding='same'))
     model.add(layers.LeakyReLU(alpha=0.2))
     # classifier
     model.add(layers.Flatten())
     model.add(layers.Dropout(0.4))
-    model.add(layers.Dense(args.noise_dim, kernel_initializer=args.w_init))
+    model.add(layers.Dense(args.noise_dim))
     # compile model
     return model
 

@@ -36,7 +36,7 @@ class DiscriminatorPenalties:
 class GeneratorPenalties:
     def weight_regularizer(self, g1, g2, shared_layers):
         distance = 0
-        for idx in range(shared_layers):
+        for idx in range(len(g1.trainable_variables)):
             distance = distance + tf.reduce_mean(tf.math.squared_difference(g1.trainable_variables[idx], g2.trainable_variables[idx]))
         return distance
 

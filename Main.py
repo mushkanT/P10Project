@@ -43,7 +43,7 @@ parser.add_argument('--label_smooth',   type=bool,          default=False,      
 parser.add_argument('--input_noise',    type=bool,          default=False,      help='Add gaussian noise to the discriminator inputs')
 parser.add_argument('--purpose',        type=str,		    default='',		    help='purpose of this experiment')
 parser.add_argument('--grayscale',      type=bool,		    default=False)
-parser.add_argument('--weight_decay',   type=float,         default=0.0001)
+parser.add_argument('--weight_decay',   type=float,         default=0.0005)
 parser.add_argument('--bias_init',      type=float,         default=0.1)
 parser.add_argument('--prelu_init',     type=float,         default=0.25)
 parser.add_argument('--noise_type',     type=str,           default='normal',   help='normal | uniform')
