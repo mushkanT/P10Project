@@ -25,7 +25,9 @@ def draw_samples(model, test_input):
 
 def write_config(args):
     file = open(os.path.join(args.dir, 'config.txt'), 'w')
-    file.write(str(args))
+    for ele in vars(args):
+        if str(ele) != 'seed':
+            file.write(str(ele) + ': ' + str(vars(args)[ele]) + '\n')
     file.close()
 
 
@@ -91,7 +93,7 @@ def select_weight_init(init_arg):
 
 def gen_noise(args):
     if args.noise_type == 'normal':
-        noise = tf.random.normal([args.num_samples_to_gen, args.noise_dim])
+        noise = tf.random.normal([args.batch_size, args.noise_dim])
     elif args.noise_type == 'uniform':
         noise = tf.random.uniform(shape=(args.batch_size, args.noise_dim), minval=-1, maxval=1)
     else:
