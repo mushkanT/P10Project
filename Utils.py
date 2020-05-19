@@ -92,11 +92,17 @@ def select_weight_init(init_arg):
     return init
 
 
-def gen_noise(args):
+def gen_noise(args, gen_sample_seed=False):
     if args.noise_type == 'normal':
-        noise = tf.random.normal([args.batch_size, args.noise_dim])
+        if gen_sample_seed:
+            noise = tf.random.normal([args.num_samples_to_gen, args.noise_dim])
+        else:
+            noise = tf.random.normal([args.batch_size, args.noise_dim])
     elif args.noise_type == 'uniform':
-        noise = tf.random.uniform(shape=(args.batch_size, args.noise_dim), minval=-1, maxval=1)
+        if gen_sample_seed:
+            noise = tf.random.uniform(shape=(args.num_samples_to_gen, args.noise_dim), minval=-1, maxval=1)
+        else:
+            noise = tf.random.uniform(shape=(args.batch_size, args.noise_dim), minval=-1, maxval=1)
     else:
         raise NotImplementedError()
     return noise

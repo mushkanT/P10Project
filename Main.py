@@ -63,8 +63,6 @@ parser.add_argument('--use_firstlayer', type=bool,          default=False, help=
 parser.add_argument('--shared_layers', type=int,            default=2, help='Number of layers to calculate feature/weight regularizer from')
 args = parser.parse_args()
 
-
-tf.image.resize
 # Debugging
 
 #args.gan_type = "classifier"
@@ -90,7 +88,7 @@ args.bi = tf.keras.initializers.Constant(args.bias_init)
 args.w_init = u.select_weight_init(args.weight_init)
 
 # We will reuse this seed overtime for visualization
-args.seed = u.gen_noise(args)
+args.seed = u.gen_noise(args, gen_sample_seed=True)
 
 # Set random seeds for reproducability
 tf.random.set_seed(2020)
@@ -161,6 +159,18 @@ if args.gan_type == 'cogan':
     discriminator2.save(args.dir + '/discriminator2')
     if args.use_cycle:
         ganTrainer.encoder.save(args.dir + '/encoder')
+
+
+elif args.gan_type =='sampler':
+    np.load('c:/users/palmi/desktop/Experiments/39056/losses/')
+
+    g1 = tf.keras.models.load_model('c:/users/palmi/desktop/Experiments/39056/generator1')
+    g2 = tf.keras.models.load_model('c:/users/palmi/desktop/Experiments/39056/generator2')
+
+    ct_trainer = cogan_t.CoGANTrainer(g1,g2,None,None,None,None)
+
+    ct_trainer.sample_images(epoch=6000, seed=args.seed, dir='c:/users/palmi/desktop/experiments/39056/',channels=3)
+
 
 
 

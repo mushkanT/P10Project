@@ -253,6 +253,7 @@ class CoGANTrainer(object):
         plt.savefig(os.path.join(dir, 'losses/disc_penalty.png'))
         np.save(os.path.join(dir, 'losses/d1_penalty.npy'),self.hist_discpenalty1)
         np.save(os.path.join(dir, 'losses/d2_penalty.npy'),self.hist_discpenalty2)
+        plt.close()
 
 
         plt.plot(self.hist_weight_similarity, label='weight differences')
@@ -260,6 +261,7 @@ class CoGANTrainer(object):
         plt.ylabel('Difference')
         plt.legend()
         plt.savefig(os.path.join(dir, 'losses/weight_diff.png'))
+        np.save(os.path.join(dir, 'losses/weight_diff.npy'),self.hist_weight_similarity)
         plt.close()
 
         plt.plot(self.hist_semantic_loss, label='semantic loss')
