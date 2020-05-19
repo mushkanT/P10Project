@@ -80,7 +80,7 @@ args.bi = tf.keras.initializers.Constant(args.bias_init)
 args.w_init = u.select_weight_init(args.weight_init)
 
 # We will reuse this seed overtime for visualization
-args.seed = u.gen_noise(args)
+args.seed = u.gen_noise(args, gen_noise_seed=True)
 
 # Set random seeds for reproducability
 tf.random.set_seed(2020)
