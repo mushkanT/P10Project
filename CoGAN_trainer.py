@@ -51,7 +51,6 @@ class CoGANTrainer(object):
             # ----------------------
 
             for i in range(args.disc_iters):
-                noise = tf.random.normal([args.batch_size, args.noise_dim])
                 # Select a random batch of images
                 if args.cogan_data in ['mnist2edge', 'Eyeglasses']:
                     batch1 = next(it1)
