@@ -226,6 +226,7 @@
       <workItem from="1589789491232" duration="2603000" />
       <workItem from="1589802615347" duration="11456000" />
       <workItem from="1589871961114" duration="5651000" />
+      <workItem from="1589961303808" duration="2629000" />
     </task>
     <servers />
   </component>
@@ -275,17 +276,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Main.py</url>
-          <line>240</line>
-          <option name="timeStamp" value="688" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Main.py</url>
-          <line>166</line>
+          <line>266</line>
           <option name="timeStamp" value="692" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/CoGAN_trainer.py</url>
-          <line>163</line>
+          <line>213</line>
           <option name="timeStamp" value="693" />
         </line-breakpoint>
       </breakpoints>
