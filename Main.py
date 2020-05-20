@@ -60,12 +60,11 @@ args = parser.parse_args()
 #args.gan_type = "cogan"
 #args.loss = 'ce'
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-#args.g_arch = 'digit'
-#args.d_arch = 'digit'
+#args.g_arch = 'face'
+#args.d_arch = 'face'
 #args.batch_size = 16
-#args.cogan_data = 'mnist2edge'
+#args.cogan_data = 'Blond_Hair'
 #args.dataset = 'celeba'
-#args.weight_init='xavier'
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'weight'
 #args.label_smooth=True
@@ -80,7 +79,7 @@ args.bi = tf.keras.initializers.Constant(args.bias_init)
 args.w_init = u.select_weight_init(args.weight_init)
 
 # We will reuse this seed overtime for visualization
-args.seed = u.gen_noise(args)
+args.seed = u.gen_noise(args, gen_noise_seed=True)
 
 # Set random seeds for reproducability
 tf.random.set_seed(2020)

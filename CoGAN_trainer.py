@@ -42,7 +42,7 @@ class GANTrainer(object):
 
             for i in range(args.disc_iters):
                 # Select a random batch of images
-                if args.cogan_data in ['mnist2edge', 'Eyeglasses']:
+                if args.cogan_data in ['mnist2edge', 'Eyeglasses', 'Smiling', 'Blond_Hair', 'Male']:
                     batch1 = next(it1)
                     batch2 = next(it2)
                 else:
