@@ -81,7 +81,7 @@ def select_gan_architecture(args):
 
 def select_weight_init(init_arg):
     if init_arg == 'normal':
-        init = tf.keras.initializers.RandomNormal(0.02)
+        init = tf.keras.initializers.RandomNormal(stddev=0.02)
     elif init_arg == 'he':
         init = tf.keras.initializers.he_normal()
     elif init_arg == 'xavier':
