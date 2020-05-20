@@ -128,7 +128,7 @@ def select_dataset_cogan(args):
         X2 = X2.shuffle(num_examples).repeat().batch(args.batch_size)
         shape = (None, 256, 256, 3)
 
-    elif args.cogan_data in ['Eyeglasses']:
+    elif args.cogan_data in ['Eyeglasses', 'Smiling', 'Blond_Hair', 'Male']:
         #lines = [line.rstrip() for line in open('C:/Users/marku/Desktop/list_attr_celeba.txt', 'r')]
         lines = [line.rstrip() for line in open('/user/student.aau.dk/mjuuln15/list_attr_celeba.txt', 'r')]
         all_attr_names = lines[1].split()
@@ -143,7 +143,7 @@ def select_dataset_cogan(args):
         for i, line in enumerate(lines):
             split = line.split()
             values = split[1:]
-            for attr_name in ['Eyeglasses']:
+            for attr_name in [args.cogan_data]:
                 idx = attr2idx[attr_name]
                 label = (values[idx] == '1')
             mask.append(label)
@@ -167,6 +167,7 @@ def select_dataset_cogan(args):
         X1 = X1.map(format_example_to128).shuffle(X1_num_examples).repeat().batch(args.batch_size)
         X2 = X2.map(format_example_to128).shuffle(X2_num_examples).repeat().batch(args.batch_size)
         shape = X2.element_spec.shape
+
     else:
         raise NotImplementedError()
 
