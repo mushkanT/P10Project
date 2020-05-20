@@ -614,6 +614,188 @@ def cogan_discriminators_rotate(args):
 
     return keras.Model(img1, validity1), keras.Model(img2, validity2)
 
+# Faces No share
+def cogan_generators_faces_noshare(args):
+    channels = args.dataset_dim[3]
+
+    output1 = []
+    output2 = []
+
+    # Shared weights between generators
+    noise = tf.keras.layers.Input(shape=(args.noise_dim,))
+
+    model = tf.keras.layers.Dense(1024 * 4 * 4, kernel_initializer=args.w_init, kernel_regularizer=args.wd,
+                                  bias_initializer=args.bi)(noise)
+    model = tf.keras.layers.Reshape((4, 4, 1024))(model)
+    model = (tf.keras.layers.BatchNormalization())(model)
+    model = (tf.keras.layers.PReLU(prelu_init))(model)
+
+    model1 = (tf.keras.layers.Conv2DTranspose(512, (4, 4), strides=(2, 2), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(model)
+    model1 = (tf.keras.layers.BatchNormalization())(model1)
+    feature1_1 = (tf.keras.layers.PReLU(prelu_init))(model1)
+    output1.append(feature1_1)
+
+    model1 = (tf.keras.layers.Conv2DTranspose(256, (4, 4), strides=(2, 2), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(feature1_1)
+    model1 = (tf.keras.layers.BatchNormalization())(model1)
+    feature2_1 = (tf.keras.layers.PReLU(prelu_init))(model1)
+    output1.append(feature2_1)
+
+    model1 = (tf.keras.layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same', kernel_initializer=args.w_init,kernel_regularizer=args.wd, bias_initializer=args.bi))(feature2_1)
+    model1 = (tf.keras.layers.BatchNormalization())(model1)
+    feature3_1 = (tf.keras.layers.PReLU(prelu_init))(model1)
+    output1.append(feature3_1)
+
+    model1 = (tf.keras.layers.Conv2DTranspose(64, (4, 4), strides=(2, 2), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(feature3_1)
+    model1 = (tf.keras.layers.BatchNormalization())(model1)
+    feature4_1 = (tf.keras.layers.PReLU(prelu_init))(model1)
+    output1.append(feature4_1)
+
+    # Generator 1
+    img1 = (tf.keras.layers.Conv2DTranspose(32, (4, 4), strides=(2, 2), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(feature4_1)
+    img1 = (tf.keras.layers.BatchNormalization())(img1)
+    img1 = (tf.keras.layers.PReLU(prelu_init))(img1)
+    img1 = tf.keras.layers.Conv2DTranspose(channels, (3, 3), strides=(1, 1), activation='tanh', padding='same',
+                                           kernel_initializer=args.w_init, kernel_regularizer=args.wd,
+                                           bias_initializer=args.bi)(img1)
+    output1.append(img1)
+
+    model2 = (tf.keras.layers.Conv2DTranspose(512, (4, 4), strides=(2, 2), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(model)
+    model2 = (tf.keras.layers.BatchNormalization())(model2)
+    feature1_2 = (tf.keras.layers.PReLU(prelu_init))(model2)
+    output2.append(feature1_2)
+
+    model2 = (tf.keras.layers.Conv2DTranspose(256, (4, 4), strides=(2, 2), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(feature1_2)
+    model2 = (tf.keras.layers.BatchNormalization())(model2)
+    feature2_2 = (tf.keras.layers.PReLU(prelu_init))(model2)
+    output2.append(feature2_2)
+
+    model2 = (tf.keras.layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same', kernel_initializer=args.w_init,
+                                        kernel_regularizer=args.wd, bias_initializer=args.bi))(feature2_2)
+    model2 = (tf.keras.layers.BatchNormalization())(model2)
+    feature3_2 = (tf.keras.layers.PReLU(prelu_init))(model2)
+    output2.append(feature3_2)
+
+    model2 = (
+        tf.keras.layers.Conv2DTranspose(64, (4, 4), strides=(2, 2), padding='same', kernel_initializer=args.w_init,
+                                        kernel_regularizer=args.wd, bias_initializer=args.bi))(feature3_2)
+    model2 = (tf.keras.layers.BatchNormalization())(model2)
+    feature4_2 = (tf.keras.layers.PReLU(prelu_init))(model2)
+    output2.append(feature4_2)
+
+
+    # Generator 2
+    img2 = (tf.keras.layers.Conv2DTranspose(32, (4, 4), strides=(2, 2), padding='same', kernel_initializer=args.w_init,
+                                            kernel_regularizer=args.wd, bias_initializer=args.bi))(feature4_2)
+    img2 = (tf.keras.layers.BatchNormalization())(img2)
+    img2 = (tf.keras.layers.PReLU(prelu_init))(img2)
+    img2 = tf.keras.layers.Conv2DTranspose(channels, (3, 3), strides=(1, 1), activation='tanh', padding='same',
+                                           kernel_initializer=args.w_init, kernel_regularizer=args.wd,
+                                           bias_initializer=args.bi)(img2)
+    output2.append(img2)
+
+    return keras.Model(noise, output1), keras.Model(noise, output2)
+
+def cogan_discriminators_faces_noshare(args):
+    img_shape = (args.dataset_dim[1], args.dataset_dim[2], args.dataset_dim[3])
+
+    # Discriminator 1
+    img1 = tf.keras.layers.Input(shape=img_shape)
+    x1 = tf.keras.layers.Conv2D(32, (5, 5), strides=(2, 2), padding='same', kernel_initializer=args.w_init,
+                                kernel_regularizer=args.wd, bias_initializer=args.bi)(img1)
+    x1 = tf.keras.layers.BatchNormalization()(x1)
+    x1 = tf.keras.layers.PReLU(prelu_init)(x1)
+    x1 = tf.keras.layers.Conv2D(64, (5, 5), strides=(2, 2), padding='same', kernel_initializer=args.w_init,
+                                kernel_regularizer=args.wd, bias_initializer=args.bi)(x1)
+    x1 = tf.keras.layers.BatchNormalization()(x1)
+    x1 = tf.keras.layers.PReLU(prelu_init)(x1)
+
+    # Discriminator 2
+    img2 = tf.keras.layers.Input(shape=img_shape)
+    x2 = tf.keras.layers.Conv2D(32, (5, 5), strides=(2, 2), padding='same', kernel_initializer=args.w_init,
+                                kernel_regularizer=args.wd, bias_initializer=args.bi)(img2)
+    x2 = tf.keras.layers.BatchNormalization()(x2)
+    x2 = tf.keras.layers.PReLU(prelu_init)(x2)
+    x2 = tf.keras.layers.Conv2D(64, (5, 5), strides=(2, 2), padding='same', kernel_initializer=args.w_init,
+                                kernel_regularizer=args.wd, bias_initializer=args.bi)(x2)
+    x2 = tf.keras.layers.BatchNormalization()(x2)
+    x2 = tf.keras.layers.PReLU(prelu_init)(x2)
+
+    # Shared discriminator layers
+    model1 = keras.Sequential()
+    model1.add(tf.keras.layers.Conv2D(128, (5, 5), strides=(2, 2), padding='same', kernel_initializer=args.w_init,
+                                     kernel_regularizer=args.wd, bias_initializer=args.bi))
+    model1.add(tf.keras.layers.BatchNormalization())
+    model1.add(tf.keras.layers.PReLU(prelu_init))
+    model1.add(tf.keras.layers.Dropout(0.1))
+
+    model1.add(tf.keras.layers.Conv2D(256, (3, 3), strides=(2, 2), padding='same', kernel_initializer=args.w_init,
+                                     kernel_regularizer=args.wd, bias_initializer=args.bi))
+    model1.add(tf.keras.layers.BatchNormalization())
+    model1.add(tf.keras.layers.PReLU(prelu_init))
+    model1.add(tf.keras.layers.Dropout(0.3))
+
+    model1.add(tf.keras.layers.Conv2D(512, (3, 3), strides=(2, 2), padding='same', kernel_initializer=args.w_init,
+                                     kernel_regularizer=args.wd, bias_initializer=args.bi))
+    model1.add(tf.keras.layers.BatchNormalization())
+    model1.add(tf.keras.layers.PReLU(prelu_init))
+    model1.add(tf.keras.layers.Dropout(0.3))
+
+    model1.add(tf.keras.layers.Conv2D(1024, (3, 3), strides=(2, 2), padding='same', kernel_initializer=args.w_init,
+                                     kernel_regularizer=args.wd, bias_initializer=args.bi))
+    model1.add(tf.keras.layers.BatchNormalization())
+    model1.add(tf.keras.layers.PReLU(prelu_init))
+    model1.add(tf.keras.layers.Dropout(0.5))
+
+    model1.add(tf.keras.layers.Flatten())
+    model1.add(tf.keras.layers.Dense(2048, kernel_initializer=args.w_init, kernel_regularizer=args.wd,
+                                    bias_initializer=args.bi))
+    model1.add(tf.keras.layers.BatchNormalization())
+    model1.add(tf.keras.layers.PReLU(prelu_init))
+    model1.add(tf.keras.layers.Dropout(0.5))
+
+    model1.add(
+        tf.keras.layers.Dense(1, kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))
+
+    model2 = keras.Sequential()
+    model2.add(tf.keras.layers.Conv2D(128, (5, 5), strides=(2, 2), padding='same', kernel_initializer=args.w_init,
+                                     kernel_regularizer=args.wd, bias_initializer=args.bi))
+    model2.add(tf.keras.layers.BatchNormalization())
+    model2.add(tf.keras.layers.PReLU(prelu_init))
+    model2.add(tf.keras.layers.Dropout(0.1))
+
+    model2.add(tf.keras.layers.Conv2D(256, (3, 3), strides=(2, 2), padding='same', kernel_initializer=args.w_init,
+                                     kernel_regularizer=args.wd, bias_initializer=args.bi))
+    model2.add(tf.keras.layers.BatchNormalization())
+    model2.add(tf.keras.layers.PReLU(prelu_init))
+    model2.add(tf.keras.layers.Dropout(0.3))
+
+    model2.add(tf.keras.layers.Conv2D(512, (3, 3), strides=(2, 2), padding='same', kernel_initializer=args.w_init,
+                                     kernel_regularizer=args.wd, bias_initializer=args.bi))
+    model2.add(tf.keras.layers.BatchNormalization())
+    model2.add(tf.keras.layers.PReLU(prelu_init))
+    model2.add(tf.keras.layers.Dropout(0.3))
+
+    model2.add(tf.keras.layers.Conv2D(1024, (3, 3), strides=(2, 2), padding='same', kernel_initializer=args.w_init,
+                                     kernel_regularizer=args.wd, bias_initializer=args.bi))
+    model2.add(tf.keras.layers.BatchNormalization())
+    model2.add(tf.keras.layers.PReLU(prelu_init))
+    model2.add(tf.keras.layers.Dropout(0.5))
+
+    model2.add(tf.keras.layers.Flatten())
+    model2.add(tf.keras.layers.Dense(2048, kernel_initializer=args.w_init, kernel_regularizer=args.wd,
+                                    bias_initializer=args.bi))
+    model2.add(tf.keras.layers.BatchNormalization())
+    model2.add(tf.keras.layers.PReLU(prelu_init))
+    model2.add(tf.keras.layers.Dropout(0.5))
+
+    model2.add(
+        tf.keras.layers.Dense(1, kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))
+
+    output1 = model1(x1)
+    output2 = model2(x2)
+
+    return keras.Model(img1, output1), keras.Model(img2, output2)
+
 
 # Faces
 def cogan_generators_faces(args):

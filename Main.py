@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import Data as data
 import Nets as nets
 
+
 parser = argparse.ArgumentParser()
 
 # Settings
@@ -51,8 +52,8 @@ parser.add_argument('--weight_init',    type=str,           default='normal',   
 
 
 # CoGAN
-parser.add_argument('--g_arch',         type=str,           default='digit_noshare',       help='digit | rotate | 256 | face | digit_noshare')
-parser.add_argument('--d_arch',         type=str,           default='digit_noshare',       help='digit | rotate | 256 | face | digit_noshare')
+parser.add_argument('--g_arch',         type=str,           default='digit_noshare',       help='digit | rotate | 256 | face | digit_noshare | face_noshare')
+parser.add_argument('--d_arch',         type=str,           default='digit_noshare',       help='digit | rotate | 256 | face | digit_noshare | face_noshare')
 parser.add_argument('--cogan_data',     type=str,           default='mnist2edge',  help='mnist2edge | mnist2rotate | mnist2svhn | mnist2negative | celeb_a | apple2orange | horse2zebra | vangogh2photo')
 parser.add_argument('--semantic_loss',  type=bool,          default=False, help='Determines whether semantic loss is used')
 parser.add_argument('--semantic_weight',type=int,           default=10, help='Weight of the semantic loss term')
@@ -80,6 +81,7 @@ args = parser.parse_args()
 #args.disc_iters = 1
 #args.images_while_training = 10
 #args.limit_dataset = True
+
 
 
 args.wd = tf.keras.regularizers.l2(args.weight_decay)
@@ -131,10 +133,9 @@ if args.gan_type == 'cogan':
 
     # Start training
     if len(tf.config.experimental.list_physical_devices('GPU')) > 0:
-        with tf.device('/GPU:0'):
-            print('Using GPU')
-            ganTrainer = cogan_t.CoGANTrainer(generator1, generator2, discriminator1, discriminator2, domain1, domain2)
-            full_training_time = ganTrainer.train(args)
+        print('Using GPU')
+        ganTrainer = cogan_t.CoGANTrainer(generator1, generator2, discriminator1, discriminator2, domain1, domain2)
+        full_training_time = ganTrainer.train(args)
     else:
         print('Using CPU')
         ganTrainer = cogan_t.CoGANTrainer(generator1, generator2, discriminator1, discriminator2, domain1, domain2)

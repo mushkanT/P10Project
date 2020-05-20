@@ -149,8 +149,8 @@ def select_dataset_cogan(args):
         shape = (None, 256, 256, 3)
 
     elif args.cogan_data in ['Eyeglasses', 'Smiling', 'Blond_Hair', 'Male']:
-        #lines = [line.rstrip() for line in open('C:/Users/marku/Desktop/list_attr_celeba.txt', 'r')]
-        lines = [line.rstrip() for line in open('/user/student.aau.dk/mjuuln15/list_attr_celeba.txt', 'r')]
+        #lines = [line.rstrip() for line in open('C:/Users/palmi/Desktop/list_attr_celeba.txt', 'r')]
+        lines = [line.rstrip() for line in open('/user/student.aau.dk/palmin15/list_attr_celeba.txt', 'r')]
         all_attr_names = lines[1].split()
         attr2idx = {}
         idx2attr = {}
@@ -161,7 +161,7 @@ def select_dataset_cogan(args):
             attr2idx[attr_name] = i
             idx2attr[i] = attr_name
         lines = lines[2:]
-        for i, line in enumerate(lines):
+        for i, line in enumerate(lines[:1000]):
             split = line.split()
             values = split[1:]
             for attr_name in [args.cogan_data]:
@@ -169,8 +169,8 @@ def select_dataset_cogan(args):
                 has_attribute = (values[idx] == '1')
             mask.append(has_attribute)
 
-        images = glob.glob('C:/Users/marku/Desktop/img_align_celeba/*.jpg')
-        #images = glob.glob('/user/student.aau.dk/mjuuln15/img_align_celeba/*.jpg')
+        #images = glob.glob('C:/Users/palmi/Desktop/celeba_small/*.jpg')
+        images = glob.glob('/user/student.aau.dk/palmin15/img_align_celeba/*.jpg')
         for i in images:
             image = plt.imread(i)
             dataset.append(image)
