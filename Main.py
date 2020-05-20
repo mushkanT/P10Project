@@ -46,7 +46,7 @@ parser.add_argument('--grayscale',      type=bool,		    default=False)
 parser.add_argument('--weight_decay',   type=float,         default=0.0005)
 parser.add_argument('--bias_init',      type=float,         default=0.1)
 parser.add_argument('--prelu_init',     type=float,         default=0.25)
-parser.add_argument('--noise_type',     type=str,           default='normal',   help='normal | uniform')
+parser.add_argument('--noise_type',     type=str,           default='uniform',   help='normal | uniform')
 parser.add_argument('--weight_init',    type=str,           default='normal',   help='normal (0.02 mean)| xavier | he')
 
 
@@ -68,12 +68,11 @@ args = parser.parse_args()
 #args.gan_type = "classifier"
 #args.loss = 'ce'
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-#args.g_arch = 'digit'
-#args.d_arch = 'digit'
+#args.g_arch = 'face'
+#args.d_arch = 'face'
 #args.batch_size = 16
-#args.cogan_data = 'mnist2edge'
+#args.cogan_data = 'Blond_Hair'
 #args.dataset = 'celeba'
-#args.weight_init='xavier'
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'feature'
 #args.scale_data = 64

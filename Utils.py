@@ -26,9 +26,8 @@ def draw_samples(model, test_input):
 def write_config(args):
     file = open(os.path.join(args.dir, 'config.txt'), 'w')
     for ele in vars(args):
-        if(str(ele) != 'seed'):
-            file.write(str(ele) + ': ' + str(vars(args)[ele])+'\n')
-    #file.write(str(args))
+        if str(ele) != 'seed':
+            file.write(str(ele) + ': ' + str(vars(args)[ele]) + '\n')
     file.close()
 
 

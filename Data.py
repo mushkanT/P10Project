@@ -148,9 +148,9 @@ def select_dataset_cogan(args):
         X2 = X2.shuffle(num_examples).repeat().batch(args.batch_size)
         shape = (None, 256, 256, 3)
 
-    elif args.cogan_data in ['Eyeglasses']:
-        lines = [line.rstrip() for line in open('C:/Users/marku/Desktop/list_attr_celeba.txt', 'r')]
-        #lines = [line.rstrip() for line in open('/user/student.aau.dk/mjuuln15/list_attr_celeba.txt', 'r')]
+    elif args.cogan_data in ['Eyeglasses', 'Smiling', 'Blond_Hair', 'Male']:
+        #lines = [line.rstrip() for line in open('C:/Users/marku/Desktop/list_attr_celeba.txt', 'r')]
+        lines = [line.rstrip() for line in open('/user/student.aau.dk/mjuuln15/list_attr_celeba.txt', 'r')]
         all_attr_names = lines[1].split()
         attr2idx = {}
         idx2attr = {}
@@ -164,8 +164,7 @@ def select_dataset_cogan(args):
         for i, line in enumerate(lines):
             split = line.split()
             values = split[1:]
-
-            for attr_name in ['Eyeglasses']:
+            for attr_name in [args.cogan_data]:
                 idx = attr2idx[attr_name]
                 has_attribute = (values[idx] == '1')
             mask.append(has_attribute)
