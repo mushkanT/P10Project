@@ -112,3 +112,5 @@ venv.bak/
 .idea/
 
 SpectralNorm.py
+
+celeba_classifier/
