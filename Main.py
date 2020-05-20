@@ -51,7 +51,8 @@ parser.add_argument('--weight_init',    type=str,           default='normal',   
 # CoGAN
 parser.add_argument('--g_arch',         type=str,           default='digit',       help='digit | rotate | 256 | face | digit_noshare')
 parser.add_argument('--d_arch',         type=str,           default='digit',       help='digit | rotate | 256 | face | digit_noshare')
-parser.add_argument('--cogan_data',     type=str,           default='mnist2edge',  help='mnist2edge | mnist2rotate | mnist2svhn | mnist2negative | celeb_a | apple2orange | horse2zebra | vangogh2photo')
+parser.add_argument('--cogan_data',     type=str,           default='mnist2edge',  help='mnist2edge | mnist2rotate | mnist2svhn | mnist2negative | Smiling | '
+                                                                                        'Blond_Hair | Male | apple2orange | horse2zebra | vangogh2photo')
 
 args = parser.parse_args()
 
@@ -123,10 +124,9 @@ if args.gan_type == 'cogan':
 
     # Start training
     if len(tf.config.experimental.list_physical_devices('GPU')) > 0:
-        with tf.device('/GPU:0'):
-            print('Using GPU')
-            ganTrainer = cogan_t.GANTrainer(generator1, generator2, discriminator1, discriminator2, domain1, domain2)
-            full_training_time = ganTrainer.train(args)
+        print('Amount of GPUs: ' + str(len(tf.config.experimental.list_physical_devices('GPU'))) + ' --Using GPU')
+        ganTrainer = cogan_t.GANTrainer(generator1, generator2, discriminator1, discriminator2, domain1, domain2)
+        full_training_time = ganTrainer.train(args)
     else:
         print('Using CPU')
         ganTrainer = cogan_t.GANTrainer(generator1, generator2, discriminator1, discriminator2, domain1, domain2)
@@ -170,10 +170,9 @@ else:
 
     # Start training
     if len(tf.config.experimental.list_physical_devices('GPU')) > 0:
-        with tf.device('/GPU:0'):
-            print('Using GPU')
-            ganTrainer = gan_t.GANTrainer(generator, discriminator, train_dat)
-            full_training_time = ganTrainer.train(args)
+        print('Amount of GPUs: ' + str(len(tf.config.experimental.list_physical_devices('GPU'))) + ' --Using GPU')
+        ganTrainer = gan_t.GANTrainer(generator, discriminator, train_dat)
+        full_training_time = ganTrainer.train(args)
     else:
         print('Using CPU')
         ganTrainer = gan_t.GANTrainer(generator, discriminator, train_dat)
