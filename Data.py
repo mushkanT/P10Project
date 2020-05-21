@@ -100,6 +100,29 @@ def select_dataset_cogan(args):
         else:
             shape = X1.element_spec[0].shape
 
+    elif args.cogan_data == 'mnist2fashion':
+        (ds_train, ds_test), ds_info = tfds.load('fashion_mnist', split=['train', 'test'], shuffle_files=True,
+                                                 as_supervised=True, with_info=True)
+
+        def normalize_img(image, label):
+            image = (tf.cast(image, tf.float32) - 127.5) / 127.5
+            image = tf.image.resize(image, (32, 32))
+            image = tf.image.grayscale_to_rgb(image)
+            return image, label
+
+        ds_train = ds_train.map(
+            normalize_img, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        ds_train = ds_train.cache()
+        ds_train = ds_train.shuffle(ds_info.splits['train'].num_examples)
+        ds_train = ds_train.batch(128)
+        ds_train = ds_train.prefetch(tf.data.experimental.AUTOTUNE)
+
+        ds_test = ds_test.map(
+            normalize_img, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        ds_test = ds_test.batch(128)
+        ds_test = ds_test.cache()
+        ds_test = ds_test.prefetch(tf.data.experimental.AUTOTUNE)
+
     elif args.cogan_data == 'mnist2svhn':
         # Domain 1
         data, info = tfds.load('mnist', with_info=True, as_supervised=True)
@@ -161,7 +184,7 @@ def select_dataset_cogan(args):
             attr2idx[attr_name] = i
             idx2attr[i] = attr_name
         lines = lines[2:]
-        for i, line in enumerate(lines[:1000]):
+        for i, line in enumerate(lines):
             split = line.split()
             values = split[1:]
             for attr_name in [args.cogan_data]:

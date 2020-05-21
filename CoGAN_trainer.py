@@ -36,6 +36,8 @@ class CoGANTrainer(object):
         self.encoder = n.encoder(args)
         if args.semantic_loss:
             self.classifier = tf.keras.models.load_model(args.classifier_path)
+            if args.cogan_data == 'mnist2fashion':
+                self.classifier2 = tf.keras.models.load_model(args.classifier_path + '_fashion')
 
         it1 = iter(self.X1)
         it2 = iter(self.X2)
