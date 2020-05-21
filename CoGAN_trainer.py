@@ -22,6 +22,8 @@ class CoGANTrainer(object):
         self.hist_weight_similarity = []
         self.hist_discpenalty1 = []
         self.hist_discpenalty2 = []
+        self.hist_high_diff = []
+        self.hist_low_diff = []
         self.X1 = domain1
         self.X2 = domain2
         self.full_training_time = 0
@@ -33,12 +35,16 @@ class CoGANTrainer(object):
 
 
     def train(self, args):
-        self.encoder = n.encoder(args)
+        if args.use_cycle:
+            self.encoder = n.encoder(args)
         if args.semantic_loss:
             self.classifier = tf.keras.models.load_model(args.classifier_path)
             if args.cogan_data == 'mnist2fashion':
                 self.classifier2 = tf.keras.models.load_model(args.classifier_path + '_fashion')
-
+        if args.feature_loss:
+            vgg = tf.keras.applications.VGG19(include_top=False, input_shape=(args.dataset_dim[1],args.dataset_dim[2], args.dataset_dim[3]))
+            self.high_level_feature_extractor = tf.keras.Model(inputs=vgg.input, outputs=vgg.get_layer('block4_conv4').output)
+            self.low_level_feature_extractor = tf.keras.Model(inputs=vgg.input, outputs=vgg.get_layer('block1_pool').output)
         it1 = iter(self.X1)
         it2 = iter(self.X2)
 
@@ -129,6 +135,27 @@ class CoGANTrainer(object):
                     g1_loss = g1_loss + diff * args.semantic_weight
                     g2_loss = g2_loss + diff * args.semantic_weight
 
+                if args.feature_loss:
+                    fake1_high_features = self.high_level_feature_extractor(gen1_fake[-1])
+                    fake2_high_features = self.high_level_feature_extractor(gen2_fake[-1])
+                    fake1_low_features = self.low_level_feature_extractor(gen1_fake[-1])
+                    fake2_low_features = self.low_level_feature_extractor(gen2_fake[-1])
+                    high_diff = tf.reduce_mean(tf.math.squared_difference(fake1_high_features,fake2_high_features))
+                    low_diff = tf.reduce_mean(tf.math.squared_difference(fake1_low_features, fake2_low_features))
+                    diffs = tf.math.l2_normalize([high_diff, low_diff])
+                    high_diff = diffs[0]
+                    low_diff = diffs[1]
+
+                    #norm_high_diff = (1-0)*(high_diff-min(high_diff,low_diff) / (max(high_diff,low_diff) - min(high_diff,low_diff))) + 0
+                    #low_diff = (1-0)*(low_diff-min(high_diff,low_diff) / (max(high_diff,low_diff) - min(high_diff,low_diff))) + 0
+
+
+                    self.hist_high_diff.append(high_diff)
+                    self.hist_low_diff.append(low_diff)
+
+                    g1_loss = g1_loss + high_diff - low_diff
+                    g2_loss = g2_loss + high_diff - low_diff
+
                 penalty = self.genPenal.calc_penalty(self.g1, self.g2, args.shared_layers, args, gen1_fake, gen2_fake)
                 g1_loss = g1_loss + (penalty * args.penalty_weight_g)
                 g2_loss = g2_loss + (penalty * args.penalty_weight_g)
@@ -138,14 +165,14 @@ class CoGANTrainer(object):
                     noise_recon1 = self.encoder(gen1_fake[-1])
                     noise_recon2 = self.encoder(gen2_fake[-1])
 
-                    fake_recon1 = self.g1(noise_recon1, training=False)
-                    fake_recon2 = self.g2(noise_recon2, training=False)
+                    #fake_recon1 = self.g1(noise_recon1, training=False)
+                    #fake_recon2 = self.g2(noise_recon2, training=False)
 
                     noise_recon_loss1 = l.recon_criterion(noise_recon1, noise)
                     noise_recon_loss2 = l.recon_criterion(noise_recon2, noise)
 
-                    fake_recon_loss1 = l.recon_criterion(fake_recon1[-1], gen1_fake[-1])
-                    fake_recon_loss2 = l.recon_criterion(fake_recon2[-1], gen2_fake[-1])
+                    #fake_recon_loss1 = l.recon_criterion(fake_recon1[-1], gen1_fake[-1])
+                    #fake_recon_loss2 = l.recon_criterion(fake_recon2[-1], gen2_fake[-1])
 
                     total_recon_loss = noise_recon_loss1 + noise_recon_loss2
 
@@ -281,6 +308,16 @@ class CoGANTrainer(object):
         plt.savefig(os.path.join(dir, 'losses/cycle_loss.png'))
         np.save(os.path.join(dir, 'losses/cycle_loss.npy'),self.hist_cycle_loss)
         plt.close()
+
+        plt.plot(self.hist_high_diff, label='high_features')
+        plt.plot(self.hist_low_diff, label='low_features')
+        plt.xlabel('Iterations')
+        plt.ylabel('Difference')
+        plt.legend()
+        plt.savefig(os.path.join(dir, 'losses/feature_loss.png'))
+        plt.close()
+
+
 
     def clip_weights(self, clip):
         for i, var in enumerate(self.d1.trainable_variables):

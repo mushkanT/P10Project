@@ -62,6 +62,7 @@ parser.add_argument('--use_cycle',      type=bool,          default=False, help=
 parser.add_argument('--cycle_weight',   type=int,           default=10, help='Weight for the cycle gan loss')
 parser.add_argument('--use_firstlayer', type=bool,          default=False, help='If using firstlayer corresponds with Torch, else with caffe')
 parser.add_argument('--shared_layers', type=int,            default=2, help='Number of layers to calculate feature/weight regularizer from')
+parser.add_argument('--feature_loss',   type=bool,          default=False, help="Use vgg to extract features used for regularizing")
 args = parser.parse_args()
 
 # Debugging

@@ -101,27 +101,48 @@ def select_dataset_cogan(args):
             shape = X1.element_spec[0].shape
 
     elif args.cogan_data == 'mnist2fashion':
-        (ds_train, ds_test), ds_info = tfds.load('fashion_mnist', split=['train', 'test'], shuffle_files=True,
-                                                 as_supervised=True, with_info=True)
+        # GET MNIST
+        data, info = tfds.load('mnist', with_info=True, as_supervised=True)
+        X1, test1 = data['train'], data['test']
+        X1 = X1.map(format_example_g2rgb)
+        # test1 = test1.map(format_example_g2rgb)
+        num_examples = info.splits['train'].num_examples
+        X1 = X1.shuffle(num_examples).repeat().batch(args.batch_size)
 
+        # GET MNIST FASHION
+        (X2, test2), ds_info = tfds.load('fashion_mnist', split=['train', 'test'], as_supervised=True, with_info=True)
         def normalize_img(image, label):
             image = (tf.cast(image, tf.float32) - 127.5) / 127.5
             image = tf.image.resize(image, (32, 32))
             image = tf.image.grayscale_to_rgb(image)
             return image, label
 
-        ds_train = ds_train.map(
+        X2 = X2.map(
             normalize_img, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-        ds_train = ds_train.cache()
-        ds_train = ds_train.shuffle(ds_info.splits['train'].num_examples)
-        ds_train = ds_train.batch(128)
-        ds_train = ds_train.prefetch(tf.data.experimental.AUTOTUNE)
+        X2 = X2.cache()
+        X2 = X2.shuffle(ds_info.splits['train'].num_examples).repeat().batch(args.batch_size)
+        X2 = X2.prefetch(tf.data.experimental.AUTOTUNE)
 
-        ds_test = ds_test.map(
-            normalize_img, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-        ds_test = ds_test.batch(128)
-        ds_test = ds_test.cache()
-        ds_test = ds_test.prefetch(tf.data.experimental.AUTOTUNE)
+        shape = X1.element_spec[0].shape
+
+    elif args.cogan_data == 'shapes2flowers':
+        X1, ds_info = tfds.load('dsprites', with_info=True)
+        X1 = X1['train'].batch(128)
+        it1 = iter(X1)
+        batch = next(it1)
+
+
+        fig, axs = plt.subplots(4, 4)
+        cnt = 0
+        for i in range(4):
+            for j in range(4):
+                axs[i, j].imshow(batch['image'][cnt, :, :, 0], cmap='gray')
+                axs[i, j].axis('off')
+                cnt += 1
+        plt.show()
+        print('dsprites baby')
+
+
 
     elif args.cogan_data == 'mnist2svhn':
         # Domain 1
