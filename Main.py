@@ -63,6 +63,9 @@ parser.add_argument('--cycle_weight',   type=int,           default=10, help='We
 parser.add_argument('--use_firstlayer', type=bool,          default=False, help='If using firstlayer corresponds with Torch, else with caffe')
 parser.add_argument('--shared_layers', type=int,            default=2, help='Number of layers to calculate feature/weight regularizer from')
 parser.add_argument('--feature_loss',   type=bool,          default=False, help="Use vgg to extract features used for regularizing")
+parser.add_argument('--fl_high_weight',   type=int,           default=1, help='Weight for high level feature similarity')
+parser.add_argument('--fl_low_weight',   type=int,           default=1, help='Weight for low level feature similarity')
+
 args = parser.parse_args()
 
 # Debugging

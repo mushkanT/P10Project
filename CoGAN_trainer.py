@@ -143,8 +143,8 @@ class CoGANTrainer(object):
                     high_diff = tf.reduce_mean(tf.math.squared_difference(fake1_high_features,fake2_high_features))
                     low_diff = tf.reduce_mean(tf.math.squared_difference(fake1_low_features, fake2_low_features))
                     diffs = tf.math.l2_normalize([high_diff, low_diff])
-                    high_diff = diffs[0]
-                    low_diff = diffs[1]
+                    high_diff = diffs[0] * args.fl_high_weight
+                    low_diff = diffs[1] * args.fl_low_weight
 
                     #norm_high_diff = (1-0)*(high_diff-min(high_diff,low_diff) / (max(high_diff,low_diff) - min(high_diff,low_diff))) + 0
                     #low_diff = (1-0)*(low_diff-min(high_diff,low_diff) / (max(high_diff,low_diff) - min(high_diff,low_diff))) + 0

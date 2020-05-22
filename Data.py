@@ -127,20 +127,18 @@ def select_dataset_cogan(args):
 
     elif args.cogan_data == 'shapes2flowers':
         X1, ds_info = tfds.load('dsprites', with_info=True)
-        X1 = X1['train'].batch(128)
-        it1 = iter(X1)
-        batch = next(it1)
+        X1 = X1['train']
+        X1 = X1.filter(scale_filter)
+        X1 = X1.map(format_example_g2rgb_2)
+        X1 = X1.shuffle(60000).repeat().batch(args.batch_size)
 
+        X2, ds_info = tfds.load('oxford_flowers102', with_info=True)
+        X2 = X2['train']
+        X2 = X2.map(format_example_to32_3)
+        X2 = X2.shuffle(ds_info.splits['train'].num_examples).repeat().batch(args.batch_size)
 
-        fig, axs = plt.subplots(4, 4)
-        cnt = 0
-        for i in range(4):
-            for j in range(4):
-                axs[i, j].imshow(batch['image'][cnt, :, :, 0], cmap='gray')
-                axs[i, j].axis('off')
-                cnt += 1
-        plt.show()
-        print('dsprites baby')
+        shape = X1.element_spec.shape
+
 
 
 
@@ -325,6 +323,13 @@ def class_filter(image, label, allowed_labels=tf.constant([1.])):
     reduced = tf.reduce_sum(tf.cast(isallowed, tf.float32))
     return tf.greater(reduced, tf.constant(0.))
 
+def scale_filter(image):
+    scale_mask = image['label_scale']
+    if scale_mask == 5:
+        return True
+    else:
+        return False
+
 
 def format_example_g2rgb(image, label):
     image = tf.cast(image, tf.float32)
@@ -334,6 +339,17 @@ def format_example_g2rgb(image, label):
     image = tf.image.resize(image, (32, 32))
     image = tf.image.grayscale_to_rgb(image)
     return (image, label)
+
+
+def format_example_g2rgb_2(image):
+    image = tf.cast(image['image'], tf.float32)
+    # Normalize the pixel values
+    image = (image - 127.5) / 127.5
+    # Resize the image
+    image = tf.image.resize(image, (32, 32))
+    image = tf.image.grayscale_to_rgb(image)
+    return image
+
 
 
 def format_example_rotate(image, label):
@@ -362,6 +378,15 @@ def format_example_to32_2(image):
     # Resize the image
     image = tf.image.resize(image, (32, 32))
     return image
+
+def format_example_to32_3(image):
+    image = tf.cast(image['image'], tf.float32)
+    # Normalize the pixel values
+    image = (image - 127.5) / 127.5
+    # Resize the image
+    image = tf.image.resize(image, (32, 32))
+    return image
+
 
 
 def format_example_to128(image):
