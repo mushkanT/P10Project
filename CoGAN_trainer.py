@@ -23,7 +23,8 @@ class CoGANTrainer(object):
         self.hist_discpenalty1 = []
         self.hist_discpenalty2 = []
         self.hist_high_diff = []
-        self.hist_low_diff = []
+        self.hist_low1_diff = []
+        self.hist_low2_diff = []
         self.X1 = domain1
         self.X2 = domain2
         self.full_training_time = 0
@@ -140,21 +141,29 @@ class CoGANTrainer(object):
                     fake2_high_features = self.high_level_feature_extractor(gen2_fake[-1])
                     fake1_low_features = self.low_level_feature_extractor(gen1_fake[-1])
                     fake2_low_features = self.low_level_feature_extractor(gen2_fake[-1])
+                    real1_low_features = self.low_level_feature_extractor(batch1)
+                    real2_low_features = self.low_level_feature_extractor(batch2)
+
                     high_diff = tf.reduce_mean(tf.math.squared_difference(fake1_high_features,fake2_high_features))
-                    low_diff = tf.reduce_mean(tf.math.squared_difference(fake1_low_features, fake2_low_features))
-                    diffs = tf.math.l2_normalize([high_diff, low_diff])
-                    high_diff = diffs[0] * args.fl_high_weight
-                    low_diff = diffs[1] * args.fl_low_weight
+                    low1_diff = tf.reduce_mean(tf.math.squared_difference(fake1_low_features, real1_low_features))
+                    low2_diff = tf.reduce_mean(tf.math.squared_difference(fake2_low_features, real2_low_features))
+                    diffs1 = tf.math.l2_normalize([high_diff, low1_diff])
+                    diffs2 = tf.math.l2_normalize([high_diff, low2_diff])
+
+                    high_diff = diffs1[0] * args.fl_high_weight
+                    low1_diff = diffs1[1] * args.fl_low_weight
+                    low2_diff = diffs2[1] * args.fl_low_weight
 
                     #norm_high_diff = (1-0)*(high_diff-min(high_diff,low_diff) / (max(high_diff,low_diff) - min(high_diff,low_diff))) + 0
                     #low_diff = (1-0)*(low_diff-min(high_diff,low_diff) / (max(high_diff,low_diff) - min(high_diff,low_diff))) + 0
 
 
                     self.hist_high_diff.append(high_diff)
-                    self.hist_low_diff.append(low_diff)
+                    self.hist_low1_diff.append(low1_diff)
+                    self.hist_low2_diff.append(low2_diff)
 
-                    g1_loss = g1_loss + high_diff - low_diff
-                    g2_loss = g2_loss + high_diff - low_diff
+                    g1_loss = g1_loss + high_diff + low1_diff
+                    g2_loss = g2_loss + high_diff + low2_diff
 
                 penalty = self.genPenal.calc_penalty(self.g1, self.g2, args.shared_layers, args, gen1_fake, gen2_fake)
                 g1_loss = g1_loss + (penalty * args.penalty_weight_g)
@@ -310,7 +319,8 @@ class CoGANTrainer(object):
         plt.close()
 
         plt.plot(self.hist_high_diff, label='high_features')
-        plt.plot(self.hist_low_diff, label='low_features')
+        plt.plot(self.hist_low1_diff, label='low_features_gen1')
+        plt.plot(self.hist_low2_diff, label='low_features_gen2')
         plt.xlabel('Iterations')
         plt.ylabel('Difference')
         plt.legend()
