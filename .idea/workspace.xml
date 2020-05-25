@@ -4,6 +4,7 @@
     <list default="true" id="220b69cb-c454-4d63-b603-ea792d470aba" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CoGAN_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/CoGAN_trainer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Data.py" beforeDir="false" afterPath="$PROJECT_DIR$/Data.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -75,7 +76,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Main.py" />
-      <option name="PARAMETERS" value="--cogan_data=mnist2svhn --gan_type=cogan --batch_size=128 --epochs=10 --weight_init=xavier --feature_loss=True --fl_low_weight=10 --fl_high_weight=10" />
+      <option name="PARAMETERS" value="--cogan_data=mnist2svhn --gan_type=cogan --batch_size=128 --epochs=1000 --feature_loss=True --gen_penalty=feature --fl_low_weight=10 --penalty_weight_g=100 --loss=wgan --disc_penalty=wgan-gp --disc_iters=5" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -233,7 +234,9 @@
       <workItem from="1589977554045" duration="11253000" />
       <workItem from="1590045089766" duration="21362000" />
       <workItem from="1590132419313" duration="5682000" />
-      <workItem from="1590222985345" duration="2866000" />
+      <workItem from="1590222985345" duration="5170000" />
+      <workItem from="1590329451587" duration="1405000" />
+      <workItem from="1590391687492" duration="2805000" />
     </task>
     <servers />
   </component>
@@ -286,11 +289,6 @@
           <line>270</line>
           <option name="timeStamp" value="692" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/CoGAN_trainer.py</url>
-          <line>139</line>
-          <option name="timeStamp" value="694" />
-        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -302,7 +300,7 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/P9Project$Main.coverage" NAME="Main Coverage Results" MODIFIED="1590224964979" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/P9Project$Main.coverage" NAME="Main Coverage Results" MODIFIED="1590393304910" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/P9Project$Sampler.coverage" NAME="Sampler Coverage Results" MODIFIED="1588242757043" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
