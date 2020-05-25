@@ -25,14 +25,62 @@ class CoGANTrainer(object):
         self.hist_high_diff = []
         self.hist_low1_diff = []
         self.hist_low2_diff = []
+        self.hist_style1_loss = []
+        self.hist_style2_loss = []
+        self.hist_content_loss = []
         self.X1 = domain1
         self.X2 = domain2
         self.full_training_time = 0
         self.discPenal = p.DiscriminatorPenalties()
         self.genPenal = p.GeneratorPenalties()
+        self.content_layers = ['block5_conv2']
+        self.style_layers = ['block1_conv1',
+                            'block2_conv1',
+                            'block3_conv1',
+                            'block4_conv1',
+                            'block5_conv1']
+        self.num_content_layers = len(self.content_layers)
+        self.num_style_layers = len(self.style_layers)
+        self.vgg_feature_model = None
 
         self.d1, self.d2 = d1, d2
         self.g1, self.g2 = g1, g2
+    def feature_layers(self, layer_names, args):
+        vgg = tf.keras.applications.VGG19(include_top=False)
+        vgg.trainable = False
+        outputs = [vgg.get_layer(name).output for name in layer_names]
+
+        model = tf.keras.Model([vgg.input], outputs)
+        return model
+
+    def gram_matrix(self,input):
+        result = tf.linalg.einsum('bijc,bijd->bcd', input, input)
+        num_locations = input.shape[1] * input.shape[2]
+        return result/num_locations
+
+    def StyleContentModel(self, inputs):
+        #inputs = (0.5 * inputs + 0.5) * 255
+        #inputs = tf.keras.applications.vgg19.preprocess_input(inputs)
+        feature_outputs = self.vgg_feature_model(inputs)
+        styles = feature_outputs[:self.num_style_layers]
+        content = feature_outputs[self.num_style_layers:]
+
+        style_outputs = [self.gram_matrix(style) for style in styles]
+
+        content_dict = {content_name:value for content_name, value in zip(self.content_layers, content)}
+        style_dict = {style_name:value for style_name, value in zip(self.style_layers,style_outputs)}
+
+        return content_dict, style_dict
+
+
+    def StyleContentLoss(self, style_fake, style_target, content_fake1, content_fake2, args):
+        style_loss = tf.add_n([tf.reduce_mean((style_fake[name]-style_target[name])**2) for name in style_fake.keys()])
+        content_loss = tf.add_n([tf.reduce_mean((content_fake1[name] - content_fake2[name])**2) for name in content_fake1.keys()])
+
+        style_loss *= args.style_weight / self.num_style_layers
+        content_loss *= args.content_weight / self.num_content_layers
+
+        return style_loss, content_loss
 
 
     def train(self, args):
@@ -46,6 +94,8 @@ class CoGANTrainer(object):
             vgg = tf.keras.applications.VGG19(include_top=False, input_shape=(args.dataset_dim[1],args.dataset_dim[2], args.dataset_dim[3]))
             self.high_level_feature_extractor = tf.keras.Model(inputs=vgg.input, outputs=vgg.get_layer('block4_conv4').output)
             self.low_level_feature_extractor = tf.keras.Model(inputs=vgg.input, outputs=vgg.get_layer('block1_pool').output)
+        if args.perceptual_loss:
+            self.vgg_feature_model = self.feature_layers(self.style_layers + self.content_layers, args)
         it1 = iter(self.X1)
         it2 = iter(self.X2)
 
@@ -152,6 +202,7 @@ class CoGANTrainer(object):
                     real2_low_features = self.low_level_feature_extractor(batch2)
 
                     #high_diff = tf.reduce_mean(tf.math.squared_difference(fake1_high_features, fake2_high_features))
+                    low_test = tf.reduce_mean(tf.math.squared_difference(fake1_low_features,fake2_low_features))
                     low1_diff = tf.reduce_mean(tf.math.squared_difference(fake1_low_features, real1_low_features))
                     low2_diff = tf.reduce_mean(tf.math.squared_difference(fake2_low_features, real2_low_features))
                     diffs1 = tf.math.l2_normalize([penalty, low1_diff])
@@ -173,6 +224,22 @@ class CoGANTrainer(object):
 
                     #g1_loss = g1_loss + high_diff + low1_diff
                     #g2_loss = g2_loss + high_diff + low2_diff
+
+                if args.perceptual_loss:
+                    fake1_content, fake1_style = self.StyleContentModel(gen1_fake[-1])
+                    fake2_content, fake2_style = self.StyleContentModel(gen2_fake[-1])
+                    real1_content, real1_style = self.StyleContentModel(batch1)
+                    real2_content, real2_style = self.StyleContentModel(batch2)
+
+                    g1_style_loss, g1_content_loss = self.StyleContentLoss(fake1_style, real1_style, fake1_content, fake2_content, args)
+                    g2_style_loss, g2_content_loss = self.StyleContentLoss(fake2_style, real2_style, fake2_content, fake1_content, args)
+
+                    g1_loss = (g1_loss) + g1_style_loss + g1_content_loss
+                    g2_loss = (g2_loss) + g2_style_loss + g2_content_loss
+
+                    self.hist_style1_loss.append(g1_style_loss)
+                    self.hist_style2_loss.append(g2_style_loss)
+                    self.hist_content_loss.append(g1_content_loss)
 
                 if args.use_cycle:
                     # Recon loss
@@ -330,6 +397,15 @@ class CoGANTrainer(object):
         plt.ylabel('Difference')
         plt.legend()
         plt.savefig(os.path.join(dir, 'losses/feature_loss.png'))
+        plt.close()
+
+        plt.plot(self.hist_style1_loss, label='style1_loss')
+        plt.plot(self.hist_style2_loss, label='style2_loss')
+        plt.plot(self.hist_content_loss, label='content_loss')
+        plt.xlabel('Iterations')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.savefig(os.path.join(dir, 'losses/perceptual_loss.png'))
         plt.close()
 
 

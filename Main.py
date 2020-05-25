@@ -65,6 +65,9 @@ parser.add_argument('--shared_layers', type=int,            default=2, help='Num
 parser.add_argument('--feature_loss',   type=bool,          default=False, help="Use vgg to extract features used for regularizing")
 parser.add_argument('--fl_high_weight',   type=int,           default=1, help='Weight for high level feature similarity')
 parser.add_argument('--fl_low_weight',   type=int,           default=1, help='Weight for low level feature similarity')
+parser.add_argument('--perceptual_loss', type=bool,         default=False, help='For using perceptual loss')
+parser.add_argument('--style_weight', type=float,           default=-1, help='If -1 use proportional to content weight, else use set value')
+parser.add_argument('--content_weight', type=float,         default=1, help='Weight for content loss')
 
 args = parser.parse_args()
 
@@ -86,6 +89,8 @@ args = parser.parse_args()
 #args.images_while_training = 10
 #args.limit_dataset = True
 
+if args.style_weight == -1:
+    args.style_weight = args.content_weight / 8e-4
 
 
 args.wd = tf.keras.regularizers.l2(args.weight_decay)
