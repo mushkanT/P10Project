@@ -5,7 +5,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CoGAN_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/CoGAN_trainer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Penalties.py" beforeDir="false" afterPath="$PROJECT_DIR$/Penalties.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Nets.py" beforeDir="false" afterPath="$PROJECT_DIR$/Nets.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -77,7 +77,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Main.py" />
-      <option name="PARAMETERS" value="--cogan_data=mnist2svhn --gan_type=cogan --batch_size=8 --epochs=1000 --loss=wgan --disc_penalty=wgan-gp --disc_iters=5 --perceptual_loss=True --style_weight=0.0001 --content_weight=1" />
+      <option name="PARAMETERS" value="--cogan_data=mnist2svhn --gan_type=classifier --batch_size=64 --epochs=5000 --loss=wgan --disc_penalty=wgan-gp --disc_iters=5 --perceptual_loss=True --style_weight=0.00000000001 --content_weight=0.001 --images_while_training=100 --lr_d=0.0002 --lr_g=0.02" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -237,7 +237,10 @@
       <workItem from="1590132419313" duration="5682000" />
       <workItem from="1590222985345" duration="5170000" />
       <workItem from="1590329451587" duration="1405000" />
-      <workItem from="1590391687492" duration="30229000" />
+      <workItem from="1590391687492" duration="38205000" />
+      <workItem from="1590576786703" duration="2616000" />
+      <workItem from="1590660874324" duration="405000" />
+      <workItem from="1590674790028" duration="215000" />
     </task>
     <servers />
   </component>
@@ -287,13 +290,18 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Main.py</url>
-          <line>275</line>
+          <line>283</line>
           <option name="timeStamp" value="692" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/CoGAN_trainer.py</url>
           <line>239</line>
           <option name="timeStamp" value="711" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Main.py</url>
+          <line>186</line>
+          <option name="timeStamp" value="713" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -306,7 +314,7 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/P9Project$Main.coverage" NAME="Main Coverage Results" MODIFIED="1590428677146" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/P9Project$Main.coverage" NAME="Main Coverage Results" MODIFIED="1590577653950" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/P9Project$Sampler.coverage" NAME="Sampler Coverage Results" MODIFIED="1588242757043" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

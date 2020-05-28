@@ -59,8 +59,8 @@ class CoGANTrainer(object):
         return result/num_locations
 
     def StyleContentModel(self, inputs):
-        #inputs = (0.5 * inputs + 0.5) * 255
-        #inputs = tf.keras.applications.vgg19.preprocess_input(inputs)
+        inputs = (0.5 * inputs + 0.5) * 255
+        inputs = tf.keras.applications.vgg19.preprocess_input(inputs)
         feature_outputs = self.vgg_feature_model(inputs)
         styles = feature_outputs[:self.num_style_layers]
         content = feature_outputs[self.num_style_layers:]
