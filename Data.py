@@ -120,8 +120,13 @@ def select_dataset_cogan(args):
         # Domains
         data, info = tfds.load('cycle_gan/'+args.cogan_data, with_info=True, as_supervised=True)
         X1, X2 = data['trainA'], data['trainB']
+
         X1 = X1.map(format_example_scale)
         X2 = X2.map(format_example_scale)
+
+        #X1 = X1.map(format_example_to128_2)
+        #X2 = X2.map(format_example_to128_2)
+
         num_examples = info.splits['trainA'].num_examples
 
         X1 = X1.shuffle(num_examples).repeat().batch(args.batch_size)
@@ -160,6 +165,7 @@ def select_dataset_cogan(args):
         X2 = dataset[np.invert(mask)]
         X1_num_examples = len(X1)
         X2_num_examples = len(X2)
+        print('len(X1)='+str(X1_num_examples)+' len(X2)='+str(X2_num_examples))
 
         X1 = tf.data.Dataset.from_tensor_slices(X1)
         X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(X2))

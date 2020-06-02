@@ -13,7 +13,7 @@ class DiscriminatorPenalties:
 
         with tf.GradientTape() as gTape:
             gTape.watch(interpolated_images)
-            disc_interpolates = discriminator(interpolated_images)
+            disc_interpolates = discriminator(interpolated_images, training=True)
 
         gradients = gTape.gradient(disc_interpolates, interpolated_images)
         gradients += 1e-8

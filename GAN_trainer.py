@@ -86,11 +86,11 @@ class GANTrainer(object):
             self.full_training_time += time.time() - start
             self.disc_loss.append(tf.reduce_mean(disc_iters_loss).numpy())
             self.gen_loss.append(g_loss.numpy())
-            print("%d [D loss: %f] [G loss: %f]" % (epoch, d_loss, g_loss,))
 
             # Generate samples and save
             if args.images_while_training != 0:
                 if epoch % args.images_while_training == 0:
+                    print("%d [D loss: %f] [G loss: %f]" % (epoch, d_loss, g_loss,))
                     if args.dataset == "toy":
                         self.images_while_training.append(u.draw_2d_samples(self.generator, args.noise_dim))
                     else:

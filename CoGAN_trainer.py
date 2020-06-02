@@ -98,7 +98,7 @@ class GANTrainer(object):
                 gen_fake = self.g1(noise, training=True)
                 disc_fake = self.d1(gen_fake, training=True)
                 g1_loss = g_loss_fn(disc_fake)
-                penalty1 = self.genPenal.calc_penalty(self.g1, self.g2, 21, args)
+                penalty1 = self.genPenal.calc_penalty(self.g1, self.g2, 20, args)
                 g1_loss = g1_loss + (penalty1 * args.penalty_weight_g)
             gradients_of_generator1 = tape.gradient(g1_loss, self.g1.trainable_variables)
             args.gen_optimizer.apply_gradients(zip(gradients_of_generator1, self.g1.trainable_variables))
@@ -107,7 +107,7 @@ class GANTrainer(object):
                 gen_fake = self.g2(noise, training=True)
                 disc_fake = self.d2(gen_fake, training=True)
                 g2_loss = g_loss_fn(disc_fake)
-                penalty2 = self.genPenal.calc_penalty(self.g1, self.g2, 21, args)
+                penalty2 = self.genPenal.calc_penalty(self.g1, self.g2, 20, args)
                 g2_loss = g2_loss + (penalty2 * args.penalty_weight_g)
             gradients_of_generator2 = tape.gradient(g2_loss, self.g2.trainable_variables)
             args.gen_optimizer.apply_gradients(zip(gradients_of_generator2, self.g2.trainable_variables))
@@ -135,19 +135,20 @@ class GANTrainer(object):
             self.hist_g1.append(g1_loss)
             self.hist_g2.append(g2_loss)
 
-            print("%d [D1 loss: %f] [D2 loss: %f] [G1 loss: %f] [G2 loss: %f] [G1 penalty: %f] [G2 penalty: %f]" % (epoch, d1_loss, d2_loss, g1_loss, g2_loss, penalty1, penalty2))
-
             # If at save interval => save generated image samples
             if epoch % args.images_while_training == 0:
                 self.sample_images(epoch, args.seed, args.dir, args.dataset_dim[3])
+                print("%d [D1 loss: %f] [D2 loss: %f] [G1 loss: %f] [G2 loss: %f] [G1 penalty: %f] [G2 penalty: %f]" % (
+                epoch, d1_loss, d2_loss, g1_loss, g2_loss, penalty1, penalty2))
+
         self.plot_losses(args.dir)
         self.sample_images(epoch, args.seed, args.dir, args.dataset_dim[3])
         return self.full_training_time
 
     def sample_images(self, epoch, seed, dir, channels):
         r, c = 4, 4
-        gen_batch1 = self.g1.predict(seed)
-        gen_batch2 = self.g2.predict(seed)
+        gen_batch1 = self.g1(seed,training=False)
+        gen_batch2 = self.g2(seed,training=False)
 
         gen_imgs = np.concatenate([gen_batch1, gen_batch2])
 

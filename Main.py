@@ -7,7 +7,10 @@ import time
 import Utils as u
 import argparse
 import os.path
-import matplotlib.pyplot as plt
+#import seaborn as sns
+#import scipy
+#import matplotlib.pyplot as plt
+
 
 parser = argparse.ArgumentParser()
 
@@ -33,7 +36,7 @@ parser.add_argument('--images_while_training', type=int,    default=1,         h
 parser.add_argument('--dir',            type=str,           default='/user/student.aau.dk/mjuuln15/output_data',     help='Directory to save images, models, weights etc')
 parser.add_argument('--g_dim',          type=int,           default=256,        help='generator layer dimensions')
 parser.add_argument('--d_dim',          type=int,           default=64,         help='discriminator layer dimensions')
-parser.add_argument('--gan_type',       type=str,           default='cogan',    help='64 | 128 | cifargan | cogan')
+parser.add_argument('--gan_type',       type=str,           default='cogan',    help='64 | 128 | 32 | cogan')
 parser.add_argument('--noise_dim',      type=int,           default=100,        help='size of the latent vector')
 parser.add_argument('--limit_dataset',  type=bool,          default=False,      help='limit dataset to one class')
 parser.add_argument('--scale_data',     type=int,           default=0,          help='Scale images in dataset to MxM')
@@ -42,11 +45,10 @@ parser.add_argument('--input_noise',    type=bool,          default=False,      
 parser.add_argument('--purpose',        type=str,		    default='',		    help='purpose of this experiment')
 parser.add_argument('--grayscale',      type=bool,		    default=False)
 parser.add_argument('--weight_decay',   type=float,         default=0.0001)
-parser.add_argument('--bias_init',      type=float,         default=0.1)
+parser.add_argument('--bias_init',      type=float,         default=0)
 parser.add_argument('--prelu_init',     type=float,         default=0.25)
 parser.add_argument('--noise_type',     type=str,           default='uniform',   help='normal | uniform')
 parser.add_argument('--weight_init',    type=str,           default='normal',   help='normal (0.02 mean)| xavier | he')
-
 
 # CoGAN
 parser.add_argument('--g_arch',         type=str,           default='digit',       help='digit | rotate | 256 | face | digit_noshare')
@@ -59,21 +61,21 @@ args = parser.parse_args()
 # Debugging
 
 #args.gan_type = "cogan"
-#args.loss = 'ce'
+#args.loss = 'wgan'
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
-#args.g_arch = 'face'
-#args.d_arch = 'face'
+#args.g_arch = 'digit'
+#args.d_arch = 'digit'
 #args.batch_size = 16
-#args.cogan_data = 'Blond_Hair'
-#args.dataset = 'celeba'
+#args.cogan_data = 'mnist2negative'
+#args.dataset = 'mnist-f'
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'weight'
+#args.noise_type='normal'
 #args.label_smooth=True
 #args.epochs = 2
 #args.disc_iters = 1
 #args.images_while_training = 10
 #args.limit_dataset = True
-
 
 args.wd = tf.keras.regularizers.l2(args.weight_decay)
 args.bi = tf.keras.initializers.Constant(args.bias_init)
@@ -87,6 +89,7 @@ tf.random.set_seed(2020)
 np.random.seed(2020)
 
 #u.latent_walk('C:/users/marku/Desktop/gan_training_output/relax_weight_sharing/26508/generator1','C:/Users/marku/Desktop/gan_training_output/relax_weight_sharing/26508/generator2',100,3)
+
 
 # GEN optimiser
 if args.optim_g == "adam":
@@ -106,8 +109,6 @@ elif args.optim_d == "sgd":
 else:
     raise NotImplementedError()
 
-
-
 # Choose gan type
 if args.gan_type == 'cogan':
     # Choose data
@@ -116,11 +117,11 @@ if args.gan_type == 'cogan':
     args.dataset_dim = shape
     data_load_time = time.time() - start
 
-    # Select architectures
-    generator1, generator2, discriminator1, discriminator2 = u.select_cogan_architecture(args)
-
     # Write config
     u.write_config(args)
+
+    # Select architectures
+    generator1, generator2, discriminator1, discriminator2 = u.select_cogan_architecture(args)
 
     # Start training
     if len(tf.config.experimental.list_physical_devices('GPU')) > 0:
@@ -162,11 +163,11 @@ else:
     if args.input_noise:
         args.variance = 0.1
 
-    # Select architectures
-    generator, discriminator = u.select_gan_architecture(args)
-
     # Write config
     u.write_config(args)
+
+    # Select architectures
+    generator, discriminator = u.select_gan_architecture(args)
 
     # Start training
     if len(tf.config.experimental.list_physical_devices('GPU')) > 0:

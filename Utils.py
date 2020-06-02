@@ -100,7 +100,7 @@ def gen_noise(args, gen_noise_seed=False):
     if args.noise_type == 'normal':
         noise = tf.random.normal([batch_size, args.noise_dim])
     elif args.noise_type == 'uniform':
-        noise = tf.random.uniform(shape=(batch_size, args.noise_dim), minval=-1, maxval=1)
+        noise = tf.random.uniform(shape=(batch_size, args.noise_dim), minval=-1., maxval=1.)
     else:
         raise NotImplementedError()
     return noise
