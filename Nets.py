@@ -397,12 +397,6 @@ def cogan_generators_digit(args):
 
     model = (tf.keras.layers.Conv2DTranspose(128, (3,3), strides=(2, 2), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(model)
     model = (tf.keras.layers.BatchNormalization())(model)
-    features_16x16 = (tf.keras.layers.PReLU())(model)
-    output1.append(features_16x16)
-    output2.append(features_16x16)
-
-    model = (tf.keras.layers.Conv2DTranspose(128, (3,3), strides=(2, 2), padding='same', kernel_regularizer=l2_reg))(model)
-    model = (tf.keras.layers.BatchNormalization())(model)
     model = (tf.keras.layers.PReLU())(model)
     output1.append(model)
     output2.append(model)

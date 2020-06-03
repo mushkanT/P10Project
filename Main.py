@@ -128,6 +128,7 @@ else:
 
 # Choose gan type
 if args.gan_type == 'cogan':
+
     # Choose data
     start = time.time()
     domain1, domain2, shape = dt.select_dataset_cogan(args)

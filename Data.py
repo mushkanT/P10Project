@@ -224,7 +224,7 @@ def select_dataset_cogan(args):
         X1_num_examples = len(X1)
         X2_num_examples = len(X2)
 
-        X1 = tf.data.Dataset.from_tensor_slices(X1)
+        X1 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(X1))
         X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(X2))
 
         X1 = X1.map(format_example_to128).shuffle(X1_num_examples).repeat().batch(args.batch_size)
