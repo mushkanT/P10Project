@@ -1,21 +1,23 @@
 import tensorflow as tf
 
+
 k_cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+#k_cross_entropy = tf.keras.losses.BinaryCrossentropy()
 
 
 def cross_entropy_gen(fake_output):
     G_loss = k_cross_entropy(tf.ones_like(fake_output), fake_output)
+    #G_loss = -tf.reduce_mean(tf.math.log(tf.math.sigmoid(fake_output)))
     return G_loss
 
 
 def cross_entropy_disc(fake_output, real_output):
     true_labels = tf.ones_like(real_output)
     false_labels = tf.zeros_like(fake_output)
-    #true_labels += 0.05 * tf.random.uniform(tf.shape(true_labels))
-    #false_labels += 0.05 * tf.random.uniform(tf.shape(false_labels))
     real_loss = k_cross_entropy(true_labels, real_output)
     fake_loss = k_cross_entropy(false_labels, fake_output)
     D_loss = real_loss + fake_loss
+    #D_loss1 = tf.math.reduce_sum(tf.reduce_mean(tf.math.log(tf.math.sigmoid(real_output)) + tf.math.log(1 - tf.math.sigmoid(fake_output))))
     return D_loss
 
 

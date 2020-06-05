@@ -718,17 +718,17 @@ def cogan_discriminators_256(args):
     model.add(tf.keras.layers.PReLU(prelu_init))
     model.add(tf.keras.layers.Dropout(0.1))
 
-    model.add(tf.keras.layers.Conv2D(256, (5, 5), padding='same', strides=(2, 2), kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))
+    model.add(tf.keras.layers.Conv2D(256, (3, 3), padding='same', strides=(2, 2), kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))
     model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU(prelu_init))
     model.add(tf.keras.layers.Dropout(0.3))
 
-    model.add(tf.keras.layers.Conv2D(512, (5, 5), padding='same', strides=(2, 2), kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))
+    model.add(tf.keras.layers.Conv2D(512, (3, 3), padding='same', strides=(2, 2), kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))
     model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU(prelu_init))
     model.add(tf.keras.layers.Dropout(0.3))
 
-    model.add(tf.keras.layers.Conv2D(1024, (5, 5), padding='same', strides=(2, 2), kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))
+    model.add(tf.keras.layers.Conv2D(1024, (3, 3), padding='same', strides=(2, 2), kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))
     model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.PReLU(prelu_init))
     model.add(tf.keras.layers.Dropout(0.5))

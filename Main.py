@@ -15,45 +15,44 @@ import os.path
 parser = argparse.ArgumentParser()
 
 # Settings
-parser.add_argument('--dataset',        type=str,           default='toy',      help=' toy | mnist | cifar10 | lsun | frey | svhn')
-parser.add_argument('--loss',           type=str,           default='ce',       help=' wgan | ce')
-parser.add_argument('--disc_penalty',   type=str,           default='none',       help='none | wgan-gp')
-parser.add_argument('--gen_penalty',    type=str,           default='none',       help='weight | feature')
-parser.add_argument('--batch_size',     type=int,           default=128)
-parser.add_argument('--epochs',         type=int,           default=5000)
-parser.add_argument('--disc_iters',     type=int,           default=1)
-parser.add_argument('--clip',           type=float,         default=0.01,       help='upper bound for clipping')
-parser.add_argument('--penalty_weight_d',      type=int,           default=10)
-parser.add_argument('--penalty_weight_g',      type=int,           default=10)
-parser.add_argument('--lr_d',           type=float,         default=0.0002)
-parser.add_argument('--lr_g',           type=float,         default=0.0002)
-parser.add_argument('--b1',             type=float,         default=0.5)
-parser.add_argument('--b2',             type=float,         default=0.999)
-parser.add_argument('--optim_d',        type=str,           default='adam',     help='adam | sgd | rms')
-parser.add_argument('--optim_g',        type=str,           default='adam',     help='adam | rms')
-parser.add_argument('--num_samples_to_gen', type=int,       default=8)
-parser.add_argument('--images_while_training', type=int,    default=1,         help='Every x epoch to print images while training')
-parser.add_argument('--dir',            type=str,           default='/user/student.aau.dk/mjuuln15/output_data',     help='Directory to save images, models, weights etc')
-parser.add_argument('--g_dim',          type=int,           default=256,        help='generator layer dimensions')
-parser.add_argument('--d_dim',          type=int,           default=64,         help='discriminator layer dimensions')
-parser.add_argument('--gan_type',       type=str,           default='cogan',    help='64 | 128 | 32 | cogan')
-parser.add_argument('--noise_dim',      type=int,           default=100,        help='size of the latent vector')
-parser.add_argument('--limit_dataset',  type=bool,          default=False,      help='limit dataset to one class')
-parser.add_argument('--scale_data',     type=int,           default=0,          help='Scale images in dataset to MxM')
-parser.add_argument('--label_smooth',   type=bool,          default=False,      help='Smooth the labels of the disc from 1 to 0 occasionally')
-parser.add_argument('--input_noise',    type=bool,          default=False,      help='Add gaussian noise to the discriminator inputs')
-parser.add_argument('--purpose',        type=str,		    default='',		    help='purpose of this experiment')
-parser.add_argument('--grayscale',      type=bool,		    default=False)
-parser.add_argument('--weight_decay',   type=float,         default=0.0001)
-parser.add_argument('--bias_init',      type=float,         default=0)
-parser.add_argument('--prelu_init',     type=float,         default=0.25)
-parser.add_argument('--noise_type',     type=str,           default='uniform',   help='normal | uniform')
-parser.add_argument('--weight_init',    type=str,           default='normal',   help='normal (0.02 mean)| xavier | he')
-
+parser.add_argument('--dataset',               type=str,    default='toy',      help=' toy | mnist | cifar10 | lsun | frey | svhn')
+parser.add_argument('--loss',                  type=str,    default='ce',       help=' wgan | ce')
+parser.add_argument('--disc_penalty',          type=str,    default='none',     help='none | wgan-gp')
+parser.add_argument('--gen_penalty',           type=str,    default='none',     help='weight | feature')
+parser.add_argument('--batch_size',            type=int,    default=128)
+parser.add_argument('--epochs',                type=int,    default=5000)
+parser.add_argument('--disc_iters',            type=int,    default=1)
+parser.add_argument('--clip',                  type=float,  default=0.01,       help='upper bound for clipping')
+parser.add_argument('--penalty_weight_d',      type=int,    default=10)
+parser.add_argument('--penalty_weight_g',      type=int,    default=10)
+parser.add_argument('--lr_d',                  type=float,  default=0.0002)
+parser.add_argument('--lr_g',                  type=float,  default=0.0002)
+parser.add_argument('--b1',                    type=float,  default=0.5)
+parser.add_argument('--b2',                    type=float,  default=0.999)
+parser.add_argument('--optim_d',               type=str,    default='adam',     help='adam | sgd | rms')
+parser.add_argument('--optim_g',               type=str,    default='adam',     help='adam | rms')
+parser.add_argument('--num_samples_to_gen',    type=int,    default=8)
+parser.add_argument('--images_while_training', type=int,    default=1,          help='Every x epoch to print images while training')
+parser.add_argument('--dir',                   type=str,    default='/user/student.aau.dk/mjuuln15/output_data',     help='Directory to save images, models, weights etc')
+parser.add_argument('--g_dim',                 type=int,    default=256,        help='generator layer dimensions')
+parser.add_argument('--d_dim',                 type=int,    default=64,         help='discriminator layer dimensions')
+parser.add_argument('--gan_type',              type=str,    default='cogan',    help='64 | 128 | 32 | cogan')
+parser.add_argument('--noise_dim',             type=int,    default=100,        help='size of the latent vector')
+parser.add_argument('--limit_dataset',         type=bool,   default=False,      help='limit dataset to one class')
+parser.add_argument('--scale_data',            type=int,    default=0,          help='Scale images in dataset to MxM')
+parser.add_argument('--label_smooth',          type=bool,   default=False,      help='Smooth the labels of the disc from 1 to 0 occasionally')
+parser.add_argument('--input_noise',           type=bool,   default=False,      help='Add gaussian noise to the discriminator inputs')
+parser.add_argument('--purpose',               type=str,    default='',		    help='purpose of this experiment')
+parser.add_argument('--grayscale',             type=bool,   default=False)
+parser.add_argument('--weight_decay',          type=float,  default=0.0001)
+parser.add_argument('--bias_init',             type=float,  default=0)
+parser.add_argument('--prelu_init',            type=float,  default=0.25)
+parser.add_argument('--noise_type',            type=str,    default='uniform',     help='normal | uniform')
+parser.add_argument('--weight_init',           type=str,    default='normal',      help='normal (0.02 mean)| xavier | he')
 # CoGAN
-parser.add_argument('--g_arch',         type=str,           default='digit',       help='digit | rotate | 256 | face | digit_noshare')
-parser.add_argument('--d_arch',         type=str,           default='digit',       help='digit | rotate | 256 | face | digit_noshare')
-parser.add_argument('--cogan_data',     type=str,           default='mnist2edge',  help='mnist2edge | mnist2rotate | mnist2svhn | mnist2negative | Smiling | '
+parser.add_argument('--g_arch',                type=str,    default='digit',       help='digit | rotate | 256 | face | digit_noshare')
+parser.add_argument('--d_arch',                type=str,    default='digit',       help='digit | rotate | 256 | face | digit_noshare')
+parser.add_argument('--cogan_data',            type=str,    default='mnist2edge',  help='mnist2edge | mnist2rotate | mnist2svhn | mnist2negative | Smiling | '
                                                                                         'Blond_Hair | Male | apple2orange | horse2zebra | vangogh2photo')
 
 args = parser.parse_args()
@@ -61,12 +60,12 @@ args = parser.parse_args()
 # Debugging
 
 #args.gan_type = "cogan"
-#args.loss = 'wgan'
+#args.loss = 'ce'
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
 #args.g_arch = 'digit'
 #args.d_arch = 'digit'
 #args.batch_size = 16
-#args.cogan_data = 'mnist2negative'
+#args.cogan_data = 'mnist2svhn'
 #args.dataset = 'mnist-f'
 #args.disc_penalty = 'wgan-gp'
 #args.gen_penalty = 'weight'
