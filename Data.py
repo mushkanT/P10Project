@@ -170,7 +170,8 @@ def select_dataset_cogan(args):
         X1 = X1.shuffle(num_examples).repeat().batch(args.batch_size)
 
         # Domain 2
-        svhn_np = np.load('/user/student.aau.dk/palmin15/40_svhn.npy')
+        #svhn_np = np.load('c:/users/palmi/desktop/40_svhn.npy')
+        svhn_np = np.load('user/student.aau.dk/palmin15/40_svhn.npy')
         X2_num_examples = len(svhn_np)
         X2 = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(svhn_np))
         X2 = X2.shuffle(X2_num_examples).repeat().batch(args.batch_size)
@@ -211,7 +212,7 @@ def select_dataset_cogan(args):
                 has_attribute = (values[idx] == '1')
             mask.append(has_attribute)
 
-        #images = glob.glob('C:/Users/palmi/Desktop/celeba_small/*.jpg')
+        #images = glob.glob('C:/Users/palmi/Desktop/img_align_celeba/*.jpg')
         images = glob.glob('/user/student.aau.dk/palmin15/img_align_celeba/*.jpg')
         for i in images:
             image = plt.imread(i)

@@ -4,8 +4,7 @@
     <list default="true" id="220b69cb-c454-4d63-b603-ea792d470aba" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Data.py" beforeDir="false" afterPath="$PROJECT_DIR$/Data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Nets.py" beforeDir="false" afterPath="$PROJECT_DIR$/Nets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sampler.py" beforeDir="false" afterPath="$PROJECT_DIR$/Sampler.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -62,7 +61,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.Main">
+  <component name="RunManager" selected="Python.Sampler">
     <configuration name="Main" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="P9Project" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -77,7 +76,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Main.py" />
-      <option name="PARAMETERS" value="--cogan_data=mnist2edge --gan_type=cogan --batch_size=64 --epochs=30000 --loss=wgan --disc_penalty=wgan-gp --disc_iters=5 --images_while_training=500 --perceptual_loss=True --style_weight=0.00000000001 --content_weight=0.001" />
+      <option name="PARAMETERS" value="--cogan_data=mnist2edge --gan_type=cogan --batch_size=128 --epochs=20000 --loss=wgan --disc_penalty=wgan-gp --disc_iters=5 --images_while_training=500 --use_cycle=True" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -99,7 +98,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Sampler.py" />
-      <option name="PARAMETERS" value="--model_dir=$USER_HOME$/desktop/experiments/32209/ --out_dir=$USER_HOME$/desktop/samples/ --num_samples=1000" />
+      <option name="PARAMETERS" value="--model_dir=$USER_HOME$/desktop/CoGAN_weight_sharing_relax/CoGAN_weight_sharing_relax/26502_3_shared_layers/ --out_dir=$USER_HOME$/desktop/lpips/ --num_samples=50000" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -182,8 +181,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.Main" />
         <item itemvalue="Python.Sampler" />
+        <item itemvalue="Python.Main" />
         <item itemvalue="Python.cogan" />
         <item itemvalue="Python.Train" />
         <item itemvalue="Python.mlm_wgan_gp" />
@@ -245,7 +244,10 @@
       <workItem from="1590861334971" duration="2597000" />
       <workItem from="1591021341941" duration="5485000" />
       <workItem from="1591088994609" duration="6346000" />
-      <workItem from="1591168128268" duration="14267000" />
+      <workItem from="1591168128268" duration="15189000" />
+      <workItem from="1591255950665" duration="8318000" />
+      <workItem from="1591347505031" duration="4655000" />
+      <workItem from="1591429057784" duration="8552000" />
     </task>
     <servers />
   </component>
@@ -289,11 +291,6 @@
           <option name="timeStamp" value="637" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Sampler.py</url>
-          <line>24</line>
-          <option name="timeStamp" value="654" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Main.py</url>
           <line>276</line>
           <option name="timeStamp" value="692" />
@@ -314,7 +311,7 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/P9Project$Main.coverage" NAME="Main Coverage Results" MODIFIED="1591197215624" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/P9Project$Sampler.coverage" NAME="Sampler Coverage Results" MODIFIED="1588242757043" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/P9Project$Main.coverage" NAME="Main Coverage Results" MODIFIED="1591268414825" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/P9Project$Sampler.coverage" NAME="Sampler Coverage Results" MODIFIED="1591436277539" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
