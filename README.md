@@ -1,47 +1,50 @@
 # Improved Learning of Joint Distributions using Soft-CoupledGANs
-## Tensorflow implementation of SCoGAN with FR, SL, CC and PL
-### DISCLAIMER! - The code is still in a prototype stage and being cleaned for easier usage
+## Tensorflow implementation of SCoGAN with FR, SL, CC and PL <br> DISCLAIMER! - The code is still in a prototype stage and is being cleaned for easier usage
 
 _Abstract:_ <br>
 In this project we analyse the joint distribution learning framework Coupled GAN and find that its imposed weight sharing constraint restricts the generators in learning the joint distribution over noisy and diverse datasets such as MNIST2SVHN, Apples2Oranges and Horses2Zebra. Through an experimental and research driven approach we propose to replace the strict weight sharing constraint with a softer coupling between generators in the shape of four regularisation terms. We call this type of model Soft-CoGAN (SCoGAN). These terms are (1) a feature regulariser which enforces generators to learn similar features, (2) a semantic loss based on classification of generated images such that the content of images are of the same class, (3) cycle consistency between latent vectors and (4) a perceptual loss which is a more advanced version of the feature regulariser using features from a pretrained deep classifier. Through experiments on different datasets we find that combinations of our proposed regularisers are able to provide a softer coupling that learns the joint distribution on MNIST2SVHN. However our approaches only achieve similar performance as CoGAN on the Apple2Oranges, Horse2Zebra and CelebA datasets. We discuss why and argue that through further tuning of hyperparameters our approaches could potentially surpass CoGAN performance.  
 
 ### Variants of the SCoGAN architecture
 <p align="center">
-<img alt="proposed MSG-GAN architecture" src="https://github.com/akanimax/BMSG-GAN/blob/master/diagrams/architecture.png"
+<img alt="proposed MSG-GAN architecture" src="https://github.com/palminde/P9Project/blob/master/architectures/feature_regulariser.pdf"
 width=90% />
 </p>
 
 <p>
-The above figure describes the architecture of MSG-GAN for 
-generating synchronized multi-scale images. Our method is 
-based on the architecture proposed in proGAN, 
-but instead of a progressively growing training scheme, 
-includes connections from the intermediate
-layers of the generator to the intermediate layers of the 
-discriminator. The multi-scale images input to 
-the discriminator are converted into spatial 
-volumes which are concatenated with the corresponding 
-activation volumes obtained from the main path of 
-convolutional layers.
+The above figure describes the architecture of SCoGAN with the feature regulariser.
 </p> <br>
 
-<p>
-For the discrimination process, appropriately downsampled 
-versions of the real images are fed to corresponding layers 
-of the discriminator as shown in the diagram (from above).
-</p> <br>
 
 <p align="center">
-<img alt="synchronization explanation" src="https://github.com/akanimax/BMSG-GAN/blob/master/diagrams/synchronization.png"
-     width=80% />
+<img alt="synchronization explanation" src="https://github.com/palminde/P9Project/blob/master/architectures/semantic_loss.pdf"
+     width=90% />
 </p>
 <br>
 
-Above figure explains how, during training, all the layers 
-in the MSG-GAN first synchronize colour-wise and subsequently 
-improve the generated images at various scales. 
-The brightness of the images across all layers (scales) 
-synchronizes eventually
+<p>
+The above figure describes the architecture of SCoGAN with the semantic loss.
+</p> <br>
+
+<p align="center">
+<img alt="synchronization explanation" src="https://github.com/palminde/P9Project/blob/master/architectures/cycle_consistency.pdf"
+     width=90% />
+</p>
+<br>
+
+<p>
+The above figure describes the architecture of SCoGAN with the cycle consistency loss
+</p> <br>
+
+
+<p align="center">
+<img alt="synchronization explanation" src="https://github.com/palminde/P9Project/blob/master/architectures/perceptul_loss.pdf"
+     width=90% />
+</p>
+<br>
+
+<p>
+The above figure describes the architecture of SCoGAN with the perceptual loss
+</p> <br>
 
 ### Running the Code
 Start the training by running the `main.py` script.
@@ -143,66 +146,20 @@ For training a SCoGAN network with semantic loss use the following arguments:
 We used 1 Tesla V100 GPUs of the 
 DGX-2 machine for our experimentation.
 
-### Generated samples on different datasets
+### Additional generated samples on different datasets
 
 <p align="center">
-     <b> <b> :star: [NEW] :star: </b> CelebA HQ [1024 x 1024] (30K dataset)</b> <br>
-     <img alt="CelebA-HQ" src="https://github.com/akanimax/BMSG-GAN/blob/master/diagrams/HQ_faces_sheet.png"
+     <b> MNIST2SVHN_pruned [32x32] with SCoGAN-SL+FR</b> <br>
+     <img alt="MNIST2SVHN" src="https://github.com/akanimax/BMSG-GAN/blob/master/diagrams/HQ_faces_sheet.png"
           width=80% />
 </p>
 <br>
 
-<p align="center">
-     <b> <b> :star: [NEW] :star: </b> Oxford Flowers (improved samples) [256 x 256] (8K dataset)</b> <br>
-     <img alt="oxford_big" src="https://github.com/akanimax/BMSG-GAN/blob/master/diagrams/flowers_sheet.png"
-          width=80% />
-     <img alt="oxford_variety" src="https://github.com/akanimax/BMSG-GAN/blob/master/diagrams/variety_flowers_sheet.png"
-          width=80% />
-</p>
-<br>
-
-<p align="center">
-     <b> CelebA HQ [256 x 256] (30K dataset)</b> <br>
-     <img alt="CelebA-HQ" src="https://github.com/akanimax/BMSG-GAN/blob/master/diagrams/CelebA-HQ_sheet.png"
-          width=80% />
-</p>
-<br>
-
-<p align="center">
-     <b> LSUN Bedrooms [128 x 128] (3M dataset) </b> <br>
-     <img alt="lsun_bedrooms" src="https://github.com/akanimax/BMSG-GAN/blob/master/diagrams/Bedrooms_sheet_new.png"
-          width=80% />
-</p>
-<br>
-
-<p align="center">
-     <b> CelebA [128 x 128] (200K dataset) </b> <br>
-     <img alt="CelebA" src="https://github.com/akanimax/BMSG-GAN/blob/master/diagrams/faces_sheet.png"
-          width=80% />
-</p>
-<br>
-
-### Synchronized all-res generated samples
-<p align="center">
-     <b> Cifar-10 [32 x 32] (50K dataset)</b> <br>
-     <img alt="cifar_allres" src="https://github.com/akanimax/BMSG-GAN/blob/master/diagrams/CIFAR10_allres_sheet.png"
-          width=80% />
-</p>
-<br>
-
-<p align="center">
-     <b> Oxford-102 Flowers [256 x 256] (8K dataset)</b> <br>
-     <img alt="flowers_allres" src="https://github.com/akanimax/BMSG-GAN/blob/master/diagrams/FLowers_allres_sheet.png"
-          width=80% />
-</p>
-<br>
 
 ## Authors
 
 * **Patrick Alminde** - [Palminde](https://github.com/Palminde)
 * **Markus Hald Juul-Nyholm** - [MarkusHald](https://github.com/MarkusHald)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
 
 ## License
 
