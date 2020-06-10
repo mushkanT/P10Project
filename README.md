@@ -2,7 +2,7 @@
 ## Tensorflow implementation of SCoGAN with FR, SL, CC and PL <br> DISCLAIMER! - The code is still in a prototype stage and is being cleaned for easier usage
 
 _Abstract:_ <br>
-In this project we analyse the joint distribution learning framework Coupled GAN and find that its imposed weight sharing constraint restricts the generators in learning the joint distribution over noisy and diverse datasets such as MNIST2SVHN, Apples2Oranges and Horses2Zebra. Through an experimental and research driven approach we propose to replace the strict weight sharing constraint with a softer coupling between generators in the shape of four regularisation terms. We call this type of model Soft-CoGAN (SCoGAN). These terms are (1) a feature regulariser which enforces generators to learn similar features, (2) a semantic loss based on classification of generated images such that the content of images are of the same class, (3) cycle consistency between latent vectors and (4) a perceptual loss which is a more advanced version of the feature regulariser using features from a pretrained deep classifier. Through experiments on different datasets we find that combinations of our proposed regularisers are able to provide a softer coupling that learns the joint distribution on MNIST2SVHN. However our approaches only achieve similar performance as CoGAN on the Apple2Oranges, Horse2Zebra and CelebA datasets. We discuss why and argue that through further tuning of hyperparameters our approaches could potentially surpass CoGAN performance.  
+In out master thesis we analyse the joint distribution learning framework Coupled GAN(CoGAN) and find that its imposed weight sharing constraint restricts the generators in learning the joint distribution over noisy and diverse datasets such as MNIST2SVHN, Apples2Oranges and Horses2Zebra. Through an experimental and research driven approach we propose to replace the strict weight sharing constraint with a softer coupling between generators in the shape of four regularisation terms. We call this type of model Soft-CoGAN (SCoGAN). These terms are (1) a feature regulariser which enforces generators to learn similar features, (2) a semantic loss based on classification of generated images such that the content of images are of the same class, (3) cycle consistency between latent vectors and (4) a perceptual loss which is a more advanced version of the feature regulariser using features from a pretrained deep classifier. Through experiments on different datasets we find that combinations of our proposed regularisers are able to provide a softer coupling that learns the joint distribution on MNIST2SVHN. However our approaches only achieve similar performance as CoGAN on the Apple2Oranges, Horse2Zebra and CelebA datasets. We discuss why and argue that through further tuning of hyperparameters our approaches could potentially surpass CoGAN performance.  
 
 ### Variants of the SCoGAN architecture
 <p align="center">
@@ -51,7 +51,6 @@ Start the training by running the `main.py` script.
 Refer to the following parameters for adapting to your own use:
 
     -h, --help            show this help message and exit
-       --dataset DATASET     toy | mnist | cifar10 | lsun | frey | svhn
        --loss LOSS           wgan | ce
        --disc_penalty DISC_PENALTY
                              none | wgan-gp
@@ -77,17 +76,10 @@ Refer to the following parameters for adapting to your own use:
        --d_dim D_DIM         discriminator layer dimensions
        --gan_type GAN_TYPE   64 | 128 | cifargan | cogan | classifier
        --noise_dim NOISE_DIM
-                             size of the latent vector
-       --limit_dataset LIMIT_DATASET
-                             limit dataset to one class
-       --scale_data SCALE_DATA
-                             Scale images in dataset to MxM
-       --label_smooth LABEL_SMOOTH
-                             Smooth the labels of the disc from 1 to 0 occasionally
+                             size of the latent noise vector
        --input_noise INPUT_NOISE
                              Add gaussian noise to the discriminator inputs
-       --purpose PURPOSE     purpose of this experiment
-       --grayscale GRAYSCALE
+       --purpose PURPOSE     Descriptive purpose of the execution
        --weight_decay WEIGHT_DECAY
        --bias_init BIAS_INIT
        --prelu_init PRELU_INIT
@@ -119,12 +111,6 @@ Refer to the following parameters for adapting to your own use:
        --shared_layers SHARED_LAYERS
                              Number of layers to calculate feature/weight
                              regularizer from
-       --feature_loss FEATURE_LOSS
-                             Use vgg to extract features used for regularizing
-       --fl_high_weight FL_HIGH_WEIGHT
-                             Weight for high level feature similarity
-       --fl_low_weight FL_LOW_WEIGHT
-                             Weight for low level feature similarity
        --perceptual_loss PERCEPTUAL_LOSS
                              For using perceptual loss
        --style_weight STYLE_WEIGHT
@@ -134,7 +120,7 @@ Refer to the following parameters for adapting to your own use:
                              Weight for content loss
 
 ##### Example of running a training
-For training a SCoGAN network with semantic loss use the following arguments:
+For training a SCoGAN network with semantic loss the following arguments can be used:
 
     $ python main.py --epochs=20000 \ 
                       --noise_dim=100 \
@@ -150,7 +136,7 @@ DGX-2 machine for our experimentation.
 
 <p align="center">
      <b> MNIST2SVHN_pruned [32x32] with SCoGAN-SL+FR</b> <br>
-     <img alt="MNIST2SVHN" src="https://github.com/akanimax/BMSG-GAN/blob/master/diagrams/HQ_faces_sheet.png"
+     <img alt="MNIST2SVHN" src="https://github.com/palminde/P9Project/blob/master/samples/Mnist2Svhn/sample1.png"
           width=80% />
 </p>
 <br>
