@@ -1,5 +1,6 @@
 # Improved Learning of Joint Distributions using Soft-CoupledGANs
 ## Tensorflow implementation of SCoGAN with FR, SL, CC and PL
+### DISCLAIMER! - The code is still in a prototype stage and being cleaned for easier usage
 
 _Abstract:_ <br>
 In this project we analyse the joint distribution learning framework Coupled GAN and find that its imposed weight sharing constraint restricts the generators in learning the joint distribution over noisy and diverse datasets such as MNIST2SVHN, Apples2Oranges and Horses2Zebra. Through an experimental and research driven approach we propose to replace the strict weight sharing constraint with a softer coupling between generators in the shape of four regularisation terms. We call this type of model Soft-CoGAN (SCoGAN). These terms are (1) a feature regulariser which enforces generators to learn similar features, (2) a semantic loss based on classification of generated images such that the content of images are of the same class, (3) cycle consistency between latent vectors and (4) a perceptual loss which is a more advanced version of the feature regulariser using features from a pretrained deep classifier. Through experiments on different datasets we find that combinations of our proposed regularisers are able to provide a softer coupling that learns the joint distribution on MNIST2SVHN. However our approaches only achieve similar performance as CoGAN on the Apple2Oranges, Horse2Zebra and CelebA datasets. We discuss why and argue that through further tuning of hyperparameters our approaches could potentially surpass CoGAN performance.  
@@ -44,74 +45,101 @@ synchronizes eventually
 
 ### Running the Code
 Start the training by running the `main.py` script.
- Refer to the following parameters for tweaking for your own use:
+Refer to the following parameters for adapting to your own use:
 
     -h, --help            show this help message and exit
-      --generator_file GENERATOR_FILE
-                            pretrained weights file for generator
-      --generator_optim_file GENERATOR_OPTIM_FILE
-                            saved state for generator optimizer
-      --shadow_generator_file SHADOW_GENERATOR_FILE
-                            pretrained weights file for the shadow generator
-      --discriminator_file DISCRIMINATOR_FILE
-                            pretrained_weights file for discriminator
-      --discriminator_optim_file DISCRIMINATOR_OPTIM_FILE
-                            saved state for discriminator optimizer
-      --images_dir IMAGES_DIR
-                            path for the images directory
-      --folder_distributed FOLDER_DISTRIBUTED
-                            whether the images directory contains folders or not
-      --flip_augment FLIP_AUGMENT
-                            whether to randomly mirror the images during training
-      --sample_dir SAMPLE_DIR
-                            path for the generated samples directory
-      --model_dir MODEL_DIR
-                            path for saved models directory
-      --loss_function LOSS_FUNCTION
-                            loss function to be used: standard-gan, wgan-gp,
-                            lsgan,lsgan-sigmoid,hinge, relativistic-hinge
-      --depth DEPTH         Depth of the GAN
-      --latent_size LATENT_SIZE
-                            latent size for the generator
-      --batch_size BATCH_SIZE
-                            batch_size for training
-      --start START         starting epoch number
-      --num_epochs NUM_EPOCHS
-                            number of epochs for training
-      --feedback_factor FEEDBACK_FACTOR
-                            number of logs to generate per epoch
-      --num_samples NUM_SAMPLES
-                            number of samples to generate for creating the grid
-                            should be a square number preferably
-      --checkpoint_factor CHECKPOINT_FACTOR
-                            save model per n epochs
-      --g_lr G_LR           learning rate for generator
-      --d_lr D_LR           learning rate for discriminator
-      --adam_beta1 ADAM_BETA1
-                            value of beta_1 for adam optimizer
-      --adam_beta2 ADAM_BETA2
-                            value of beta_2 for adam optimizer
-      --use_eql USE_EQL     Whether to use equalized learning rate or not
-      --use_ema USE_EMA     Whether to use exponential moving averages or not
-      --ema_decay EMA_DECAY
-                            decay value for the ema
-      --data_percentage DATA_PERCENTAGE
-                            percentage of data to use
-      --num_workers NUM_WORKERS
-                            number of parallel workers for reading files
+       --dataset DATASET     toy | mnist | cifar10 | lsun | frey | svhn
+       --loss LOSS           wgan | ce
+       --disc_penalty DISC_PENALTY
+                             none | wgan-gp
+       --gen_penalty GEN_PENALTY
+                             weight | feature
+       --batch_size BATCH_SIZE
+       --epochs EPOCHS
+       --disc_iters DISC_ITERS
+       --clip CLIP           upper bound for clipping
+       --penalty_weight_d PENALTY_WEIGHT_D
+       --penalty_weight_g PENALTY_WEIGHT_G
+       --lr_d LR_D
+       --lr_g LR_G
+       --b1 B1
+       --b2 B2
+       --optim_d OPTIM_D     adam | sgd | rms
+       --optim_g OPTIM_G     adam | rms
+       --num_samples_to_gen NUM_SAMPLES_TO_GEN
+       --images_while_training IMAGES_WHILE_TRAINING
+                             Every x epoch to print images while training
+       --dir DIR             Directory to save images, models, weights etc
+       --g_dim G_DIM         generator layer dimensions
+       --d_dim D_DIM         discriminator layer dimensions
+       --gan_type GAN_TYPE   64 | 128 | cifargan | cogan | classifier
+       --noise_dim NOISE_DIM
+                             size of the latent vector
+       --limit_dataset LIMIT_DATASET
+                             limit dataset to one class
+       --scale_data SCALE_DATA
+                             Scale images in dataset to MxM
+       --label_smooth LABEL_SMOOTH
+                             Smooth the labels of the disc from 1 to 0 occasionally
+       --input_noise INPUT_NOISE
+                             Add gaussian noise to the discriminator inputs
+       --purpose PURPOSE     purpose of this experiment
+       --grayscale GRAYSCALE
+       --weight_decay WEIGHT_DECAY
+       --bias_init BIAS_INIT
+       --prelu_init PRELU_INIT
+       --noise_type NOISE_TYPE
+                             normal | uniform
+       --weight_init WEIGHT_INIT
+                             normal (0.02 mean)| xavier | he
+       --g_arch G_ARCH       digit | rotate | 256 | face | digit_noshare |
+                             face_noshare
+       --d_arch D_ARCH       digit | rotate | 256 | face | digit_noshare |
+                             face_noshare
+       --cogan_data COGAN_DATA
+                             mnist2edge | mnist2rotate | mnist2svhn |
+                             mnist2negative | celeb_a | apple2orange | horse2zebra
+                             | vangogh2photo
+       --semantic_loss SEMANTIC_LOSS
+                             Determines whether semantic loss is used
+       --semantic_weight SEMANTIC_WEIGHT
+                             Weight of the semantic loss term
+       --classifier_path CLASSIFIER_PATH
+                             Path to the classifier used for semantic loss
+       --use_cycle USE_CYCLE
+                             Turn on the cycle consistency loss
+       --cycle_weight CYCLE_WEIGHT
+                             Weight for the cycle gan loss
+       --use_firstlayer USE_FIRSTLAYER
+                             If using firstlayer corresponds with Torch, else with
+                             caffe
+       --shared_layers SHARED_LAYERS
+                             Number of layers to calculate feature/weight
+                             regularizer from
+       --feature_loss FEATURE_LOSS
+                             Use vgg to extract features used for regularizing
+       --fl_high_weight FL_HIGH_WEIGHT
+                             Weight for high level feature similarity
+       --fl_low_weight FL_LOW_WEIGHT
+                             Weight for low level feature similarity
+       --perceptual_loss PERCEPTUAL_LOSS
+                             For using perceptual loss
+       --style_weight STYLE_WEIGHT
+                             If -1 use proportional to content weight, else use set
+                             value
+       --content_weight CONTENT_WEIGHT
+                             Weight for content loss
 
 ##### Example of running a training
-For training a network at resolution `256 x 256`, 
-use the following arguments:
+For training a SCoGAN network with semantic loss use the following arguments:
 
-    $ python train.py --depth=7 \ 
-                      --latent_size=512 \
-                      --images_dir=<path to images> \
-                      --sample_dir=samples/exp_1 \
-                      --model_dir=models/exp_1
+    $ python main.py --epochs=20000 \ 
+                      --noise_dim=100 \
+                      --dir=<path to wanted output directory> \
+                      --cogan_data=mnist2svhn \
+                      --classifier_path=<path to classifier used in semantic loss> \
+                      --semantic_weight=10
 
-Set the `batch_size`, `feedback_factor` and 
-`checkpoint_factor` accordingly.
 We used 1 Tesla V100 GPUs of the 
 DGX-2 machine for our experimentation.
 
@@ -168,31 +196,6 @@ DGX-2 machine for our experimentation.
           width=80% />
 </p>
 <br>
-
-### Cite our work
-    @article{karnewar2019msg,
-      title={MSG-GAN: Multi-Scale Gradient GAN for Stable Image Synthesis},
-      author={Karnewar, Animesh and Wang, Oliver and Iyengar, Raghu Sesha},
-      journal={arXiv preprint arXiv:1903.06048},
-      year={2019}
-    }
-
-### Other Contributors :smile:
-
-<p align="center">
-     <b> Cartoon Set [128 x 128] (10K dataset) by <a href="https://github.com/huangzh13">@huangzh13</a> </b> <br>
-     <img alt="Cartoon_Set" src="https://github.com/huangzh13/BMSG-GAN/blob/dev/diagrams/cartoonset_sheet.png"
-          width=80% />
-</p>
-<br>
-
-### Thanks
-Please feel free to open PRs here if 
-you train on other datasets using this architecture. 
-<br>
-
-Best regards, <br>
-@akanimax :)
 
 ## Authors
 
