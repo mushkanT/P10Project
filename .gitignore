@@ -102,3 +102,31 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+.idea/codeStyles/
+
+.idea/inspectionProfiles/
+
+celeba_classifier/saved_model.pb
+
+celeba_classifier/variables/variables.data-00000-of-00002
+
+celeba_classifier/variables/variables.data-00001-of-00002
+
+celeba_classifier/variables/variables.index
+
+discrim1.png
+
+discrim2.png
+
+gen1.png
+
+gen2.png
+
+run/_cache/03b2abf94c361535950c60aa65c96ccc_vgg16.pkl
+
+celeba_classifier/
+
+*.png
+
+run/_cache/
