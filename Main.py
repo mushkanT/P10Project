@@ -50,6 +50,7 @@ parser.add_argument('--bias_init',             type=float,  default=0)
 parser.add_argument('--prelu_init',            type=float,  default=0.25)
 parser.add_argument('--noise_type',            type=str,    default='uniform',     help='normal | uniform')
 parser.add_argument('--weight_init',           type=str,    default='normal',      help='normal (0.02 mean)| xavier | he')
+parser.add_argument('--norm',                  type=str,    default='batch',       help='batch | instance | layer')
 # CoGAN
 parser.add_argument('--g_arch',                type=str,    default='digit',       help='digit | rotate | 256 | face | digit_noshare')
 parser.add_argument('--d_arch',                type=str,    default='digit',       help='digit | rotate | 256 | face | digit_noshare')
@@ -60,14 +61,15 @@ args = parser.parse_args()
 
 # Debugging
 
-#args.gan_type = "32"
+#args.gan_type = "res128"
+#args.norm='layer'
 #args.loss = 'wgan'
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
 #args.g_arch = 'digit'
 #args.d_arch = 'digit'
-#args.batch_size = 64
+#args.batch_size = 16
 #args.cogan_data = 'mnist2svhn'
-#args.dataset = 'toy'
+#args.dataset = 'apple2orange'
 #args.noise_type='normal'
 #args.epochs = 6001
 #args.disc_iters = 5

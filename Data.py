@@ -28,8 +28,8 @@ def select_dataset_gan(args):
         data, info = tfds.load('cycle_gan/'+args.dataset, with_info=True, as_supervised=True)
         trainA, trainB = data['trainA'], data['trainB']
         train = trainA.concatenate(trainB)
-        train = train.map(format_example_scale)
-        shape = (None,256,256,3)
+        train = train.map(format_example_to128_2)
+        shape = (None,128,128,3)
         num_examples = info.splits['trainA'].num_examples+info.splits['trainB'].num_examples
         train = train.shuffle(num_examples).repeat().batch(args.batch_size)
 

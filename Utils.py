@@ -67,6 +67,9 @@ def select_gan_architecture(args):
     elif args.gan_type == '128':
         generator = nets.gan128_gen(args)
         discriminator = nets.gan128_disc(args)
+    elif args.gan_type == 'res128':
+        generator = nets.resnet128_gen(args)
+        discriminator = nets.gan128_disc(args)
     elif args.gan_type == '256':
         generator = nets.gan256_gen(args)
         discriminator = nets.gan256_disc(args)
@@ -78,6 +81,16 @@ def select_gan_architecture(args):
 
     return generator, discriminator
 
+
+def get_norm(norm):
+    if norm == 'batch':
+        return tf.keras.layers.BatchNormalization()
+    elif norm == 'layer':
+        return tf.keras.layers.LayerNormalization()
+    elif norm == 'instance':
+        return tf.keras.layers.InstanceNormalization()
+    else:
+        raise NotImplementedError()
 
 def select_weight_init(init_arg):
     if init_arg == 'normal':
