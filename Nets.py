@@ -324,9 +324,9 @@ def gan256_disc(args):
 # Toy
 def toy_gen(n_dim):
     inputs = keras.Input(shape=(n_dim,), name='digits')
-    x = layers.Dense(128, activation='tanh', name='dense1')(inputs)
-    x = layers.Dense(128, activation='tanh', name='dense2')(x)
-    x = layers.Dense(128, activation='tanh', name='dense3')(x)
+    x = layers.Dense(128, activation='tanh')(inputs)
+    x = layers.Dense(128, activation='tanh')(x)
+    x = layers.Dense(128, activation='tanh')(x)
     outputs = layers.Dense(2, activation='linear', name='preds')(x)
     model = keras.Model(inputs=inputs, outputs=outputs)
     return model

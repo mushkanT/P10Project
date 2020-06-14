@@ -12,8 +12,8 @@ def select_dataset_gan(args):
     if args.dataset == "toy":
         dat = createToyDataRing()
         # o2i.plot_toy_distribution(dat)
-        train = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).batch(args.batch_size).repeat()
-
+        train = tf.data.Dataset.from_tensor_slices(dat).shuffle(dat.shape[0]).repeat().batch(args.batch_size)
+        shape = (None, 2)
     elif args.dataset == "mnist":
         data, info = tfds.load('mnist', with_info=True, as_supervised=True)
         train, test = data['train'], data['test']
@@ -82,7 +82,7 @@ def select_dataset_gan(args):
     else:
         raise NotImplementedError()
 
-    if args.dataset not in ['lsun', 'celeba', 'apple2orange', 'horse2zebra', 'vangogh2photo']:
+    if args.dataset not in ['lsun', 'celeba', 'apple2orange', 'horse2zebra', 'vangogh2photo', 'toy']:
         if args.limit_dataset:
             train = train.filter(class_filter)
         num_examples = info.splits['train'].num_examples

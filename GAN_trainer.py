@@ -6,6 +6,8 @@ import Losses as l
 import matplotlib.pyplot as plt
 import Penalties as p
 import os
+#import pandas as pd
+#import seaborn as sns
 
 TINY = 1e-8
 
@@ -42,7 +44,7 @@ class GANTrainer(object):
         args.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.discriminator.trainable_variables))
 
         # Clip weights if wgan loss function
-        if args.loss == "wgan":
+        if args.loss == "wgan" and args.disc_penalty=='none':
             for var in self.discriminator.trainable_variables:
                 var.assign(tf.clip_by_value(var, -args.clip, args.clip))
         return disc_loss
@@ -73,13 +75,12 @@ class GANTrainer(object):
 
             # take x steps with disc before training generator
             for i in range(args.disc_iters):
-                if args.dataset in ['celeba', 'lsun']:
+                if args.dataset in ['celeba', 'lsun', 'toy']:
                     batch = next(it)
                 else:
                     batch = next(it)[0]
 
                 d_loss = self.train_discriminator(batch, args)
-                disc_iters_loss.append(d_loss)
 
             g_loss = self.train_generator(args)
 
@@ -92,7 +93,8 @@ class GANTrainer(object):
                 if epoch % args.images_while_training == 0:
                     print("%d [D loss: %f] [G loss: %f]" % (epoch, d_loss, g_loss,))
                     if args.dataset == "toy":
-                        self.images_while_training.append(u.draw_2d_samples(self.generator, args.noise_dim))
+                        a = u.draw_2d_samples(self.generator, args.noise_dim)
+                        plot_toy_distribution(a,str(epoch))
                     else:
                         self.sample_images(epoch, args.seed, args.dir, args.dataset_dim[3])
 
@@ -133,12 +135,21 @@ class GANTrainer(object):
         plt.xlabel('Epochs')
         plt.ylabel('Loss')
         plt.legend()
-        plt.savefig(os.path.join(dir, 'losses/gen_loss.png'))
+        #plt.savefig(dir+ '/losses/gen_loss.png')
+        plt.savefig(os.path.join(dir, '/losses/gen_loss.png'))
         plt.close()
 
         plt.plot(d_loss, label='Discriminator loss')
         plt.xlabel('Epochs')
         plt.ylabel('Loss')
         plt.legend()
-        plt.savefig(os.path.join(dir, 'losses/disc_loss.png'))
+        #plt.savefig(dir+'/losses/disc_loss.png')
+        plt.savefig(os.path.join(dir, '/losses/disc_loss.png'))
         plt.close()
+
+
+def plot_toy_distribution(dat,it):
+    df = pd.DataFrame(dat, columns=["x", "y"])
+    sns.jointplot(x="x", y="y", data=df, kind="kde")
+    plt.savefig('C:/Users/marku/Desktop/GAN_training_output/testing/'+it+'.png')
+    plt.close()

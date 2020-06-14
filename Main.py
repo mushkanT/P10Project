@@ -10,6 +10,7 @@ import os.path
 #import seaborn as sns
 #import scipy
 #import matplotlib.pyplot as plt
+#import PIL
 
 
 parser = argparse.ArgumentParser()
@@ -59,22 +60,26 @@ args = parser.parse_args()
 
 # Debugging
 
-#args.gan_type = "cogan"
-#args.loss = 'ce'
+#args.gan_type = "32"
+#args.loss = 'wgan'
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
 #args.g_arch = 'digit'
 #args.d_arch = 'digit'
-#args.batch_size = 16
+#args.batch_size = 64
 #args.cogan_data = 'mnist2svhn'
-#args.dataset = 'mnist-f'
-#args.disc_penalty = 'wgan-gp'
-#args.gen_penalty = 'weight'
+#args.dataset = 'toy'
 #args.noise_type='normal'
-#args.label_smooth=True
-#args.epochs = 2
-#args.disc_iters = 1
-#args.images_while_training = 10
-#args.limit_dataset = True
+#args.epochs = 6001
+#args.disc_iters = 5
+#args.images_while_training = 200
+#args.noise_dim=10
+#
+#args.disc_penalty = 'wgan-gp'
+#args.lr_d=0.0001
+#args.lr_g=0.0001
+#args.b1=0
+#args.b2=0.9
+
 
 args.wd = tf.keras.regularizers.l2(args.weight_decay)
 args.bi = tf.keras.initializers.Constant(args.bias_init)
@@ -86,6 +91,7 @@ args.seed = u.gen_noise(args, gen_noise_seed=True)
 # Set random seeds for reproducability
 tf.random.set_seed(2020)
 np.random.seed(2020)
+
 
 #u.latent_walk('C:/users/marku/Desktop/gan_training_output/relax_weight_sharing/26508/generator1','C:/Users/marku/Desktop/gan_training_output/relax_weight_sharing/26508/generator2',100,3)
 
