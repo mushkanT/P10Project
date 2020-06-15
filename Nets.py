@@ -231,12 +231,22 @@ def gan128_disc(args):
     return keras.Model(img1, output1)
 
 
-def res_net_block(input_data, filters, conv_size, norm):
-    x = layers.Conv2D(filters, conv_size, activation='relu', padding='same')(input_data)
-    x = u.get_norm(norm)(x)
+def res_net_block_down(input_data, filters, conv_size, norm):
+    input = layers.Conv2D(filters, conv_size, 2, activation='relu', padding='same')(input_data)
+    x = u.get_norm(norm)(input)
     x = layers.Conv2D(filters, conv_size, activation=None, padding='same')(x)
     x = u.get_norm(norm)(x)
-    x = layers.Add()([x, input_data])
+    x = layers.Add()([x, input])
+    x = layers.Activation('relu')(x)
+    return x
+
+
+def res_net_block_up(input_data, filters, conv_size, norm):
+    input = layers.Conv2DTranspose(filters, conv_size, 2, activation='relu', padding='same')(input_data)
+    x = u.get_norm(norm)(input)
+    x = layers.Conv2DTranspose(filters, conv_size, activation=None, padding='same')(x)
+    x = u.get_norm(norm)(x)
+    x = layers.Add()([x, input])
     x = layers.Activation('relu')(x)
     return x
 
@@ -246,37 +256,38 @@ def resnet128_gen(args):
 
     noise = tf.keras.layers.Input(shape=(args.noise_dim,))
 
-    model = tf.keras.layers.Dense(3*128*128, kernel_initializer=args.w_init, kernel_regularizer=args.wd)(noise)
-    model = tf.keras.layers.Reshape((128, 128, 3))(model)
+    model = tf.keras.layers.Dense(4*4*128, kernel_initializer=args.w_init, kernel_regularizer=args.wd)(noise)
+    model = tf.keras.layers.Reshape((4, 4, 128))(model)
     model = u.get_norm(args.norm)(model)
     model = (tf.keras.layers.PReLU(prelu_init))(model)
 
-    model = (tf.keras.layers.Conv2D(64, (7,7), strides=(1,1), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(model)
+    for i in range(5):
+        model = res_net_block_up(model, 128, 3, args.norm)
+
     model = u.get_norm(args.norm)(model)
-    model = (tf.keras.layers.ReLU())(model)
+    model = layers.Activation('relu')(model)
 
-    model = (tf.keras.layers.Conv2D(128, (3,3), strides=(2, 2), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(model)
-    model = u.get_norm(args.norm)(model)
-    model = (tf.keras.layers.ReLU())(model)
-
-    model = (tf.keras.layers.Conv2D(256, (3,3), strides=(2, 2), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(model)
-    model = u.get_norm(args.norm)(model)
-    model = (tf.keras.layers.ReLU())(model)
-
-    for i in range(6):
-        model = res_net_block(model, 256, 3, args.norm)
-
-    model = (tf.keras.layers.Conv2DTranspose(128, (4,4), strides=(2,2), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(model)
-    model = u.get_norm(args.norm)(model)
-    model = (tf.keras.layers.ReLU())(model)
-
-    model = (tf.keras.layers.Conv2DTranspose(64, (4,4), strides=(2,2), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(model)
-    model = u.get_norm(args.norm)(model)
-    model = (tf.keras.layers.ReLU())(model)
-
-    img1 = tf.keras.layers.Conv2DTranspose(channels, (7,7), strides=(1, 1), activation='tanh', padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi)(model)
+    img1 = tf.keras.layers.Conv2DTranspose(channels, (3,3), strides=(1, 1), activation='tanh', padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi)(model)
 
     return keras.Model(noise, img1)
+
+
+def resnet128_disc(args):
+    img_shape = (args.dataset_dim[1], args.dataset_dim[2], args.dataset_dim[3])
+
+    img = tf.keras.layers.Input(shape=img_shape)
+    x = tf.keras.layers.Conv2D(256, (5, 5), strides=(2, 2), padding='same', kernel_regularizer=args.wd)(img)
+    x = u.get_norm(args.norm)(x)
+    x = tf.keras.layers.PReLU(prelu_init)(x)
+
+    for i in range(5):
+        x = res_net_block_down(x, 256, 3, args.norm)
+
+    x = layers.Activation('relu')(x)
+    x = (tf.keras.layers.Flatten())(x)
+    out = (tf.keras.layers.Dense(1, kernel_regularizer=args.wd))(x)
+
+    return keras.Model(img, out)
 
 
 def gan256_gen(args):

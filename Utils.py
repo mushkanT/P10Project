@@ -69,7 +69,7 @@ def select_gan_architecture(args):
         discriminator = nets.gan128_disc(args)
     elif args.gan_type == 'res128':
         generator = nets.resnet128_gen(args)
-        discriminator = nets.gan128_disc(args)
+        discriminator = nets.resnet128_disc(args)
     elif args.gan_type == '256':
         generator = nets.gan256_gen(args)
         discriminator = nets.gan256_disc(args)
