@@ -4,47 +4,6 @@
 _Abstract:_ <br>
 In out master thesis we analyse the joint distribution learning framework Coupled GAN(CoGAN) and find that its imposed weight sharing constraint restricts the generators in learning the joint distribution over noisy and diverse datasets such as MNIST2SVHN, Apples2Oranges and Horses2Zebra. Through an experimental and research driven approach we propose to replace the strict weight sharing constraint with a softer coupling between generators in the shape of four regularisation terms. We call this type of model Soft-CoGAN (SCoGAN). These terms are (1) a feature regulariser which enforces generators to learn similar features, (2) a semantic loss based on classification of generated images such that the content of images are of the same class, (3) cycle consistency between latent vectors and (4) a perceptual loss which is a more advanced version of the feature regulariser using features from a pretrained deep classifier. Through experiments on different datasets we find that combinations of our proposed regularisers are able to provide a softer coupling that learns the joint distribution on MNIST2SVHN. However our approaches only achieve similar performance as CoGAN on the Apple2Oranges, Horse2Zebra and CelebA datasets. We discuss why and argue that through further tuning of hyperparameters our approaches could potentially surpass CoGAN performance.  
 
-### Variants of the SCoGAN architecture
-<p align="center">
-<img alt="proposed MSG-GAN architecture" src="https://github.com/palminde/P9Project/blob/master/architectures/feature_regulariser.pdf"
-width=90% />
-</p>
-
-<p>
-The above figure describes the architecture of SCoGAN with the feature regulariser.
-</p> <br>
-
-
-<p align="center">
-<img alt="synchronization explanation" src="https://github.com/palminde/P9Project/blob/master/architectures/semantic_loss.pdf"
-     width=90% />
-</p>
-<br>
-
-<p>
-The above figure describes the architecture of SCoGAN with the semantic loss.
-</p> <br>
-
-<p align="center">
-<img alt="synchronization explanation" src="https://github.com/palminde/P9Project/blob/master/architectures/cycle_consistency.pdf"
-     width=90% />
-</p>
-<br>
-
-<p>
-The above figure describes the architecture of SCoGAN with the cycle consistency loss
-</p> <br>
-
-
-<p align="center">
-<img alt="synchronization explanation" src="https://github.com/palminde/P9Project/blob/master/architectures/perceptul_loss.pdf"
-     width=90% />
-</p>
-<br>
-
-<p>
-The above figure describes the architecture of SCoGAN with the perceptual loss
-</p> <br>
 
 ### Running the Code
 Start the training by running the `main.py` script.
