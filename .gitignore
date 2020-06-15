@@ -130,3 +130,19 @@ celeba_classifier/
 *.png
 
 run/_cache/
+
+*.png
+
+*.pkl
+
+*.h5
+
+.idea/
+
+SpectralNorm.py
+
+celeba_classifier/
+
+classifier2/
+
+classifier/
