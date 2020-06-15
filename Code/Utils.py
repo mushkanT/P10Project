@@ -1,6 +1,5 @@
 import tensorflow as tf
 import os.path
-import Nets as nets
 from numpy import asarray
 from numpy import vstack
 from numpy import arccos
@@ -33,50 +32,50 @@ def write_config(args):
 
 def select_cogan_architecture(args):
     if args.g_arch == 'digit':
-        generator1, generator2 = nets.cogan_generators_digit(args)
+        generator1, generator2 = Nets.cogan_generators_digit(args)
     elif args.g_arch == 'rotate':
-        generator1, generator2 = nets.cogan_generators_rotate(args)
+        generator1, generator2 = Nets.cogan_generators_rotate(args)
     elif args.g_arch == '256':
-        generator1, generator2 = nets.cogan_generators_256(args)
+        generator1, generator2 = Nets.cogan_generators_256(args)
     elif args.g_arch == 'face':
-        generator1, generator2 = nets.cogan_generators_faces(args)
+        generator1, generator2 = Nets.cogan_generators_faces(args)
     elif args.g_arch == 'digit_noshare':
-        generator1, generator2 = nets.cogan_generators_digit_noshare(args)
+        generator1, generator2 = Nets.cogan_generators_digit_noshare(args)
     elif args.g_arch == 'face_noshare':
-        generator1, generator2 = nets.cogan_generators_faces_noshare(args)
+        generator1, generator2 = Nets.cogan_generators_faces_noshare(args)
 
     if args.d_arch == 'digit':
-        discriminator1, discriminator2 = nets.cogan_discriminators_digit(args)
+        discriminator1, discriminator2 = Nets.cogan_discriminators_digit(args)
     elif args.d_arch == 'rotate':
-        discriminator1, discriminator2 = nets.cogan_discriminators_rotate(args)
+        discriminator1, discriminator2 = Nets.cogan_discriminators_rotate(args)
     elif args.d_arch == '256':
-        discriminator1, discriminator2 = nets.cogan_discriminators_256(args)
+        discriminator1, discriminator2 = Nets.cogan_discriminators_256(args)
     elif args.d_arch == 'face':
-        discriminator1, discriminator2 = nets.cogan_discriminators_faces(args)
+        discriminator1, discriminator2 = Nets.cogan_discriminators_faces(args)
     elif args.g_arch == 'digit_noshare':
-        discriminator1, discriminator2 = nets.cogan_discriminators_digit_noshare(args)
+        discriminator1, discriminator2 = Nets.cogan_discriminators_digit_noshare(args)
     elif args.d_arch == 'face_noshare':
-        discriminator1, discriminator2 = nets.cogan_discriminators_faces_noshare(args)
+        discriminator1, discriminator2 = Nets.cogan_discriminators_faces_noshare(args)
 
     return generator1, generator2, discriminator1, discriminator2
 
 
 def select_gan_architecture(args):
     if args.dataset == 'toy':
-        generator = nets.toy_gen(args.noise_dim)
-        discriminator = nets.toy_disc(args)
+        generator = Nets.toy_gen(args.noise_dim)
+        discriminator = Nets.toy_disc(args)
     elif args.gan_type == '64':
-        generator = nets.gan64_gen(args)
-        discriminator = nets.gan64_disc(args)
+        generator = Nets.gan64_gen(args)
+        discriminator = Nets.gan64_disc(args)
     elif args.gan_type == '128':
-        generator = nets.gan128_gen(args)
-        discriminator = nets.gan128_disc(args)
+        generator = Nets.gan128_gen(args)
+        discriminator = Nets.gan128_disc(args)
     elif args.gan_type == '256':
-        generator = nets.gan256_gen(args)
-        discriminator = nets.gan256_disc(args)
+        generator = Nets.gan256_gen(args)
+        discriminator = Nets.gan256_disc(args)
     elif args.gan_type == '32':
-        generator = nets.cifargan_gen(args)
-        discriminator = nets.cifargan_disc(args)
+        generator = Nets.cifargan_gen(args)
+        discriminator = Nets.cifargan_disc(args)
     else:
         raise NotImplementedError()
 

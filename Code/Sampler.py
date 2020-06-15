@@ -2,10 +2,6 @@ import numpy as np
 import tensorflow as tf
 import argparse
 import os
-import Data
-import matplotlib.pyplot as plt
-import scipy.stats
-import seaborn as sns
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

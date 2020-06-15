@@ -4,10 +4,7 @@ import tensorflow as tf
 import time
 import numpy as np
 import os
-import Penalties as p
-import Losses as l
-import Nets as n
-import Utils as u
+from Code import Utils as u, Nets as n, Losses as l, Penalties as p
 
 
 class CoGANTrainer(object):

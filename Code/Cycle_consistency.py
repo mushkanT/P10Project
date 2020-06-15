@@ -1,11 +1,10 @@
 import tensorflow as tf
 import numpy as np
-import Losses as l
 import os
 import matplotlib.pyplot as plt
-import Data as d
 import argparse
-import Utils as u
+from Code import Utils as u, Data as d, Losses as l
+
 layers = tf.keras.layers
 
 tf.random.set_seed(2020)

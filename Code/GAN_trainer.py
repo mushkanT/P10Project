@@ -1,10 +1,7 @@
 import tensorflow as tf
-import numpy as np
 import time
-import Utils as u
-import Losses as l
+from Code import Utils as u, Losses as l, Penalties as p
 import matplotlib.pyplot as plt
-import Penalties as p
 import os
 
 TINY = 1e-8
