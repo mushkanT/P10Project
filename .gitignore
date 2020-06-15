@@ -130,7 +130,6 @@ celeba_classifier/
 
 run/_cache/
 
-*.png
 
 *.pkl
 
