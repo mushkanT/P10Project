@@ -91,15 +91,6 @@ For training a SCoGAN network with semantic loss the following arguments can be 
 We used 1 Tesla V100 GPUs of the 
 DGX-2 machine for our experimentation.
 
-### Additional generated samples on different datasets
-
-<p align="center">
-     <b> MNIST2SVHN_pruned [32x32] with SCoGAN-SL+FR</b> <br>
-     <img alt="MNIST2SVHN" src="https://github.com/palminde/P9Project/blob/master/samples/Mnist2Svhn/sample1.png"
-          width=80% />
-</p>
-<br>
-
 
 ## Authors
 
