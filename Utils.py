@@ -184,3 +184,28 @@ def latent_walk(gen1_dir, gen2_dir, z_dim=100, amount_of_pairs=1, steps=10):
     plot_generated(res2, steps, amount_of_pairs)
 
 
+def find_latent_code(content_image, generator, args, feature_loss, iterations=1000):
+    x = tf.Variable(gen_noise(args), trainable=True)
+    opt = tf.optimizers.Adam(learning_rate=0.001)
+
+    for i in range(iterations):
+        with tf.GradientTape() as t:
+            # no need to watch a variable:
+            # trainable variables are always watched
+            if feature_loss:
+                img_guess = generator(x)[-1]
+            else:
+                img_guess = generator(x)
+
+            diff = tf.math.abs(content_image - img_guess)
+            # diff = tf.math.squared_difference(self.content_image, img_guess)
+            loss = tf.math.reduce_mean(diff)
+
+        # Is the tape that computes the gradients!
+        trainable_variables = [x]
+        gradients = t.gradient(loss, trainable_variables)
+        # The optimize applies the update, using the variables
+        # and the optimizer update rule
+        opt.apply_gradients(zip(gradients, trainable_variables))
+    return x
+

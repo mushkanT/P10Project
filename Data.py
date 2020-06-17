@@ -230,10 +230,10 @@ def format_example_to128(image):
     # Normalize the pixel values
     image = (image - 127.5) / 127.5
     # Resize the image
-    image = tf.image.central_crop(image, 0.7)#[132, 132, 3])
-    image = tf.image.resize(image, [128,128])
+    image = tf.image.central_crop(image, 0.7)
+    image = tf.image.resize(image, [132,132])
     #image = tf.image.resize(image, [132,132])
-    #image = tf.image.random_crop(image, [128, 128, 3])
+    image = tf.image.random_crop(image, [128, 128, 3])
     return image
 
 
