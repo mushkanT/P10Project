@@ -231,23 +231,25 @@ def gan128_disc(args):
     return keras.Model(img1, output1)
 
 
-def res_net_block_down(input_data, filters, conv_size, norm):
-    x = layers.Conv2D(filters, conv_size, padding='same')(input_data)
+def res_net_block_down(input_data, filters, kernel, norm):
+    x = layers.Conv2D(filters, kernel, padding='same')(input_data)
     x = u.get_norm(norm)(x)
-    x = layers.PReLU(prelu_init)(x)
-    x = layers.Conv2D(filters, conv_size, activation=None, padding='same')(x)
+    #x = layers.PReLU(prelu_init)(x)
+    x = layers.Activation('relu')(x)
+    x = layers.Conv2D(filters, kernel, padding='same')(x)
     x = u.get_norm(norm)(x)
-    x = layers.Add()([x, input_data])
+    x = layers.Add()([input_data, x])
     return x
 
 
-def res_net_block_up(input_data, filters, conv_size, norm):
-    x = layers.Conv2DTranspose(filters, conv_size, padding='same')(input_data)
+def res_net_block_up(input_data, filters, kernel, norm):
+    x = layers.Conv2DTranspose(filters, kernel, padding='same')(input_data)
     x = u.get_norm(norm)(x)
-    x = layers.PReLU(prelu_init)(x)
-    x = layers.Conv2DTranspose(filters, conv_size, activation=None, padding='same')(x)
+    #x = layers.PReLU(prelu_init)(x)
+    x = layers.Activation('relu')(x)
+    x = layers.Conv2DTranspose(filters, kernel, padding='same')(x)
     x = u.get_norm(norm)(x)
-    x = layers.Add()([x, input_data])
+    x = layers.Add()([input_data, x])
     return x
 
 
@@ -375,6 +377,30 @@ def resnet128_disc(args):
 
     return keras.Model(img1, output1)
 
+
+def patch_gan_disc(args):
+    img_shape = (args.dataset_dim[1], args.dataset_dim[2], args.dataset_dim[3])
+
+    img1 = tf.keras.layers.Input(shape=img_shape)
+
+    x = tf.keras.layers.Conv2D(32, 4, strides=(2, 2), padding='same')(img1)
+    x = tf.keras.layers.LeakyReLU(0.2)(x)
+
+    x = tf.keras.layers.Conv2D(64, 4, strides=(2, 2), padding='same')(x)
+    x = u.get_norm(args.norm)(x)
+    x = tf.keras.layers.LeakyReLU(0.2)(x)
+
+    x = tf.keras.layers.Conv2D(128, 4, strides=(2, 2), padding='same')(x)
+    x = u.get_norm(args.norm)(x)
+    x = tf.keras.layers.LeakyReLU(0.2)(x)
+
+    x = tf.keras.layers.Conv2D(256, 4, strides=(2, 2), padding='same')(x)
+    x = u.get_norm(args.norm)(x)
+    x = tf.keras.layers.LeakyReLU(0.2)(x)
+
+    out = tf.keras.layers.Conv2D(1, (4, 4), padding='same')(x)
+
+    return keras.Model(img1, out)
 
 def gan256_gen(args):
     channels = args.dataset_dim[3]

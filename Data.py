@@ -33,7 +33,7 @@ def select_dataset_gan(args):
         num_examples = info.splits['trainA'].num_examples+info.splits['trainB'].num_examples
         train = train.shuffle(num_examples).repeat().batch(args.batch_size)
 
-    elif args.dataset == "celeba":
+    elif args.dataset in ["celeba"]:
         #images = glob.glob('C:/Users/marku/Desktop/img_align_celeba/*.jpg')
         images = glob.glob('/user/student.aau.dk/mjuuln15/img_align_celeba/*.jpg')
         dataset = []

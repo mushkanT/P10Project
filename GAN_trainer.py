@@ -136,7 +136,7 @@ class GANTrainer(object):
         plt.ylabel('Loss')
         plt.legend()
         #plt.savefig(dir+ '/losses/gen_loss.png')
-        plt.savefig(os.path.join(dir, '/losses/gen_loss.png'))
+        plt.savefig(os.path.join(dir, 'losses/gen_loss.png'))
         plt.close()
 
         plt.plot(d_loss, label='Discriminator loss')
@@ -144,7 +144,7 @@ class GANTrainer(object):
         plt.ylabel('Loss')
         plt.legend()
         #plt.savefig(dir+'/losses/disc_loss.png')
-        plt.savefig(os.path.join(dir, '/losses/disc_loss.png'))
+        plt.savefig(os.path.join(dir, 'losses/disc_loss.png'))
         plt.close()
 
 

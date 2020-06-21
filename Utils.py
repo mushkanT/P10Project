@@ -12,6 +12,7 @@ from numpy.linalg import norm
 from matplotlib import pyplot as plt
 
 
+
 def draw_2d_samples(generator, n_dim, seed=2019):
     noise = tf.random.normal([3000, n_dim], seed=seed)
     generated_image = generator(noise).numpy()
@@ -69,7 +70,8 @@ def select_gan_architecture(args):
         discriminator = nets.gan128_disc(args)
     elif args.gan_type == 'res128':
         generator = nets.resnet128_gen(args)
-        discriminator = nets.resnet128_disc(args)
+        #discriminator = nets.resnet128_disc(args)
+        discriminator = nets.patch_gan_disc(args)
     elif args.gan_type == '256':
         generator = nets.gan256_gen(args)
         discriminator = nets.gan256_disc(args)
@@ -88,7 +90,7 @@ def get_norm(norm):
     elif norm == 'layer':
         return tf.keras.layers.LayerNormalization()
     elif norm == 'instance':
-        return tf.keras.layers.InstanceNormalization()
+        return tfa.layers.InstanceNormalization(axis=-1, center=False, scale=False)
     else:
         raise NotImplementedError()
 
@@ -104,9 +106,11 @@ def select_weight_init(init_arg):
     return init
 
 
-def gen_noise(args, gen_noise_seed=False):
+def gen_noise(args, gen_noise_seed=False, style_transfer=False):
     if gen_noise_seed:
         batch_size = args.num_samples_to_gen
+    elif style_transfer:
+        batch_size = 1
     else:
         batch_size = args.batch_size
 
@@ -185,7 +189,7 @@ def latent_walk(gen1_dir, gen2_dir, z_dim=100, amount_of_pairs=1, steps=10):
 
 
 def find_latent_code(content_image, generator, args, feature_loss, iterations=1000):
-    x = tf.Variable(gen_noise(args), trainable=True)
+    x = tf.Variable(gen_noise(args, style_transfer=True), trainable=True)
     opt = tf.optimizers.Adam(learning_rate=0.001)
 
     for i in range(iterations):

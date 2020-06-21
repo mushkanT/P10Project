@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/Utils.py" line="96" />
+    <bookmark url="file://$PROJECT_DIR$/Utils.py" line="98" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="220b69cb-c454-4d63-b603-ea792d470aba" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Data.py" beforeDir="false" afterPath="$PROJECT_DIR$/Data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GAN_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/GAN_trainer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Nets.py" beforeDir="false" afterPath="$PROJECT_DIR$/Nets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/Utils.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -16,7 +19,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/P9Project_10$Main.coverage" NAME="Main Coverage Results" MODIFIED="1592490839520" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/P9Project_10$Main.coverage" NAME="Main Coverage Results" MODIFIED="1592742037456" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/P9Project$Main.coverage" NAME="Main Coverage Results" MODIFIED="1589444171652" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/P9Project$Cycle_consistency.coverage" NAME="Cycle_consistency Coverage Results" MODIFIED="1588334891254" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
@@ -113,7 +116,7 @@
     <session id="1884525784">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="29" />
+          <entry key="project.closed" value="32" />
           <entry key="project.open.time.0" value="5" />
           <entry key="project.open.time.26" value="3" />
           <entry key="project.open.time.28" value="1" />
@@ -121,33 +124,33 @@
           <entry key="project.open.time.30" value="2" />
           <entry key="project.open.time.31" value="3" />
           <entry key="project.open.time.32" value="7" />
-          <entry key="project.open.time.33" value="4" />
-          <entry key="project.open.time.34" value="4" />
-          <entry key="project.open.time.35" value="3" />
+          <entry key="project.open.time.33" value="5" />
+          <entry key="project.open.time.34" value="5" />
+          <entry key="project.open.time.35" value="4" />
           <entry key="project.open.time.36" value="2" />
           <entry key="project.open.time.5" value="1" />
           <entry key="project.open.time.6" value="1" />
-          <entry key="project.opened" value="37" />
+          <entry key="project.opened" value="40" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="11765" />
+          <entry key="py" value="14262" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="11765" />
+          <entry key="Python" value="14262" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="37" />
+          <entry key="py" value="54" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Python" value="37" />
+          <entry key="Python" value="54" />
         </counts>
       </usages-collector>
     </session>
@@ -157,10 +160,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1241">
-              <caret line="71" column="22" selection-start-line="71" selection-start-column="22" selection-end-line="71" selection-end-column="22" />
+            <state relative-caret-position="277">
+              <caret line="23" column="69" selection-start-line="23" selection-start-column="69" selection-end-line="23" selection-end-column="69" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
+                <element signature="e#5295#8828#1" />
               </folding>
             </state>
           </provider>
@@ -169,27 +173,19 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Nets.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="449">
-              <caret line="342" column="48" lean-forward="true" selection-start-line="342" selection-start-column="48" selection-end-line="342" selection-end-column="48" />
+            <state relative-caret-position="988">
+              <caret line="380" column="25" selection-start-line="380" selection-start-column="25" selection-end-line="380" selection-end-column="25" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
                 <element signature="e#218#571#0" />
-                <element signature="e#12355#14226#0" />
-                <element signature="e#14256#16384#0" />
-                <element signature="e#16417#16758#0" />
-                <element signature="e#16785#17162#0" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/o2img.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2414">
-              <caret line="148" column="8" selection-start-line="148" selection-start-column="4" selection-end-line="148" selection-end-column="8" />
-              <folding>
-                <element signature="e#0#23#0" expanded="true" />
+                <element signature="e#662#2215#0" />
+                <element signature="e#2247#3381#0" />
+                <element signature="e#3417#4622#0" />
+                <element signature="e#4651#5746#0" />
+                <element signature="e#5775#7822#0" />
+                <element signature="e#7852#10150#0" />
+                <element signature="e#14439#17537#0" />
+                <element signature="e#17594#18441#0" />
               </folding>
             </state>
           </provider>
@@ -198,7 +194,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/CoGAN_trainer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="85">
+            <state relative-caret-position="617">
               <caret line="149" column="48" selection-start-line="149" selection-start-column="33" selection-end-line="149" selection-end-column="48" />
               <folding>
                 <element signature="e#0#47#0" expanded="true" />
@@ -207,11 +203,23 @@
           </provider>
         </entry>
       </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/GAN_trainer.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="357">
+              <caret line="36" selection-start-line="36" selection-end-line="36" />
+              <folding>
+                <element signature="e#0#23#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Data.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="37" column="8" selection-start-line="37" selection-start-column="8" selection-end-line="37" selection-end-column="8" />
+            <state relative-caret-position="170">
+              <caret line="37" column="9" selection-start-line="37" selection-start-column="9" selection-end-line="37" selection-end-column="9" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
               </folding>
@@ -231,8 +239,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Penalties.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="153">
-              <caret line="10" column="25" selection-start-line="10" selection-start-column="25" selection-end-line="10" selection-end-column="25" />
+            <state relative-caret-position="238">
+              <caret line="15" column="44" selection-start-line="15" selection-start-column="37" selection-end-line="15" selection-end-column="44" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
               </folding>
@@ -243,8 +251,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="279">
-              <caret line="71" column="35" lean-forward="true" selection-start-line="70" selection-start-column="24" selection-end-line="71" selection-end-column="35" />
+            <state relative-caret-position="253">
+              <caret line="97" selection-start-line="97" selection-end-line="97" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
                 <element signature="e#352#476#0" />
@@ -266,7 +274,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>Dropout(0.5)</find>
       <find>Dropout(0.5, training=True)</find>
       <find>, training=true</find>
       <find>bias_init</find>
@@ -296,6 +303,7 @@
       <find>1</find>
       <find>LayerNormalization</find>
       <find>model.addu.get_norm(args.norm)</find>
+      <find>Activation(</find>
     </findStrings>
     <replaceStrings>
       <replace>args.</replace>
@@ -356,10 +364,10 @@
         <option value="$PROJECT_DIR$/CoGAN_trainer.py" />
         <option value="$PROJECT_DIR$/Losses.py" />
         <option value="$PROJECT_DIR$/Penalties.py" />
-        <option value="$PROJECT_DIR$/GAN_trainer.py" />
         <option value="$PROJECT_DIR$/Style_transfer.py" />
-        <option value="$PROJECT_DIR$/Utils.py" />
+        <option value="$PROJECT_DIR$/GAN_trainer.py" />
         <option value="$PROJECT_DIR$/Nets.py" />
+        <option value="$PROJECT_DIR$/Utils.py" />
         <option value="$PROJECT_DIR$/Main.py" />
         <option value="$PROJECT_DIR$/Data.py" />
       </list>
@@ -383,6 +391,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -394,7 +403,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -582,7 +590,7 @@
     <layout>
       <window_info id="Structure" order="0" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="1" side_tool="true" />
-      <window_info content_ui="combo" id="Project" order="2" visible="true" weight="0.08742005" />
+      <window_info content_ui="combo" id="Project" order="2" visible="true" weight="0.08901919" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3286334" />
       <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.4989339" visible="true" weight="0.24186552" />
@@ -695,16 +703,6 @@
           <line>134</line>
           <option name="timeStamp" value="767" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Data.py</url>
-          <line>42</line>
-          <option name="timeStamp" value="788" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Main.py</url>
-          <line>163</line>
-          <option name="timeStamp" value="806" />
-        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -788,7 +786,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://C:/Program Files/Python36/Lib/site-packages/tensorflow_core/python/keras/engine/base_layer.py" />
     <entry file="file://C:/Program Files/Python36/Lib/site-packages/tensorflow_core/python/keras/layers/advanced_activations.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="209">
@@ -803,24 +800,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/GAN_trainer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2040">
-          <caret line="127" column="32" selection-start-line="127" selection-start-column="32" selection-end-line="127" selection-end-column="32" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Style_transfer.py" />
-    <entry file="file://C:/Program Files/Python36/Lib/codecs.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="236">
-          <caret line="308" selection-start-line="308" selection-end-line="308" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/o2img.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2414">
@@ -831,6 +811,20 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://C:/Program Files/Python36/Lib/site-packages/tensorflow_core/python/keras/engine/base_layer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="209">
+          <caret line="727" selection-start-line="727" selection-end-line="727" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Program Files/Python36/Lib/codecs.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="491">
+          <caret line="308" selection-start-line="308" selection-end-line="308" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Losses.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="493">
@@ -838,35 +832,30 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Penalties.py">
+    <entry file="file://$PROJECT_DIR$/CoGAN_trainer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="10" column="25" selection-start-line="10" selection-start-column="25" selection-end-line="10" selection-end-column="25" />
+        <state relative-caret-position="617">
+          <caret line="149" column="48" selection-start-line="149" selection-start-column="33" selection-end-line="149" selection-end-column="48" />
           <folding>
-            <element signature="e#0#23#0" expanded="true" />
+            <element signature="e#0#47#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Nets.py">
+    <entry file="file://$PROJECT_DIR$/GAN_trainer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="449">
-          <caret line="342" column="48" lean-forward="true" selection-start-line="342" selection-start-column="48" selection-end-line="342" selection-end-column="48" />
+        <state relative-caret-position="357">
+          <caret line="36" selection-start-line="36" selection-end-line="36" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
-            <element signature="e#218#571#0" />
-            <element signature="e#12355#14226#0" />
-            <element signature="e#14256#16384#0" />
-            <element signature="e#16417#16758#0" />
-            <element signature="e#16785#17162#0" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="279">
-          <caret line="71" column="35" lean-forward="true" selection-start-line="70" selection-start-column="24" selection-end-line="71" selection-end-column="35" />
+        <state relative-caret-position="253">
+          <caret line="97" selection-start-line="97" selection-end-line="97" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
             <element signature="e#352#476#0" />
@@ -876,30 +865,50 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Main.py">
+    <entry file="file://$PROJECT_DIR$/Penalties.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1241">
-          <caret line="71" column="22" selection-start-line="71" selection-start-column="22" selection-end-line="71" selection-end-column="22" />
+        <state relative-caret-position="238">
+          <caret line="15" column="44" selection-start-line="15" selection-start-column="37" selection-end-line="15" selection-end-column="44" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/CoGAN_trainer.py">
+    <entry file="file://$PROJECT_DIR$/Nets.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
-          <caret line="149" column="48" selection-start-line="149" selection-start-column="33" selection-end-line="149" selection-end-column="48" />
+        <state relative-caret-position="988">
+          <caret line="380" column="25" selection-start-line="380" selection-start-column="25" selection-end-line="380" selection-end-column="25" />
           <folding>
-            <element signature="e#0#47#0" expanded="true" />
+            <element signature="e#0#23#0" expanded="true" />
+            <element signature="e#218#571#0" />
+            <element signature="e#662#2215#0" />
+            <element signature="e#2247#3381#0" />
+            <element signature="e#3417#4622#0" />
+            <element signature="e#4651#5746#0" />
+            <element signature="e#5775#7822#0" />
+            <element signature="e#7852#10150#0" />
+            <element signature="e#14439#17537#0" />
+            <element signature="e#17594#18441#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="277">
+          <caret line="23" column="69" selection-start-line="23" selection-start-column="69" selection-end-line="23" selection-end-column="69" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+            <element signature="e#5295#8828#1" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Data.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="37" column="8" selection-start-line="37" selection-start-column="8" selection-end-line="37" selection-end-column="8" />
+        <state relative-caret-position="170">
+          <caret line="37" column="9" selection-start-line="37" selection-start-column="9" selection-end-line="37" selection-end-column="9" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>

@@ -67,15 +67,15 @@ args = parser.parse_args()
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
 #args.g_arch = 'digit'
 #args.d_arch = 'digit'
-#args.batch_size = 1
+#args.batch_size = 20
 #args.cogan_data = 'mnist2svhn'
-#args.dataset = 'mnist'
+#args.dataset = 'celeba'
 #args.noise_type='normal'
 #args.epochs = 6001
 #args.disc_iters = 5
 #args.images_while_training = 200
 #args.noise_dim=10
-#
+
 #args.disc_penalty = 'wgan-gp'
 #args.lr_d=0.0001
 #args.lr_g=0.0001
@@ -98,64 +98,97 @@ np.random.seed(2020)
 
 # Style transfer
 '''
-path_a2o = 'C:/Users/marku/Desktop/gan_training_output/perceptual/sw_0.00000000001_cw_0.001/20k/41565'
-path_celeb = 'C:/Users/marku/Desktop/gan_training_output/perceptual/sw_0.00000000001_cw_0.001/20k/celeba/41590'
-path_mnist = 'C:/Users/marku/Desktop/gan_training_output/weight_penalty/39737'
+path_celeb = 'C:/Users/marku/Desktop/gan_training_output/perceptual/sw_0.00000000001_cw_0.001/20k/celeba/41735'
 
+g_celeb_1 = tf.keras.models.load_model(path_celeb + '/generator1')
+g_celeb_2 = tf.keras.models.load_model(path_celeb + '/generator2')
 
-image_celeb = plt.imread('C:/Users/marku/Desktop/img_align_celeba/000019.jpg')
-image_celeb = plt.imread('C:/Users/marku/Desktop/img_align_celeba/000053.jpg')
-image_celeb = plt.imread('C:/Users/marku/Desktop/img_align_celeba/000174.jpg')
-image_celeb = plt.imread('C:/Users/marku/Desktop/img_align_celeba/000258.jpg')
+image_celeb = plt.imread('C:/Users/marku/Desktop/img_align_celeba/000008.jpg')
+image_celeb = plt.imread('C:/Users/marku/Desktop/img_align_celeba/000022.jpg')
+image_celeb = plt.imread('C:/Users/marku/Desktop/img_align_celeba/000332.jpg')
+
 image_celeb = (image_celeb - 127.5) / 127.5
 image_celeb = tf.convert_to_tensor(image_celeb)
 image_celeb = tf.image.central_crop(image_celeb, 0.7)  # [132, 132, 3])
 image_celeb = tf.image.resize(image_celeb, [128, 128])
 image_celeb = tf.cast(image_celeb, tf.float32)
 
-image_a2o = plt.imread('C:/Users/marku/Desktop/apple.jpg')
-image_a2o = (image_a2o - 127.5) / 127.5
-image_a2o = tf.convert_to_tensor(image_a2o)
-image_a2o = tf.image.resize(image_a2o, [128, 128])
-image_a2o = tf.cast(image_a2o, tf.float32)
-
-train_dat, shape = dt.select_dataset_gan(args)
-iter = iter(train_dat)
-b = next(iter)
-image_mnist = tf.image.resize(b[0][0], [32, 32])
-image_mnist = tf.cast(image_mnist, tf.float32)
-
-
-g_a2o_1 = tf.keras.models.load_model(path_a2o+'/generator1')
-g_a2o_2 = tf.keras.models.load_model(path_a2o+'/generator2')
-plt.imshow(image_a2o* 0.5 + 0.5)
-plt.show()
-latent_a2o = u.find_latent_code(image_a2o, g_a2o_1, args, True, 500)
-image_a2o_stylized = g_a2o_2(latent_a2o)[-1]
-plt.imshow(image_a2o_stylized[0]* 0.5 + 0.5)
-plt.show()
-
-
-g_celeb_1 = tf.keras.models.load_model(path_celeb+'/generator1')
-g_celeb_2 = tf.keras.models.load_model(path_celeb+'/generator2')
 plt.imshow(image_celeb* 0.5 + 0.5)
-plt.show()
+plt.savefig(os.path.join(args.dir, "ST/celeba/3.png"))
 latent_celeb = u.find_latent_code(image_celeb, g_celeb_1, args, True, 5000)
 image_celeb_stylized = g_celeb_2(latent_celeb)[-1]
 plt.imshow(image_celeb_stylized[0]* 0.5 + 0.5)
-plt.show()
+plt.savefig(os.path.join(args.dir, "ST/celeba/3_transferred.png"))
 
 
-g_mnist_1 = tf.keras.models.load_model(path_mnist+'/generator1')
-g_mnist_2 = tf.keras.models.load_model(path_mnist+'/generator2')
-plt.imshow(image_mnist[:,:,0]* 0.5 + 0.5)
-plt.show()
+path_a2o = 'C:/Users/marku/Desktop/gan_training_output/perceptual/sw_0.00000000001_cw_0.001/20k/41565'
+
+args.dataset='apple2orange'
+dat, shape = dt.select_dataset_gan(args)
+it = iter(dat)
+b = next(it)[0]
+# o 5, 13, 15
+# a 3, 16, 19
+img = b[5]
+
+g_a2o_1 = tf.keras.models.load_model(path_a2o+'/generator1')
+g_a2o_2 = tf.keras.models.load_model(path_a2o+'/generator2')
+
+plt.imshow(img* 0.5 + 0.5)
+plt.savefig(os.path.join(args.dir, "ST/a2o/1.png"))
+latent_a2o = u.find_latent_code(img, g_a2o_1, args, True, 1000)
+image_a2o_stylized = g_a2o_2(latent_a2o)[-1]
+plt.imshow(image_a2o_stylized[0]* 0.5 + 0.5)
+plt.savefig(os.path.join(args.dir, "ST/a2o/1_transferred.png"))
+image_a2o_stylized = g_a2o_1(latent_a2o)[-1]
+plt.imshow(image_a2o_stylized[0]* 0.5 + 0.5)
+plt.savefig(os.path.join(args.dir, "ST/a2o/1_transferred_og.png"))
+
+
+path_mnist = 'C:/Users/marku/Desktop/gan_training_output/weight_penalty/39737'
+
+args.dataset='mnist'
+dat, shape = dt.select_dataset_gan(args)
+it = iter(dat)
+b = next(it)[0]
+
+image_mnist = b[8]
+
+g_mnist_1 = tf.keras.models.load_model(path_mnist + '/generator1')
+g_mnist_2 = tf.keras.models.load_model(path_mnist + '/generator2')
+
+plt.imshow(image_mnist[:,:,0]* 0.5 + 0.5, cmap='gray')
+plt.savefig(os.path.join(args.dir, "ST/mnist2edge/3.png"))
 latent_mnist = u.find_latent_code(image_mnist, g_mnist_1, args, False, 500)
 image_mnist_stylized = g_mnist_2(latent_mnist)
-plt.imshow(image_mnist_stylized[0][:,:,0]* 0.5 + 0.5)
-plt.show()
-'''
+plt.imshow(image_mnist_stylized[0][:,:,0]* 0.5 + 0.5, cmap='gray')
+plt.savefig(os.path.join(args.dir, "ST/mnist2edge/3_transferred.png"))
 
+
+
+path_mnistSVHN = 'C:/Users/marku/Desktop/gan_training_output/SLFR_model'
+
+args.dataset='mnist'
+dat, shape = dt.select_dataset_gan(args)
+it = iter(dat)
+b = next(it)[0]
+# 0,11,16
+image_mnist = b[6]
+image_mnist = tf.image.grayscale_to_rgb(image_mnist)
+
+g_mnist_1 = tf.keras.models.load_model(path_mnistSVHN+'/generator1')
+g_mnist_2 = tf.keras.models.load_model(path_mnistSVHN+'/generator2')
+
+plt.imshow(image_mnist* 0.5 + 0.5)
+plt.savefig(os.path.join(args.dir, "ST/mnist2svhn/4.png"))
+latent_mnist = u.find_latent_code(image_mnist, g_mnist_1, args, True, 3000)
+image_mnist_stylized = g_mnist_2(latent_mnist)[-1]
+plt.imshow(image_mnist_stylized[0]* 0.5 + 0.5)
+plt.savefig(os.path.join(args.dir, "ST/mnist2svhn/4_transferred.png"))
+image_mnist_stylized = g_mnist_1(latent_mnist)[-1]
+plt.imshow(image_mnist_stylized[0]* 0.5 + 0.5, cmap='gray')
+plt.savefig(os.path.join(args.dir, "ST/mnist2svhn/4_mnistlatent.png"))
+'''
 
 #u.latent_walk('C:/users/marku/Desktop/gan_training_output/relax_weight_sharing/26508/generator1','C:/Users/marku/Desktop/gan_training_output/relax_weight_sharing/26508/generator2',100,3)
 
