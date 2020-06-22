@@ -183,13 +183,13 @@ def select_dataset_cogan(args):
         # Domains
         data, info = tfds.load('cycle_gan/'+args.cogan_data, with_info=True, as_supervised=True)
         X1, X2 = data['trainA'], data['trainB']
-        X1 = X1.map(format_example_scale)
-        X2 = X2.map(format_example_scale)
+        X1 = X1.map(format_example_to128_2)
+        X2 = X2.map(format_example_to128_2)
         num_examples = info.splits['trainA'].num_examples
 
         X1 = X1.shuffle(num_examples).repeat().batch(args.batch_size)
         X2 = X2.shuffle(num_examples).repeat().batch(args.batch_size)
-        shape = (None, 256, 256, 3)
+        shape = (None, 128, 128, 3)
 
     elif args.cogan_data in ['Eyeglasses', 'Smiling', 'Blond_Hair', 'Male']:
         #lines = [line.rstrip() for line in open('C:/Users/palmi/Desktop/list_attr_celeba.txt', 'r')]
