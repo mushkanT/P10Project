@@ -43,6 +43,8 @@ def select_cogan_architecture(args):
         generator1, generator2 = nets.cogan_generators_faces(args)
     elif args.g_arch == 'digit_noshare':
         generator1, generator2 = nets.cogan_generators_digit_noshare(args)
+    elif args.g_arch == 'face_noshare':
+        generator1, generator2 = nets.cogan_generators_faces_noshare(args)
 
     if args.d_arch == 'digit':
         discriminator1, discriminator2 = nets.cogan_discriminators_digit(args)
@@ -54,7 +56,8 @@ def select_cogan_architecture(args):
         discriminator1, discriminator2 = nets.cogan_discriminators_faces(args)
     elif args.g_arch == 'digit_noshare':
         discriminator1, discriminator2 = nets.cogan_discriminators_digit_noshare(args)
-
+    elif args.d_arch == 'face_noshare':
+        discriminator1, discriminator2 = nets.cogan_discriminators_faces_noshare(args)
     return generator1, generator2, discriminator1, discriminator2
 
 
