@@ -172,8 +172,8 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.Sampler" />
       <item itemvalue="Python.Main" />
+      <item itemvalue="Python.Sampler" />
       <item itemvalue="Python.Train" />
       <item itemvalue="Python.cogan" />
       <item itemvalue="Python.mlm_wgan_gp" />
