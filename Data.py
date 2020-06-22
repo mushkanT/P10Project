@@ -33,19 +33,55 @@ def select_dataset_gan(args):
         num_examples = info.splits['trainA'].num_examples+info.splits['trainB'].num_examples
         train = train.shuffle(num_examples).repeat().batch(args.batch_size)
 
-    elif args.dataset in ["celeba"]:
-        #images = glob.glob('C:/Users/marku/Desktop/img_align_celeba/*.jpg')
-        images = glob.glob('/user/student.aau.dk/mjuuln15/img_align_celeba/*.jpg')
-        dataset = []
-        for i in images:
-            image = plt.imread(i)
-            dataset.append(image)
-        X1 = np.array(dataset)
-        num_examples = len(X1)
-        X1 = tf.data.Dataset.from_tensor_slices(X1)
-        train = X1.map(format_example_to128)
-        train = train.shuffle(num_examples).repeat().batch(args.batch_size)
-        shape = train.element_spec.shape
+    elif args.dataset in ["celeba", "Smiling", "Eyeglasses"]:
+        if args.dataset == "celeba":
+            #images = glob.glob('C:/Users/marku/Desktop/img_align_celeba/*.jpg')
+            images = glob.glob('/user/student.aau.dk/mjuuln15/img_align_celeba/*.jpg')
+            dataset = []
+            for i in images:
+                image = plt.imread(i)
+                dataset.append(image)
+            X1 = np.array(dataset)
+            num_examples = len(X1)
+            X1 = tf.data.Dataset.from_tensor_slices(X1)
+            train = X1.map(format_example_to128)
+            train = train.shuffle(num_examples).repeat().batch(args.batch_size)
+            shape = train.element_spec.shape
+        else:
+            #lines = [line.rstrip() for line in open('C:/Users/marku/Desktop/list_attr_celeba.txt', 'r')]
+            lines = [line.rstrip() for line in open('/user/student.aau.dk/mjuuln15/list_attr_celeba.txt', 'r')]
+            all_attr_names = lines[1].split()
+            attr2idx = {}
+            idx2attr = {}
+            mask = []
+            dataset = []
+            for i, attr_name in enumerate(all_attr_names):
+                attr2idx[attr_name] = i
+                idx2attr[i] = attr_name
+            lines = lines[2:]
+            for i, line in enumerate(lines):
+                split = line.split()
+                values = split[1:]
+                for attr_name in [args.dataset]:
+                    idx = attr2idx[attr_name]
+                    label = (values[idx] == '1')
+                mask.append(label)
+
+            #images = glob.glob('C:/Users/marku/Desktop/img_align_celeba/*.jpg')
+            images = glob.glob('/user/student.aau.dk/mjuuln15/img_align_celeba/*.jpg')
+            for i in images:
+                image = plt.imread(i)
+                dataset.append(image)
+
+            mask = np.array(mask)
+            dataset = np.array(dataset)
+            X1 = dataset[mask]
+            X1_num_examples = len(X1)
+            print('len(X1)='+str(X1_num_examples))
+
+            X1 = tf.data.Dataset.from_tensor_slices(X1)
+            train = X1.map(format_example_to128).shuffle(X1_num_examples).repeat().batch(args.batch_size)
+            shape = train.element_spec.shape
 
     elif args.dataset == "mnist-f":
         data, info = tfds.load('fashion_mnist', with_info=True, as_supervised=True)
@@ -82,7 +118,7 @@ def select_dataset_gan(args):
     else:
         raise NotImplementedError()
 
-    if args.dataset not in ['lsun', 'celeba', 'apple2orange', 'horse2zebra', 'vangogh2photo', 'toy']:
+    if args.dataset not in ['lsun', 'celeba', 'apple2orange', 'horse2zebra', 'vangogh2photo', 'toy', 'Smiling', 'Eyeglasses']:
         if args.limit_dataset:
             train = train.filter(class_filter)
         num_examples = info.splits['train'].num_examples

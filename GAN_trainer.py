@@ -75,7 +75,7 @@ class GANTrainer(object):
 
             # take x steps with disc before training generator
             for i in range(args.disc_iters):
-                if args.dataset in ['celeba', 'lsun', 'toy']:
+                if args.dataset in ['celeba', 'lsun', 'toy', 'Smiling', 'Eyeglasses']:
                     batch = next(it)
                 else:
                     batch = next(it)[0]

@@ -262,56 +262,30 @@ def resnet128_gen(args):
     model = tf.keras.layers.Dense(1024*4*4, kernel_initializer=args.w_init, kernel_regularizer=args.wd)(noise)
     model = tf.keras.layers.Reshape((4, 4, 1024))(model)
     model = u.get_norm(args.norm)(model)
-    model = (tf.keras.layers.PReLU(prelu_init))(model)
+    model = layers.Activation('relu')(model)
 
-    model = (tf.keras.layers.Conv2DTranspose(512, (1, 1), strides=(1, 1), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(model)
+    model = (tf.keras.layers.Conv2DTranspose(512, 3, strides=(2, 2), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(model)
     model = u.get_norm(args.norm)(model)
-    model = (tf.keras.layers.PReLU(prelu_init))(model)
+    model = layers.Activation('relu')(model)
 
-    for i in range(3):
-        model = res_net_block_up(model, 512, 3, args.norm)
-
-    model = (tf.keras.layers.Conv2DTranspose(512, (4,4), strides=(2, 2), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(model)
+    model = (tf.keras.layers.Conv2DTranspose(256, 3, strides=(2, 2), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(model)
     model = u.get_norm(args.norm)(model)
-    model = (tf.keras.layers.PReLU(prelu_init))(model)
+    model = layers.Activation('relu')(model)
 
-    model = (tf.keras.layers.Conv2DTranspose(256, (3,3), strides=(1, 1), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(model)
-    model = u.get_norm(args.norm)(model)
-    model = (tf.keras.layers.PReLU(prelu_init))(model)
-
-    for i in range(4):
+    for i in range(6):
         model = res_net_block_up(model, 256, 3, args.norm)
 
-    model = (tf.keras.layers.Conv2DTranspose(256, (3,3), strides=(2, 2), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(model)
+    model = (tf.keras.layers.Conv2DTranspose(128, 3, strides=(2, 2), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(model)
     model = u.get_norm(args.norm)(model)
-    model = (tf.keras.layers.PReLU(prelu_init))(model)
-
-    model = (tf.keras.layers.Conv2DTranspose(128, (3,3), strides=(1, 1), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(model)
-    model = u.get_norm(args.norm)(model)
-    model = (tf.keras.layers.PReLU(prelu_init))(model)
-
-    for i in range(2):
-        model = res_net_block_up(model, 128, 3, args.norm)
-
-    model = (tf.keras.layers.Conv2DTranspose(128, (3,3), strides=(2, 2), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(model)
-    model = u.get_norm(args.norm)(model)
-    model = (tf.keras.layers.PReLU(prelu_init))(model)
-
-    model = (tf.keras.layers.Conv2DTranspose(64, (3,3), strides=(1, 1), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(model)
-    model = u.get_norm(args.norm)(model)
-    model = (tf.keras.layers.PReLU(prelu_init))(model)
-
-    for i in range(1):
-        model = res_net_block_up(model, 64, 3, args.norm)
+    model = layers.Activation('relu')(model)
 
     model = (tf.keras.layers.Conv2DTranspose(64, (3,3), strides=(2, 2), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(model)
     model = u.get_norm(args.norm)(model)
-    model = (tf.keras.layers.PReLU(prelu_init))(model)
+    model = layers.Activation('relu')(model)
 
-    # Generator 1
     img1 = (tf.keras.layers.Conv2DTranspose(32, (3,3), strides=(2, 2), padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi))(model)
     img1 = u.get_norm(args.norm)(img1)
-    img1 = (tf.keras.layers.PReLU(prelu_init))(img1)
+    img1 = layers.Activation('relu')(img1)
 
     img1 = tf.keras.layers.Conv2DTranspose(channels, (3,3), strides=(1, 1), activation='tanh', padding='same', kernel_initializer=args.w_init, kernel_regularizer=args.wd, bias_initializer=args.bi)(img1)
 

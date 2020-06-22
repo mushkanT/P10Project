@@ -61,15 +61,15 @@ args = parser.parse_args()
 
 # Debugging
 
-#args.gan_type = "res128"
-#args.norm='layer'
+#args.gan_type = "128"
+#args.norm='batch'
 #args.loss = 'wgan'
 #args.dir = 'C:/Users/marku/Desktop/gan_training_output/testing'
 #args.g_arch = 'digit'
 #args.d_arch = 'digit'
 #args.batch_size = 20
 #args.cogan_data = 'mnist2svhn'
-#args.dataset = 'celeba'
+#args.dataset = 'Smiling'
 #args.noise_type='normal'
 #args.epochs = 6001
 #args.disc_iters = 5
