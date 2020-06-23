@@ -53,10 +53,12 @@ def select_cogan_architecture(args):
         discriminator1, discriminator2 = nets.cogan_discriminators_256(args)
     elif args.d_arch == 'face':
         discriminator1, discriminator2 = nets.cogan_discriminators_faces(args)
-    elif args.g_arch == 'digit_noshare':
+    elif args.d_arch == 'digit_noshare':
         discriminator1, discriminator2 = nets.cogan_discriminators_digit_noshare(args)
     elif args.d_arch == 'face_noshare':
         discriminator1, discriminator2 = nets.cogan_discriminators_faces_noshare(args)
+    elif args.d_arch == 'patch':
+        discriminator1, discriminator2 = nets.patch_cogan_disc(args)
 
     return generator1, generator2, discriminator1, discriminator2
 

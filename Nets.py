@@ -891,6 +891,46 @@ def cogan_discriminators_faces(args):
 
     return keras.Model(img1, output1), keras.Model(img2, output2)
 
+def patch_cogan_disc(args):
+    img_shape = (args.dataset_dim[1], args.dataset_dim[2], args.dataset_dim[3])
+
+    # Discriminator 1
+    img1 = tf.keras.layers.Input(shape=img_shape)
+    x1 = tf.keras.layers.Conv2D(32, 4, (2, 2), padding='same', kernel_initializer=args.w_init)(img1)
+    x1 = tf.keras.layers.LeakyReLU(0.2)(x1)
+
+    model1 = tf.keras.layers.Conv2D(64, 4, (2, 2), padding='same', kernel_initializer=args.w_init)(x1)
+    model1 = tf.keras.layers.LayerNormalization()(model1)
+    model1 = tf.keras.layers.LeakyReLU(0.2)(model1)
+    model1 = tf.keras.layers.Conv2D(128, 4, (2, 2), padding='same', kernel_initializer=args.w_init)(model1)
+    model1 = tf.keras.layers.LayerNormalization()(model1)
+    model1 = tf.keras.layers.LeakyReLU(0.2)(model1)
+    model1 = tf.keras.layers.Conv2D(256, 4, (2, 2), padding='same', kernel_initializer=args.w_init)(model1)
+    model1 = tf.keras.layers.LayerNormalization()(model1)
+    model1 = tf.keras.layers.LeakyReLU(0.2)(model1)
+
+    out1 = tf.keras.layers.Conv2D(1,(4,4),padding='same', kernel_initializer=args.w_init)(model1)
+
+
+    # Discriminator 2
+    img2 = tf.keras.layers.Input(shape=img_shape)
+    x2 = tf.keras.layers.Conv2D(32, 4, (2, 2), padding='same', kernel_initializer=args.w_init)(img2)
+    x2 = tf.keras.layers.LeakyReLU(0.2)(x2)
+
+    model2 = tf.keras.layers.Conv2D(64, 4, (2, 2), padding='same', kernel_initializer=args.w_init)(x2)
+    model2 = tf.keras.layers.LayerNormalization()(model2)
+    model2 = tf.keras.layers.LeakyReLU(0.2)(model2)
+    model2 = tf.keras.layers.Conv2D(128, 4, (2, 2), padding='same', kernel_initializer=args.w_init)(model2)
+    model2 = tf.keras.layers.LayerNormalization()(model2)
+    model2 = tf.keras.layers.LeakyReLU(0.2)(model2)
+    model2 = tf.keras.layers.Conv2D(256, 4, (2, 2), padding='same', kernel_initializer=args.w_init)(model2)
+    model2 = tf.keras.layers.LayerNormalization()(model2)
+    model2 = tf.keras.layers.LeakyReLU(0.2)(model2)
+
+    out2 = tf.keras.layers.Conv2D(1,(4,4),padding='same', kernel_initializer=args.w_init)(model2)
+
+    return keras.Model(img1, out1), keras.Model(img2, out2)
+
 
 # 256x256 CoGANs
 def cogan_generators_256(args):
